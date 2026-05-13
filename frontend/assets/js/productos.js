@@ -265,6 +265,16 @@
     document.getElementById('shopSort')?.addEventListener('change', renderizarCatalogo);
   }
 
+  function leerProductosOcultos() {
+    try { return JSON.parse(localStorage.getItem('shineHiddenProducts') || '[]'); } catch { return []; }
+  }
+
+  function filtrarOcultos(lista) {
+    const ocultos = leerProductosOcultos();
+    if (!ocultos.length) return lista;
+    return lista.filter(p => !ocultos.includes(p.idProducto ?? p.id));
+  }
+
   async function cargarProductos() {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
@@ -277,7 +287,7 @@
     const productosCache = leerProductosCache();
     if (productosCache.length) {
       // Instant render from cache — user sees products in <50ms
-      productos = productosCache.map(normalizarProducto);
+      productos = filtrarOcultos(productosCache).map(normalizarProducto);
       renderizarCatalogo();
     } else {
       // No cache yet — show skeleton placeholders immediately
@@ -287,7 +297,7 @@
     try {
       const data = await window.ShineAPI.get('/productos');
       if (Array.isArray(data)) guardarProductosCache(data);
-      productos = Array.isArray(data) ? data.map(normalizarProducto) : [];
+      productos = Array.isArray(data) ? filtrarOcultos(data).map(normalizarProducto) : [];
 
       if (!productos.length) {
         mostrarEstado(grid, 'No products available in the catalog yet.');

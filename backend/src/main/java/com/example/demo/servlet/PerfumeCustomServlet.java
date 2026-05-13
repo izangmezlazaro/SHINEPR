@@ -46,7 +46,10 @@ public class PerfumeCustomServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            Integer userId = HttpUtil.getAuthUserId(req);
+            if (userId == null) { HttpUtil.writeError(resp, 401, "No autenticado"); return; }
             PerfumeCustomRequestDTO dto = JsonUtil.fromJson(HttpUtil.readBody(req), PerfumeCustomRequestDTO.class);
+            dto.setIdUsuario(userId);
             HttpUtil.writeJson(resp, 201, perfumeCustomService.crear(dto));
         } catch (BadRequestException e) {
             HttpUtil.writeError(resp, 400, e.getMessage());

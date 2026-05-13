@@ -1,5 +1,6 @@
 package com.example.demo.dao;
 
+import com.example.demo.dto.AdminPedidoDTO;
 import com.example.demo.entity.Direccion;
 import com.example.demo.entity.Pedido;
 import com.example.demo.entity.Usuario;
@@ -61,6 +62,42 @@ public class PedidoDAO {
             }
         }
         return p;
+    }
+
+    public List<AdminPedidoDTO> findAllAdmin() throws SQLException {
+        String sql =
+            "SELECT p.id_pedido, p.estado, p.total, p.fecha, " +
+            "       u.nombre AS u_nombre, u.email AS u_email " +
+            "FROM pedido p " +
+            "JOIN usuario u ON p.id_usuario = u.id " +
+            "ORDER BY p.fecha DESC";
+        List<AdminPedidoDTO> result = new ArrayList<>();
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                AdminPedidoDTO dto = new AdminPedidoDTO();
+                dto.setIdPedido(rs.getInt("id_pedido"));
+                dto.setEstado(rs.getString("estado"));
+                dto.setTotal(rs.getBigDecimal("total"));
+                Timestamp ts = rs.getTimestamp("fecha");
+                if (ts != null) dto.setFecha(ts.toLocalDateTime());
+                dto.setNombreUsuario(rs.getString("u_nombre"));
+                dto.setEmailUsuario(rs.getString("u_email"));
+                result.add(dto);
+            }
+        }
+        return result;
+    }
+
+    public void updateEstado(Integer idPedido, String estado) throws SQLException {
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE pedido SET estado = ? WHERE id_pedido = ?")) {
+            ps.setString(1, estado);
+            ps.setInt(2, idPedido);
+            ps.executeUpdate();
+        }
     }
 
     private Pedido mapRow(ResultSet rs) throws SQLException {

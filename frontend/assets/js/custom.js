@@ -11,10 +11,23 @@
     corazon:  'assets/img/product-serum.png',
     fondo:    'assets/img/product-bodyoil.png'
   };
+  const NOTE_DESCRIPTIONS = {
+    'Tobacco':    'Warm and enveloping',
+    'Sandalwood': 'Fresh wood',
+    'White Musk': 'Enveloping musky scent'
+  };
   const TYPE_PRICE = {
     eau_de_parfum: 42,
     eau_de_toilette: 32,
     body_mist: 22
+  };
+
+  const TYPE_QUANTITY_PRICE = {
+    elixir:          { 50: 65,  75: 90,  100: 112, 125: 132 },
+    eau_de_parfum:   { 50: 42,  75: 58,  100: 72,  125: 85  },
+    eau_de_toilette: { 50: 32,  75: 44,  100: 55,  125: 65  },
+    eau_de_cologne:  { 50: 24,  75: 33,  100: 42,  125: 50  },
+    body_mist:       { 50: 18,  75: 24,  100: 30,  125: 36  }
   };
 
   let currentStep = 0;
@@ -26,6 +39,7 @@
     intensidad: null,
     cantidad: null,
     idFrasco: null,
+    bottleLabel: null,
     base: null,
     notes: []
   };
@@ -87,11 +101,11 @@
   }
 
   function intensidadDesdeCard(card) {
-    const text = normalizarTexto(card.textContent);
     const value = normalizarTexto(card.dataset.value);
+    const text  = normalizarTexto(card.textContent);
 
-    if (text.includes('toilette') || value.includes('edt')) return 'eau_de_toilette';
-    if (text.includes('mist') || text.includes('solide') || value.includes('mist')) return 'body_mist';
+    if (value === 'body_mist' || text.includes('solide') || text.includes('mist')) return 'body_mist';
+    if (value === 'eau_de_toilette' || value === 'eau_de_cologne' || text.includes('toilette') || text.includes('cologne')) return 'eau_de_toilette';
     return 'eau_de_parfum';
   }
 
@@ -109,16 +123,46 @@
 
   function getFrascoLabel(idFrasco) {
     const frasco = getFrasco(idFrasco);
-    if (!frasco) return '—';
-    return `${frasco.forma} (${frasco.capacidadMl}ml)`;
+    if (frasco) return `${frasco.forma} (${frasco.capacidadMl}ml)`;
+    return selections.bottleLabel || '—';
   }
 
   function calcularPrecio() {
     const frasco = getFrasco(selections.idFrasco);
     const precioFrasco = Number(frasco?.precio || 0);
-    const precioIntensidad = TYPE_PRICE[selections.intensidad] || 0;
-    const precioFragancias = new Set([selections.base, ...selections.notes].filter(Boolean)).size * 4;
+    const typeKey = document.querySelector('[data-group="type"] .option-card.selected')?.dataset.value;
+    const qty = Number(selections.cantidad) || null;
+    const precioIntensidad = (typeKey && qty && TYPE_QUANTITY_PRICE[typeKey]?.[qty])
+      || (typeKey && TYPE_QUANTITY_PRICE[typeKey]?.[50])
+      || TYPE_PRICE[selections.intensidad]
+      || 0;
+    const precioFragancias = new Set([selections.base, ...selections.notes].filter(Boolean)).size * 1;
     return precioFrasco + precioIntensidad + precioFragancias;
+  }
+
+  function updateTypePriceReveals() {
+    const qty = Number(selections.cantidad) || null;
+    document.querySelectorAll('[data-group="type"] .option-card').forEach(card => {
+      const reveal = card.querySelector('.type-price-reveal');
+      if (!reveal) return;
+      const typeKey = card.dataset.value;
+      const prices = TYPE_QUANTITY_PRICE[typeKey];
+      if (!prices) return;
+      if (qty && prices[qty] !== undefined) {
+        reveal.textContent = formatCurrency(prices[qty]);
+      } else {
+        const vals = Object.values(prices);
+        reveal.textContent = `${formatCurrency(Math.min(...vals))} – ${formatCurrency(Math.max(...vals))}`;
+      }
+      reveal.classList.add('visible');
+    });
+  }
+
+  function updatePriceBar() {
+    const el = document.getElementById('priceBarTotal');
+    if (!el) return;
+    const total = calcularPrecio();
+    el.textContent = total > 0 ? formatCurrency(total) : '—';
   }
 
   function optionCard({ id, label, description, image, group, apiValue }) {
@@ -134,6 +178,7 @@
   function renderFrascos() {
     const grid = document.querySelector('[data-group="bottle"]');
     if (!grid) return;
+    if (grid.querySelector('.option-card')) return;
 
     if (!frascos.length) {
       grid.innerHTML = '<p class="text-sm text-muted">No hay frascos disponibles.</p>';
@@ -167,12 +212,13 @@
         : escapeHtml(NOTE_FALLBACKS[nota.tipo] || FRAGRANCE_IMAGE);
 
       const tipoLabel = { salida: 'Top note', corazon: 'Heart note', fondo: 'Base note' }[nota.tipo] || nota.tipo;
+      const desc = NOTE_DESCRIPTIONS[nota.nombre] || tipoLabel;
 
       return `
-        <div class="option-card" data-value="${escapeHtml(String(nota.idNota))}" data-api-value="${escapeHtml(String(nota.idNota))}" data-group="notes">
+        <div class="option-card" data-value="${escapeHtml(String(nota.idNota))}" data-api-value="${escapeHtml(String(nota.idFragancia))}" data-group="notes">
           <img src="${imagen}" alt="${escapeHtml(nota.nombre)}" onerror="this.src='${escapeHtml(FRAGRANCE_IMAGE)}'">
           <div class="option-card__label">${escapeHtml(nota.nombre)}</div>
-          <div class="option-card__desc">${escapeHtml(tipoLabel)}</div>
+          <div class="option-card__desc">${escapeHtml(desc)}</div>
         </div>`;
     }).join('');
   }
@@ -188,7 +234,7 @@
         ? bases.map(fragancia => optionCard({
             id: fragancia.idFragancia,
             label: fragancia.nombre,
-            description: fragancia.familia || 'Base note',
+            description: NOTE_DESCRIPTIONS[fragancia.nombre] || fragancia.familia || 'Base note',
             image: BASE_IMAGE,
             group: 'base'
           })).join('')
@@ -266,6 +312,9 @@
 
       previewComposition.textContent = composition || '—';
     }
+
+    updateTypePriceReveals();
+    updatePriceBar();
   }
 
   function selectSingleCard(card, group) {
@@ -276,7 +325,10 @@
     if (group === 'type') selections.intensidad = card.dataset.apiValue || intensidadDesdeCard(card);
     if (group === 'quantity') selections.cantidad = card.dataset.value;
     if (group === 'base') selections.base = Number(card.dataset.apiValue || card.dataset.value);
-    if (group === 'bottle') selections.idFrasco = Number(card.dataset.apiValue || card.dataset.value);
+    if (group === 'bottle') {
+      selections.idFrasco = card.dataset.value;
+      selections.bottleLabel = card.querySelector('.option-card__label')?.textContent?.trim() || card.dataset.value;
+    }
   }
 
   function toggleNoteCard(card) {
@@ -492,5 +544,6 @@
     setupStepper();
     setupCarousel();
     cargarOpcionesBackend();
+    updateTypePriceReveals();
   });
 })();

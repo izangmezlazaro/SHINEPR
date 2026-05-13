@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.AdminPedidoDTO;
 import com.example.demo.dao.DetallePedidoDAO;
 import com.example.demo.dao.DireccionDAO;
 import com.example.demo.dao.PedidoDAO;
+import com.example.demo.dao.ProductoDAO;
 import com.example.demo.dao.UsuarioDAO;
 import com.example.demo.dto.DetallePedidoDTO;
 import com.example.demo.dto.PedidoRequestDTO;
@@ -21,18 +23,20 @@ import java.util.stream.Collectors;
 
 public class PedidoService {
 
-    private final PedidoDAO       pedidoDAO;
-    private final UsuarioDAO      usuarioDAO;
-    private final DireccionDAO    direccionDAO;
+    private final PedidoDAO        pedidoDAO;
+    private final UsuarioDAO       usuarioDAO;
+    private final DireccionDAO     direccionDAO;
     private final DetallePedidoDAO detallePedidoDAO;
-    private final CarritoService  carritoService;
+    private final CarritoService   carritoService;
+    private final ProductoDAO      productoDAO;
 
     public PedidoService() {
-        this.pedidoDAO       = new PedidoDAO();
-        this.usuarioDAO      = new UsuarioDAO();
-        this.direccionDAO    = new DireccionDAO();
+        this.pedidoDAO        = new PedidoDAO();
+        this.usuarioDAO       = new UsuarioDAO();
+        this.direccionDAO     = new DireccionDAO();
         this.detallePedidoDAO = new DetallePedidoDAO();
-        this.carritoService  = new CarritoService();
+        this.carritoService   = new CarritoService();
+        this.productoDAO      = new ProductoDAO();
     }
 
     public List<PedidoResponseDTO> listarPorUsuario(Integer idUsuario) {
@@ -67,6 +71,19 @@ public class PedidoService {
                     throw new BadRequestException("No se puede crear un pedido con el carrito vacío");
                 }
 
+                // Validar stock antes de crear el pedido
+                for (CarritoItem item : carrito.getItems()) {
+                    if (item.getProducto() != null) {
+                        Producto producto = item.getProducto();
+                        int stockDisponible = producto.getStock() == null ? 0 : producto.getStock();
+                        if (stockDisponible < item.getCantidad()) {
+                            throw new BadRequestException(
+                                "Stock insuficiente para \"" + producto.getNombre() +
+                                "\". Disponible: " + stockDisponible + ", solicitado: " + item.getCantidad());
+                        }
+                    }
+                }
+
                 Pedido pedido = new Pedido();
                 pedido.setUsuario(usuario);
                 pedido.setDireccion(direccion);
@@ -91,10 +108,14 @@ public class PedidoService {
                 // Insertar pedido en la transacción compartida
                 pedidoDAO.save(pedido, conn);
 
-                // Insertar detalles en la misma transacción
+                // Insertar detalles y reducir stock en la misma transacción
                 for (DetallePedido detalle : detalles) {
                     detalle.setPedido(pedido);
                     detallePedidoDAO.save(detalle, conn);
+                    if (detalle.getProducto() != null) {
+                        productoDAO.decrementarStock(
+                            detalle.getProducto().getIdProducto(), detalle.getCantidad(), conn);
+                    }
                 }
 
                 // Vaciar carrito (usa su propio conn)
@@ -107,6 +128,23 @@ public class PedidoService {
                 conn.rollback();
                 throw e;
             }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    public List<AdminPedidoDTO> listarTodosAdmin() {
+        try {
+            List<AdminPedidoDTO> pedidos = pedidoDAO.findAllAdmin();
+            for (AdminPedidoDTO dto : pedidos) {
+                List<DetallePedido> detalles = detallePedidoDAO.findByPedidoId(dto.getIdPedido());
+                dto.setDetalles(detalles.stream().map(this::toDetalleDto).collect(Collectors.toList()));
+            }
+            return pedidos;
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    public void actualizarEstado(Integer idPedido, String estado) {
+        try {
+            pedidoDAO.updateEstado(idPedido, estado);
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 

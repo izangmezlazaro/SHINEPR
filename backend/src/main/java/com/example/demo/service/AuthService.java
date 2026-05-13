@@ -59,6 +59,6 @@ public class AuthService {
     private AuthUserDTO toUserDto(Usuario usuario) {
         return new AuthUserDTO(
                 usuario.getId(), usuario.getNombre(), usuario.getEmail(),
-                usuario.getTelefono(), usuario.getRol());
+                usuario.getTelefono(), usuario.getRol(), usuario.getPuntos());
     }
 }

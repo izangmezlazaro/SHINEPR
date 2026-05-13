@@ -189,12 +189,12 @@
       }
 
       function statusLabel(s) {
-        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'Pending', cancelled: 'Cancelled' };
+        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'In Preparation', procesando: 'Processing', cancelled: 'Cancelled' };
         return map[String(s).toLowerCase()] || s;
       }
 
       function statusClass(s) {
-        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', cancelled: 'cancelled' };
+        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', procesando: 'pending', cancelled: 'cancelled' };
         return map[String(s).toLowerCase()] || 'pending';
       }
 
@@ -210,17 +210,17 @@
           return;
         }
         const cls = statusClass(order.estado);
-        const thumbs = (order.items || []).slice(0, 2).map(i =>
-          `<img class="order-card__thumb" src="${i.imagen || 'assets/img/product-perfume.png'}" alt="${i.nombre || ''}" onerror="this.src='assets/img/product-perfume.png'">`
+        const thumbs = (order.items || order.detalles || []).slice(0, 2).map(i =>
+          `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-perfume.png'}" alt="${i.nombre || ''}" onerror="this.src='assets/img/product-perfume.png'">`
         ).join('');
-        const names = (order.items || []).map(i => i.nombre).filter(Boolean).join(' &amp; ');
+        const names = (order.items || order.detalles || []).map(i => i.nombre).filter(Boolean).join(' &amp; ');
         card.innerHTML = `
           <div class="account-card__title">Recent Order</div>
           <div class="order-card" style="margin-bottom:0;border:none;padding:0">
             <div class="order-card__header">
               <div>
                 <div class="order-card__num">#${order.idPedido || order.id}</div>
-                <div class="order-card__date">${order.fecha ? new Date(order.fecha).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : ''}</div>
+                <div class="order-card__date">${order.fecha ? new Date(order.fecha).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : ''}</div>
               </div>
               <span class="order-status order-status--${cls}">${statusLabel(order.estado)}</span>
             </div>
@@ -234,11 +234,17 @@
 
       async function loadAccountData() {
         try {
-          const orders = await window.ShineAPI.get(`/pedidos/usuario/${user.id}`);
+          const [orders, puntosData] = await Promise.all([
+            window.ShineAPI.get('/pedidos'),
+            window.ShineAPI.get(`/usuarios/${user.id}/puntos`).catch(() => ({ puntos: 0 }))
+          ]);
           const list = Array.isArray(orders) ? orders : [];
+          const puntos = puntosData?.puntos ?? 0;
+
           document.getElementById('statOrders').textContent = list.length;
-          document.getElementById('statPoints').textContent = list.length * 0; // points not yet in backend
-          document.getElementById('loyaltyPoints').textContent = 0;
+          document.getElementById('statPoints').textContent = puntos.toLocaleString('es-ES');
+          document.getElementById('loyaltyPoints').textContent = puntos.toLocaleString('es-ES');
+
           const sorted = list.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
           renderRecentOrder(sorted[0] || null);
         } catch (_) {

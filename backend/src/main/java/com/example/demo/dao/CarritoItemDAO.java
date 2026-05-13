@@ -2,6 +2,7 @@ package com.example.demo.dao;
 
 import com.example.demo.entity.Carrito;
 import com.example.demo.entity.CarritoItem;
+import com.example.demo.entity.Categoria;
 import com.example.demo.entity.PerfumeCustom;
 import com.example.demo.entity.Producto;
 import com.example.demo.util.ConexionDB;
@@ -72,6 +73,65 @@ public class CarritoItemDAO {
             ps.setInt(1, idCarrito);
             ps.executeUpdate();
         }
+    }
+
+    public List<CarritoItem> findByCarritoIdEnriquecido(Integer idCarrito) throws SQLException {
+        String sql =
+            "SELECT ci.id, ci.id_carrito, ci.id_producto, ci.id_perf_cust, ci.cantidad, " +
+            "p.sku, p.nombre AS prod_nombre, p.descripcion, p.ingredientes, p.modo_uso, " +
+            "p.precio, p.stock, p.genero, p.tipo_fragancia, p.id_categoria, cat.nombre AS cat_nombre, " +
+            "pc.nombre_personalizado, pc.intensidad, pc.precio_calculado " +
+            "FROM carrito_item ci " +
+            "LEFT JOIN producto p ON ci.id_producto = p.id_producto " +
+            "LEFT JOIN categoria cat ON p.id_categoria = cat.id_categoria " +
+            "LEFT JOIN perfume_custom pc ON ci.id_perf_cust = pc.id_perf_cust " +
+            "WHERE ci.id_carrito = ?";
+        List<CarritoItem> list = new ArrayList<>();
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCarrito);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRowEnriquecido(rs));
+            }
+        }
+        return list;
+    }
+
+    private CarritoItem mapRowEnriquecido(ResultSet rs) throws SQLException {
+        CarritoItem item = new CarritoItem();
+        item.setId(rs.getInt("id"));
+        Carrito c = new Carrito(); c.setId(rs.getInt("id_carrito"));
+        item.setCarrito(c);
+        item.setCantidad(rs.getInt("cantidad"));
+
+        int idProducto = rs.getInt("id_producto");
+        if (!rs.wasNull()) {
+            Producto p = new Producto();
+            p.setIdProducto(idProducto);
+            p.setSku(rs.getString("sku"));
+            p.setNombre(rs.getString("prod_nombre"));
+            p.setDescripcion(rs.getString("descripcion"));
+            p.setIngredientes(rs.getString("ingredientes"));
+            p.setModoUso(rs.getString("modo_uso"));
+            p.setPrecio(rs.getBigDecimal("precio"));
+            p.setStock(rs.getInt("stock"));
+            p.setGenero(rs.getString("genero"));
+            p.setTipoFragancia(rs.getString("tipo_fragancia"));
+            p.setCategoria(new Categoria(rs.getInt("id_categoria"), rs.getString("cat_nombre")));
+            item.setProducto(p);
+        }
+
+        int idPerfCust = rs.getInt("id_perf_cust");
+        if (!rs.wasNull()) {
+            PerfumeCustom pc = new PerfumeCustom();
+            pc.setIdPerfCust(idPerfCust);
+            pc.setNombrePersonalizado(rs.getString("nombre_personalizado"));
+            pc.setIntensidad(rs.getString("intensidad"));
+            pc.setPrecioCalculado(rs.getBigDecimal("precio_calculado"));
+            item.setPerfumeCustom(pc);
+        }
+
+        return item;
     }
 
     private CarritoItem mapRow(ResultSet rs) throws SQLException {

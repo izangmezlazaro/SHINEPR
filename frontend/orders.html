@@ -126,6 +126,7 @@
             <!-- Filter tabs -->
             <div class="filter-tabs">
               <button class="filter-tab active" data-filter="all">All</button>
+              <button class="filter-tab" data-filter="pending">In Preparation</button>
               <button class="filter-tab" data-filter="transit">In Transit</button>
               <button class="filter-tab" data-filter="delivered">Delivered</button>
             </div>
@@ -183,20 +184,20 @@
       }
 
       function statusLabel(s) {
-        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'Pending', cancelled: 'Cancelled' };
+        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'In Preparation', procesando: 'Processing', cancelled: 'Cancelled' };
         return map[String(s).toLowerCase()] || s;
       }
 
       function statusClass(s) {
-        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', cancelled: 'cancelled' };
+        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', procesando: 'pending', cancelled: 'cancelled' };
         return map[String(s).toLowerCase()] || 'pending';
       }
 
       function renderOrder(order, idx) {
         const id = order.idPedido || order.id || idx;
         const cls = statusClass(order.estado);
-        const fecha = order.fecha ? new Date(order.fecha).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-        const items = order.items || order.lineas || [];
+        const fecha = order.fecha ? new Date(order.fecha).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+        const items = order.items || order.lineas || order.detalles || [];
         const thumbs = items.slice(0, 2).map(i =>
           `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-perfume.png'}" alt="${i.nombre || ''}" onerror="this.src='assets/img/product-perfume.png'">`
         ).join('');
@@ -232,7 +233,8 @@
               </button>
             </div>
             <div class="order-detail-panel" id="detail-${id}">
-              <h4 style="margin-bottom:var(--sp-lg)">Order Details — #${id}</h4>
+              <h4 style="margin-bottom:var(--sp-xs)">Order Details — #${id}</h4>
+              <p class="text-sm text-muted" style="margin:0 0 var(--sp-lg)">${fecha}</p>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2xl)">
                 <div>
                   <p class="text-sm" style="font-weight:600;margin-bottom:var(--sp-md)">Items ordered</p>
@@ -292,7 +294,7 @@
 
       async function loadOrders() {
         try {
-          const data = await window.ShineAPI.get(`/pedidos/usuario/${user.id}`);
+          const data = await window.ShineAPI.get('/pedidos');
           allOrders = Array.isArray(data) ? data.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha)) : [];
         } catch (_) {
           allOrders = [];

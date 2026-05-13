@@ -218,6 +218,104 @@
     renderAccordion(producto);
 
     document.querySelectorAll('.product-gallery, .product-detail .reveal').forEach(el => el.classList.add('visible'));
+
+    renderStaffPanel(producto);
+  }
+
+  function renderStaffPanel(producto) {
+    const staffSession = (() => {
+      try { return JSON.parse(localStorage.getItem('shineStaff')); } catch { return null; }
+    })();
+    if (!staffSession) return;
+
+    const existing = document.getElementById('staffEditPanel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'staffEditPanel';
+    panel.style.cssText = 'margin-top:28px;padding:20px 24px;border:1px solid #e0d5ce;border-radius:12px;background:#fdf9f7';
+
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c49a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span style="font-size:0.82rem;font-weight:600;color:#8a7b82;text-transform:uppercase;letter-spacing:.05em">Edición de personal</span>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div>
+          <label style="font-size:0.82rem;font-weight:500;color:#4a3f3f;display:block;margin-bottom:6px">Descripción</label>
+          <textarea id="staffEditDesc" rows="3" style="width:100%;padding:10px 12px;border:1px solid #ddd0c8;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#2a2020;resize:vertical;box-sizing:border-box;outline:none">${escapeHtml(producto.descripcion || '')}</textarea>
+        </div>
+        <div>
+          <label style="font-size:0.82rem;font-weight:500;color:#4a3f3f;display:block;margin-bottom:6px">Precio (€)</label>
+          <input id="staffEditPrice" type="number" step="0.01" min="0" value="${Number(producto.precio || 0).toFixed(2)}" style="width:100%;padding:10px 12px;border:1px solid #ddd0c8;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#2a2020;box-sizing:border-box;outline:none">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <button id="staffSaveBtn" style="padding:9px 22px;background:#c49a9a;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-family:inherit;font-weight:500;cursor:pointer;transition:background .2s">Guardar cambios</button>
+          <span id="staffSaveStatus" style="font-size:0.82rem"></span>
+        </div>
+      </div>
+    `;
+
+    const infoSection = document.querySelector('.product-detail > div:not(.product-gallery)');
+    if (infoSection) infoSection.appendChild(panel);
+
+    document.getElementById('staffSaveBtn')?.addEventListener('click', async () => {
+      if (!productoActual) return;
+
+      const newDesc = document.getElementById('staffEditDesc')?.value.trim() ?? '';
+      const newPrice = parseFloat(document.getElementById('staffEditPrice')?.value || '0');
+      const statusEl = document.getElementById('staffSaveStatus');
+      const saveBtn = document.getElementById('staffSaveBtn');
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Guardando...';
+      if (statusEl) statusEl.textContent = '';
+
+      try {
+        const payload = {
+          nombre: productoActual.nombre,
+          sku: productoActual.sku,
+          descripcion: newDesc,
+          ingredientes: productoActual.ingredientes || '',
+          modoUso: productoActual.modoUso || '',
+          precio: newPrice,
+          stock: productoActual.stock || 0,
+          genero: productoActual.genero || null,
+          tipoFragancia: productoActual.tipoFragancia || null,
+          idCategoria: productoActual.categoria?.idCategoria
+        };
+
+        const res = await fetch(`http://localhost:8080/api/v1/productos/${productoActual.idProducto}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        productoActual.descripcion = newDesc;
+        productoActual.precio = newPrice;
+        setText('#productDescription', newDesc);
+        setText('#productPrice', formatCurrency(newPrice));
+        actualizarProductoEnCache(productoActual);
+        localStorage.removeItem('shine:productos:v2');
+
+        saveBtn.textContent = 'Guardar cambios';
+        saveBtn.disabled = false;
+        if (statusEl) {
+          statusEl.style.color = '#4a7a4a';
+          statusEl.textContent = '✓ Guardado correctamente';
+          setTimeout(() => { statusEl.textContent = ''; }, 3500);
+        }
+      } catch (err) {
+        saveBtn.textContent = 'Guardar cambios';
+        saveBtn.disabled = false;
+        if (statusEl) {
+          statusEl.style.color = '#c0392b';
+          statusEl.textContent = '✗ Error al guardar. Verifica el servidor.';
+        }
+      }
+    });
   }
 
   function productCard(producto) {

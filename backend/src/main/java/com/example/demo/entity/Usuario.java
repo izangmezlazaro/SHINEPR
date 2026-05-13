@@ -8,6 +8,7 @@ public class Usuario {
     private String  password;
     private String  telefono;
     private String  rol = "cliente";
+    private Integer puntos = 0;
 
     public Usuario() {}
 
@@ -37,4 +38,7 @@ public class Usuario {
 
     public String getRol()       { return rol; }
     public void   setRol(String rol) { this.rol = (rol == null || rol.isBlank()) ? "cliente" : rol; }
+
+    public Integer getPuntos()   { return puntos == null ? 0 : puntos; }
+    public void    setPuntos(Integer puntos) { this.puntos = puntos == null ? 0 : puntos; }
 }

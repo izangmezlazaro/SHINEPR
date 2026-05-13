@@ -100,6 +100,8 @@ public class JwtFilter implements Filter {
         if (path.startsWith("/api/v1/fichajes"))  return true;
         if (path.startsWith("/api/v1/anuncios"))  return true;
         if (path.startsWith("/api/v1/reuniones")) return true;
+        if (path.startsWith("/api/v1/intranet/")) return true;
+        if (path.startsWith("/api/v1/productos")) return true;
 
         return false;
     }

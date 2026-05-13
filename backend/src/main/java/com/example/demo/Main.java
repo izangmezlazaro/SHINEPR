@@ -3,6 +3,7 @@ package com.example.demo;
 import com.example.demo.filter.CorsFilter;
 import com.example.demo.filter.JwtFilter;
 import com.example.demo.servlet.*;
+import com.example.demo.util.ConexionDB;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -11,6 +12,10 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.Statement;
 
 /**
  * Punto de entrada de la aplicación.
@@ -34,6 +39,7 @@ public class Main {
 
         // Contexto raíz "/"
         Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
+        ctx.setParentClassLoader(Thread.currentThread().getContextClassLoader());
 
         // ── Filtros ──────────────────────────────────────────────────────────
         addFilter(ctx, "CorsFilter", CorsFilter.class, "/*");
@@ -52,9 +58,13 @@ public class Main {
         addServlet(ctx, tomcat, "FrascoServlet",         FrascoServlet.class,        "/api/v1/frascos/*");
         addServlet(ctx, tomcat, "PerfumeCustomServlet",  PerfumeCustomServlet.class, "/api/v1/perfumes-custom/*");
         addServlet(ctx, tomcat, "NotaOlfativaServlet",   NotaOlfativaServlet.class,  "/api/v1/notas-olfativas/*");
-        addServlet(ctx, tomcat, "AnuncioServlet",        AnuncioServlet.class,       "/api/v1/anuncios/*");
-        addServlet(ctx, tomcat, "FichajeServlet",        FichajeServlet.class,       "/api/v1/fichajes/*");
-        addServlet(ctx, tomcat, "ReunionServlet",        ReunionServlet.class,       "/api/v1/reuniones/*");
+        addServlet(ctx, tomcat, "AnuncioServlet",        AnuncioServlet.class,          "/api/v1/anuncios/*");
+        addServlet(ctx, tomcat, "FichajeServlet",        FichajeServlet.class,          "/api/v1/fichajes/*");
+        addServlet(ctx, tomcat, "ReunionServlet",        ReunionServlet.class,          "/api/v1/reuniones/*");
+        addServlet(ctx, tomcat, "UsuarioServlet",        UsuarioServlet.class,          "/api/v1/usuarios/*");
+        addServlet(ctx, tomcat, "IntranetPedidoServlet", IntranetPedidoServlet.class,   "/api/v1/intranet/pedidos/*");
+
+        runMigrations();
 
         tomcat.start();
         System.out.println("╔════════════════════════════════════════════╗");
@@ -82,6 +92,26 @@ public class Main {
         fm.setFilterName(name);
         fm.addURLPattern(pattern);
         ctx.addFilterMap(fm);
+    }
+
+    private static void runMigrations() {
+        String[] scripts = {"intranet_migration.sql", "puntos_migration.sql", "frascos_migration.sql", "pedido_estado_migration.sql"};
+        try (Connection conn = ConexionDB.getConnection()) {
+            for (String script : scripts) {
+                try (InputStream in = Main.class.getClassLoader().getResourceAsStream(script)) {
+                    if (in == null) { System.err.println("Migration not found: " + script); continue; }
+                    String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                    try (Statement stmt = conn.createStatement()) {
+                        stmt.execute(sql);
+                        System.out.println("Migration OK: " + script);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Migration warning (" + script + "): " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Cannot run migrations: " + e.getMessage());
+        }
     }
 
     private static String createTempDir() {

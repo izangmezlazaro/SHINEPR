@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dao.PagoDAO;
+import com.example.demo.dao.UsuarioDAO;
 import com.example.demo.dto.PagoDTO;
 import com.example.demo.entity.Pago;
 import com.example.demo.entity.Pedido;
@@ -13,12 +14,14 @@ public class PagoService {
 
     private static final String METODO_PAGO_PERMITIDO = "bizum";
 
-    private final PagoDAO     pagoDAO;
+    private final PagoDAO       pagoDAO;
     private final PedidoService pedidoService;
+    private final UsuarioDAO    usuarioDAO;
 
     public PagoService() {
         this.pagoDAO       = new PagoDAO();
         this.pedidoService = new PedidoService();
+        this.usuarioDAO    = new UsuarioDAO();
     }
 
     public PagoDTO obtenerPorPedido(Integer idPedido) {
@@ -40,9 +43,20 @@ public class PagoService {
             Pago pago = new Pago();
             pago.setPedido(pedido);
             pago.setMetodoPago(request.getMetodoPago());
-            pago.setEstado(request.getEstado() == null || request.getEstado().isBlank() ? "pendiente" : request.getEstado());
+            String estado = request.getEstado() == null || request.getEstado().isBlank() ? "pendiente" : request.getEstado();
+            pago.setEstado(estado);
             pago.setFechaPago(request.getFechaPago());
-            return toDto(pagoDAO.save(pago));
+            PagoDTO result = toDto(pagoDAO.save(pago));
+
+            if ("completado".equals(estado) && pedido.getTotal() != null) {
+                int puntos = (int) Math.round(pedido.getTotal().doubleValue() * 10);
+                if (puntos > 0) {
+                    usuarioDAO.addPuntos(pedido.getUsuario().getId(), puntos);
+                }
+                pedidoService.actualizarEstado(pedido.getIdPedido(), "procesando");
+            }
+
+            return result;
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 

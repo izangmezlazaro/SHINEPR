@@ -9,7 +9,7 @@ import java.util.Optional;
 public class UsuarioDAO {
 
     public Optional<Usuario> findById(Integer id) throws SQLException {
-        String sql = "SELECT id, nombre, email, password, telefono, rol FROM usuario WHERE id = ?";
+        String sql = "SELECT id, nombre, email, password, telefono, rol, puntos FROM usuario WHERE id = ?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -21,7 +21,7 @@ public class UsuarioDAO {
     }
 
     public Optional<Usuario> findByEmail(String email) throws SQLException {
-        String sql = "SELECT id, nombre, email, password, telefono, rol FROM usuario WHERE email = ?";
+        String sql = "SELECT id, nombre, email, password, telefono, rol, puntos FROM usuario WHERE email = ?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -53,8 +53,8 @@ public class UsuarioDAO {
     }
 
     private Usuario insert(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO usuario (nombre, email, password, telefono, rol) " +
-                     "VALUES (?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO usuario (nombre, email, password, telefono, rol, puntos) " +
+                     "VALUES (?, ?, ?, ?, ?, 0) RETURNING id";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, usuario.getNombre());
@@ -65,13 +65,14 @@ public class UsuarioDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 usuario.setId(rs.getInt(1));
+                usuario.setPuntos(0);
             }
         }
         return usuario;
     }
 
     private Usuario update(Usuario usuario) throws SQLException {
-        String sql = "UPDATE usuario SET nombre=?, email=?, password=?, telefono=?, rol=? WHERE id=?";
+        String sql = "UPDATE usuario SET nombre=?, email=?, password=?, telefono=?, rol=?, puntos=? WHERE id=?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, usuario.getNombre());
@@ -79,10 +80,22 @@ public class UsuarioDAO {
             ps.setString(3, usuario.getPassword());
             ps.setString(4, usuario.getTelefono());
             ps.setString(5, usuario.getRol());
-            ps.setInt(6, usuario.getId());
+            ps.setInt(6, usuario.getPuntos());
+            ps.setInt(7, usuario.getId());
             ps.executeUpdate();
         }
         return usuario;
+    }
+
+    /** Suma puntos al saldo actual del usuario (operación atómica en BD). */
+    public void addPuntos(Integer idUsuario, int puntos) throws SQLException {
+        String sql = "UPDATE usuario SET puntos = puntos + ? WHERE id = ?";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, puntos);
+            ps.setInt(2, idUsuario);
+            ps.executeUpdate();
+        }
     }
 
     private Usuario mapRow(ResultSet rs) throws SQLException {
@@ -93,6 +106,7 @@ public class UsuarioDAO {
         u.setPassword(rs.getString("password"));
         u.setTelefono(rs.getString("telefono"));
         u.setRol(rs.getString("rol"));
+        u.setPuntos(rs.getInt("puntos"));
         return u;
     }
 }

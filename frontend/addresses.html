@@ -165,6 +165,7 @@
   </footer>
 
   <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/api.js"></script>
   <script>
     (function () {
       const user = JSON.parse(localStorage.getItem('shineUser') || 'null');
@@ -180,17 +181,10 @@
         window.location.href = 'index.html';
       });
 
-      // ── Storage keyed per user ──────────────────
-      const STORAGE_KEY = `shine:addresses:${user.id}`;
-
-      function loadAddresses() {
-        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-        catch (_) { return []; }
-      }
-
-      function saveAddresses(list) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-      }
+      // Local metadata (label, phone, country, isDefault) keyed by API address id
+      const META_KEY = `shine:addr-meta:${user.id}`;
+      function loadMeta() { try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch (_) { return {}; } }
+      function saveMeta(m) { localStorage.setItem(META_KEY, JSON.stringify(m)); }
 
       // ── Toast ───────────────────────────────────
       function showToast(msg) {
@@ -200,30 +194,33 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
       }
 
+      let addresses = [];
+
       // ── Render ──────────────────────────────────
       function renderAddresses() {
-        const list = loadAddresses();
+        const meta = loadMeta();
         const container = document.getElementById('addressList');
         const empty = document.getElementById('addressEmpty');
 
-        if (!list.length) {
+        if (!addresses.length) {
           container.innerHTML = '';
           empty.style.display = '';
           return;
         }
         empty.style.display = 'none';
-        container.innerHTML = list.map(addr => {
-          const isDefault = !!addr.isDefault;
-          const country = addr.country || '';
-          const zip = addr.zip ? ' ' + addr.zip : '';
-          const phone = addr.phone ? `<br>${addr.phone}` : '';
+        container.innerHTML = addresses.map(addr => {
+          const m = meta[addr.id] || {};
+          const isDefault = !!m.isDefault;
+          const label = m.label || 'Address';
+          const phone = m.phone ? `<br>${m.phone}` : '';
+          const country = m.country ? `, ${m.country}` : '';
           return `
             <div class="address-card${isDefault ? ' address-card--default' : ''}" data-id="${addr.id}">
               ${isDefault ? '<div class="address-card__badge">Default</div>' : ''}
               <div style="padding-right:${isDefault ? '80px' : '0'}">
-                <div style="font-weight:700;margin-bottom:var(--sp-xs)">${addr.label}</div>
+                <div style="font-weight:700;margin-bottom:var(--sp-xs)">${label}</div>
                 <p class="text-sm text-muted" style="margin:0;line-height:1.7">
-                  ${addr.line}<br>${addr.city}${zip}, ${country}${phone}
+                  ${addr.calle}<br>${addr.ciudad}, ${addr.codigoPostal}${country}${phone}
                 </p>
               </div>
               <div class="address-card__actions">
@@ -235,43 +232,66 @@
         }).join('');
       }
 
+      async function fetchAddresses() {
+        try {
+          const data = await window.ShineAPI.get('/direcciones');
+          addresses = Array.isArray(data) ? data : [];
+        } catch (_) {
+          addresses = [];
+        }
+        renderAddresses();
+      }
+
       // ── Actions via delegation ──────────────────
       let editingId = null;
 
-      document.getElementById('addressList').addEventListener('click', function (e) {
+      document.getElementById('addressList').addEventListener('click', async function (e) {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
         const id = Number(btn.dataset.id);
         const action = btn.dataset.action;
-        const list = loadAddresses();
+        const meta = loadMeta();
 
         if (action === 'delete') {
           if (!confirm('Remove this address?')) return;
-          saveAddresses(list.filter(a => a.id !== id));
-          renderAddresses();
-          showToast('Address removed.');
+          try {
+            await window.ShineAPI.delete(`/direcciones/${id}`);
+            const m = { ...meta };
+            delete m[id];
+            saveMeta(m);
+            addresses = addresses.filter(a => a.id !== id);
+            renderAddresses();
+            showToast('Address removed.');
+          } catch (err) {
+            showToast(err.message || 'Could not remove address.');
+          }
         }
 
         if (action === 'default') {
-          saveAddresses(list.map(a => ({ ...a, isDefault: a.id === id })));
+          const updated = {};
+          for (const k of Object.keys(meta)) updated[k] = { ...meta[k], isDefault: false };
+          updated[id] = { ...(updated[id] || {}), isDefault: true };
+          saveMeta(updated);
           renderAddresses();
           showToast('Default address updated.');
         }
 
         if (action === 'edit') {
-          const addr = list.find(a => a.id === id);
+          const addr = addresses.find(a => a.id === id);
           if (!addr) return;
+          const m = meta[id] || {};
           editingId = id;
           document.getElementById('formTitle').textContent = 'Edit Address';
-          document.getElementById('addrLabel').value = addr.label || '';
-          document.getElementById('addrPhone').value = addr.phone || '';
-          document.getElementById('addrLine').value = addr.line || '';
-          document.getElementById('addrCity').value = addr.city || '';
-          document.getElementById('addrZip').value = addr.zip || '';
-          document.getElementById('setAsDefault').checked = !!addr.isDefault;
+          document.getElementById('addrLabel').value = m.label || '';
+          document.getElementById('addrPhone').value = m.phone || '';
+          document.getElementById('addrLine').value = addr.calle || '';
+          document.getElementById('addrCity').value = addr.ciudad || '';
+          document.getElementById('addrZip').value = addr.codigoPostal || '';
+          document.getElementById('setAsDefault').checked = !!m.isDefault;
           const sel = document.getElementById('addrCountry');
+          const country = m.country || 'Spain';
           for (let i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].text === addr.country) { sel.selectedIndex = i; break; }
+            if (sel.options[i].text === country) { sel.selectedIndex = i; break; }
           }
           const form = document.getElementById('addressForm');
           form.classList.add('open');
@@ -296,34 +316,50 @@
         document.getElementById('addressForm').classList.remove('open');
       });
 
-      document.getElementById('saveAddrBtn').addEventListener('click', () => {
+      document.getElementById('saveAddrBtn').addEventListener('click', async () => {
         const label = document.getElementById('addrLabel').value.trim();
-        const line  = document.getElementById('addrLine').value.trim();
-        const city  = document.getElementById('addrCity').value.trim();
-        if (!label || !line || !city) { alert('Please fill in the required fields.'); return; }
+        const calle = document.getElementById('addrLine').value.trim();
+        const ciudad = document.getElementById('addrCity').value.trim();
+        const codigoPostal = document.getElementById('addrZip').value.trim();
+        if (!calle || !ciudad) { alert('Please fill in at least street and city.'); return; }
 
         const isDefault = document.getElementById('setAsDefault').checked;
-        const country = document.getElementById('addrCountry').options[document.getElementById('addrCountry').selectedIndex].text;
-        const zip   = document.getElementById('addrZip').value.trim();
         const phone = document.getElementById('addrPhone').value.trim();
+        const sel = document.getElementById('addrCountry');
+        const country = sel.options[sel.selectedIndex].text;
 
-        let list = loadAddresses();
-        if (isDefault) list = list.map(a => ({ ...a, isDefault: false }));
+        try {
+          let addr;
+          if (editingId) {
+            addr = await window.ShineAPI.put(`/direcciones/${editingId}`, {
+              idUsuario: user.id, calle, ciudad, codigoPostal
+            });
+            addresses = addresses.map(a => a.id === editingId ? addr : a);
+          } else {
+            addr = await window.ShineAPI.post('/direcciones', {
+              idUsuario: user.id, calle, ciudad, codigoPostal
+            });
+            addresses.push(addr);
+          }
 
-        if (editingId) {
-          list = list.map(a => a.id === editingId ? { ...a, label, line, city, zip, phone, country, isDefault } : a);
-        } else {
-          list.push({ id: Date.now(), label, line, city, zip, phone, country, isDefault });
+          // Save display metadata locally
+          const meta = loadMeta();
+          if (isDefault) {
+            for (const k of Object.keys(meta)) meta[k] = { ...meta[k], isDefault: false };
+          }
+          meta[addr.id] = { label: label || 'Address', phone, country, isDefault };
+          saveMeta(meta);
+
+          editingId = null;
+          renderAddresses();
+          document.getElementById('addressForm').classList.remove('open');
+          showToast('Address saved successfully.');
+        } catch (err) {
+          showToast(err.message || 'Could not save address.');
         }
-
-        saveAddresses(list);
-        editingId = null;
-        renderAddresses();
-        document.getElementById('addressForm').classList.remove('open');
-        showToast('Address saved successfully.');
       });
 
-      renderAddresses();
+      document.addEventListener('DOMContentLoaded', fetchAddresses);
     })();
   </script>
   <script src="assets/js/search.js" defer></script>

@@ -23,7 +23,8 @@
       name: usuario.nombre,
       email: usuario.email,
       initials: getInitials(usuario.nombre, usuario.email),
-      role: usuario.rol
+      role: usuario.rol,
+      puntos: usuario.puntos || 0
     }));
 
     // Update the global ID used by carrito.js

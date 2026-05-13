@@ -22,6 +22,7 @@ public class FraganciaDAO {
     }
 
     public Optional<Fragancia> findById(Integer id) throws SQLException {
+        if (id == null) return Optional.empty();
         String sql = "SELECT id_fragancia, nombre, familia, es_base FROM fragancia WHERE id_fragancia = ?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

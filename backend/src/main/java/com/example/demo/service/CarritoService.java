@@ -90,31 +90,14 @@ public class CarritoService {
         try {
             Carrito carrito = carritoDAO.findByUsuarioId(idUsuario)
                     .orElseThrow(() -> new EntityNotFoundException("Carrito de usuario", idUsuario));
-            List<CarritoItem> items = carritoItemDAO.findByCarritoId(carrito.getId());
-            // Enriquecer items con datos completos de Producto / PerfumeCustom
-            for (CarritoItem item : items) {
-                if (item.getProducto() != null) {
-                    productoDAO.findById(item.getProducto().getIdProducto()).ifPresent(item::setProducto);
-                }
-                if (item.getPerfumeCustom() != null) {
-                    perfumeCustomDAO.findById(item.getPerfumeCustom().getIdPerfCust()).ifPresent(item::setPerfumeCustom);
-                }
-            }
-            carrito.setItems(items);
+            carrito.setItems(carritoItemDAO.findByCarritoIdEnriquecido(carrito.getId()));
             return carrito;
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
     CarritoDTO toDto(Carrito carrito) {
         try {
-            List<CarritoItem> items = carritoItemDAO.findByCarritoId(carrito.getId());
-            // Enriquecer items
-            for (CarritoItem item : items) {
-                if (item.getProducto() != null)
-                    productoDAO.findById(item.getProducto().getIdProducto()).ifPresent(item::setProducto);
-                if (item.getPerfumeCustom() != null)
-                    perfumeCustomDAO.findById(item.getPerfumeCustom().getIdPerfCust()).ifPresent(item::setPerfumeCustom);
-            }
+            List<CarritoItem> items = carritoItemDAO.findByCarritoIdEnriquecido(carrito.getId());
             carrito.setItems(items);
             List<CarritoItemResponseDTO> itemDtos = items.stream().map(this::toItemDto).collect(Collectors.toList());
             BigDecimal total = itemDtos.stream().map(CarritoItemResponseDTO::getSubtotal)

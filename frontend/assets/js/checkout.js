@@ -81,8 +81,16 @@
     }, 2500);
   }
 
-  function showBizumModal({ pedido, pago }) {
+  function showBizumModal({ pedido, pago, puntosGanados, puntosTotal }) {
     document.getElementById('bizumPaymentModal')?.remove();
+
+    const pointsBadge = puntosGanados > 0
+      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:var(--petal);border-radius:var(--r-md);padding:var(--sp-sm) var(--sp-md);margin-bottom:var(--sp-lg);font-size:var(--fs-sm)">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+           <span style="color:var(--rose);font-weight:700">+${puntosGanados} points earned</span>
+           ${puntosTotal != null ? `<span style="color:var(--text-muted)">· ${puntosTotal} total</span>` : ''}
+         </div>`
+      : '';
 
     const modal = document.createElement('div');
     modal.id = 'bizumPaymentModal';
@@ -92,15 +100,22 @@
         <div style="width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--petal);color:var(--rose);margin:0 auto var(--sp-lg)">
           ${CHECK_SVG}
         </div>
-        <h3 style="margin-bottom:var(--sp-sm)">Bizum payment completed</h3>
-        <p class="text-sm text-muted" style="margin:0 0 var(--sp-lg)">
-          Order #${escapeHtml(pedido.idPedido)} confirmed. Payment #${escapeHtml(pago.idPago || 'bizum')} processed via Bizum.
+        <h3 style="margin-bottom:var(--sp-sm)">Order confirmed!</h3>
+        <p class="text-sm text-muted" style="margin:0 0 var(--sp-md)">
+          Order #${escapeHtml(pedido.idPedido)} confirmed. Payment processed via Bizum. Your order is being prepared.
         </p>
-        <button class="btn btn--primary" id="bizumDoneBtn" type="button" style="width:100%">Back to Home</button>
+        ${pointsBadge}
+        <div style="display:flex;gap:var(--sp-sm);justify-content:center">
+          <button class="btn btn--primary" id="bizumOrdersBtn" type="button" style="flex:1">View my orders</button>
+          <button class="btn btn--outline" id="bizumDoneBtn" type="button" style="flex:1">Home</button>
+        </div>
       </div>
     `;
     document.body.appendChild(modal);
 
+    document.getElementById('bizumOrdersBtn')?.addEventListener('click', () => {
+      window.location.href = 'orders.html';
+    });
     document.getElementById('bizumDoneBtn')?.addEventListener('click', () => {
       window.location.href = 'index.html';
     });
@@ -226,11 +241,17 @@
     const taxEl = document.getElementById('coTax');
     const shippingEl = document.getElementById('coShippingCost');
     const totalEl = document.getElementById('coTotal');
+    const pointsEl = document.getElementById('coPointsToEarn');
 
     if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
     if (taxEl) taxEl.textContent = formatCurrency(tax);
     if (shippingEl) shippingEl.textContent = shipping === 0 ? 'Free' : formatCurrency(shipping);
     if (totalEl) totalEl.textContent = formatCurrency(total);
+
+    if (pointsEl) {
+      const puntos = Math.round(subtotal * 10);
+      pointsEl.textContent = puntos > 0 ? `+${puntos} pts` : '0 pts';
+    }
   }
 
   async function cargarCheckout() {
@@ -241,8 +262,8 @@
 
     try {
       const [carritoData, direccionesData] = await Promise.all([
-        window.ShineAPI.get(`/usuarios/${getUsuarioId()}/carrito`),
-        window.ShineAPI.get(`/usuarios/${getUsuarioId()}/direcciones`)
+        window.ShineAPI.get('/carrito'),
+        window.ShineAPI.get('/direcciones')
       ]);
 
       carrito = carritoData;
@@ -252,6 +273,7 @@
       renderSummaryItems();
       syncShippingSummary();
 
+      if (!getCartItems().length) {
         showToast('Your cart is empty.');
       }
     } catch (error) {
@@ -270,7 +292,7 @@
     }
 
     try {
-      const direccion = await window.ShineAPI.post(`/usuarios/${getUsuarioId()}/direcciones`, {
+      const direccion = await window.ShineAPI.post('/direcciones', {
         idUsuario: getUsuarioId(),
         calle,
         ciudad,
@@ -310,6 +332,8 @@
     }
 
     try {
+      const puntosGanados = Math.round(getSubtotal() * 10);
+
       const pedido = await window.ShineAPI.post('/pedidos', {
         idUsuario: getUsuarioId(),
         idDireccion: getSelectedAddressId()
@@ -321,9 +345,26 @@
         estado: 'completado'
       });
 
+      // Clear cart in backend and all frontend caches
+      try { await window.ShineAPI.delete('/carrito'); } catch (_) {}
+      sessionStorage.removeItem('shine:carrito:v1');
+      localStorage.removeItem('shineCart');
+
+      // Refresh loyalty points in localStorage so other pages show the updated balance
+      let puntosTotal = null;
+      try {
+        const puntosData = await window.ShineAPI.get(`/usuarios/${getUsuarioId()}/puntos`);
+        puntosTotal = puntosData?.puntos ?? null;
+        const user = JSON.parse(localStorage.getItem('shineUser') || 'null');
+        if (user && puntosTotal !== null) {
+          user.puntos = puntosTotal;
+          localStorage.setItem('shineUser', JSON.stringify(user));
+        }
+      } catch (_) {}
+
       carrito = { items: [], total: 0 };
       renderSummaryItems();
-      showBizumModal({ pedido, pago });
+      showBizumModal({ pedido, pago, puntosGanados, puntosTotal });
     } catch (error) {
       showToast(error.message || 'Could not complete the Bizum payment.');
     } finally {

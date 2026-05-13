@@ -41,7 +41,18 @@ const tabTitles = {
   'admin-creacion':'Creación de Productos'
 };
 
+const ADMIN_ONLY_TABS = ['dashboard', 'orders', 'team', 'reports', 'planner', 'admin-roles', 'admin-fichajes', 'admin-creacion'];
+
 function goToTab(tab) {
+  // Guard: redirigir si no hay sesión
+  if (!window._staffRole) { window.location.href = 'staff-login.html'; return; }
+
+  // Guard: empleados no pueden acceder a tabs restringidos
+  if (window._staffRole !== 'admin' && ADMIN_ONLY_TABS.includes(tab)) {
+    if (typeof showToast === 'function') showToast('Acceso restringido. Solo administradores.', 'warn');
+    return;
+  }
+
   links.forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
   sections.forEach(s => s.classList.toggle('active', s.id === 'sec-' + tab));
   titleEl.textContent = tabTitles[tab] || tab;
@@ -49,6 +60,9 @@ function goToTab(tab) {
   document.getElementById('sidebarOverlay').classList.remove('active');
   if (tab === 'reports') initReportsCharts();
   if (tab === 'objectives-2026') animateProgressBars();
+  if (tab === 'admin-fichajes' && typeof window.loadFichajesAdmin === 'function') window.loadFichajesAdmin();
+  if (tab === 'catalogue' && typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
+  if (tab === 'orders') window.loadIntranetOrders();
 }
 
 links.forEach(l => l.addEventListener('click', () => goToTab(l.dataset.tab)));
@@ -139,9 +153,13 @@ if (punchBtn) {
   updatePunchUI(punchState);
 
   punchBtn.addEventListener('click', async () => {
-    punchState.punched = !punchState.punched;
-    const tipo = punchState.punched ? 'ENTRADA' : 'SALIDA';
+    const nextPunched = !punchState.punched;
+    const tipo = nextPunched ? 'ENTRADA' : 'SALIDA';
     const staff = staffSession();
+
+    punchBtn.disabled = true;
+    punchBtn.textContent = nextPunched ? 'Fichando…' : 'Desfichando…';
+
     try {
       const r = await fetch(`${INTRANET_API}/fichajes`, {
         method: 'POST',
@@ -153,14 +171,23 @@ if (punchBtn) {
         })
       });
       if (!r.ok) {
-        const err = await r.text();
-        console.error(`Fichaje rechazado por el servidor (${r.status}):`, err);
+        const data = await r.json().catch(() => ({}));
+        showToast(data.error || `Error del servidor (${r.status})`, 'error');
+        punchBtn.disabled = false;
+        updatePunchUI(punchState);
+        return;
       }
-    } catch (e) { console.error('No se pudo conectar con el servidor para fichar:', e); }
-    savePunchState(punchState);
-    updatePunchUI(punchState);
-    showToast(punchState.punched ? 'Fichado correctamente.' : 'Desfichado correctamente.', 'success');
-    if (typeof loadFichajesAdmin === 'function') loadFichajesAdmin();
+      punchState.punched = nextPunched;
+      savePunchState(punchState);
+      showToast(nextPunched ? 'Fichado correctamente.' : 'Desfichado correctamente.', 'success');
+      if (typeof window.loadFichajesAdmin === 'function') window.loadFichajesAdmin();
+    } catch (e) {
+      console.error('No se pudo conectar con el servidor para fichar:', e);
+      showToast('No se pudo conectar con el servidor.', 'error');
+    } finally {
+      punchBtn.disabled = false;
+      updatePunchUI(punchState);
+    }
   });
 }
 
@@ -421,43 +448,54 @@ document.getElementById('submitNewOrder').addEventListener('click', () => {
   showToast(`Order ${id} created!`, 'success');
 });
 
-// View Order Detail
+// View Order Detail (API data)
+const _apiOrderCache = {};
+
 document.addEventListener('click', e => {
-  const btn = e.target.closest('.view-order');
+  const btn = e.target.closest('.view-order-api');
   if (!btn) return;
   const id = btn.dataset.id;
-  const o = orderData[id];
-  if (!o) return;
-  document.getElementById('orderDetailTitle').textContent = 'Order #' + id;
-  const statusMap = { Processing: 'status--pending', Shipped: 'status--shipped', Delivered: 'status--active' };
+  const p = _apiOrderCache[id];
+  if (!p) return;
+
+  const statusMap = { procesando: 'status--pending', pendiente: 'status--pending', enviado: 'status--shipped', entregado: 'status--active', cancelado: 'status--danger' };
+  const statusLabel = { procesando: 'Procesando', pendiente: 'Pendiente', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const estado = (p.estado || '').toLowerCase();
+  const fechaStr = p.fecha ? new Date(p.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+  const detalles = p.detalles || [];
+  const totalCalc = detalles.reduce((s, d) => s + (parseFloat(d.precioUnitario) * d.cantidad), 0);
+
+  document.getElementById('orderDetailTitle').textContent = 'Pedido #' + id;
   document.getElementById('orderDetailBody').innerHTML = `
     <div class="dash-grid-2" style="margin-bottom:18px">
       <div>
-        <div class="dash-label">Customer</div>
-        <div style="font-weight:600;margin-top:4px">${o.customer}</div>
-        <div style="color:var(--dash-muted);font-size:0.8rem">${o.email}</div>
+        <div class="dash-label">Cliente</div>
+        <div style="font-weight:600;margin-top:4px">${escapeHtml(p.nombreUsuario || '—')}</div>
+        <div style="color:var(--dash-muted);font-size:0.8rem">${escapeHtml(p.emailUsuario || '')}</div>
       </div>
       <div>
-        <div class="dash-label">Status</div>
-        <span class="status ${statusMap[o.status]}" style="margin-top:6px;display:inline-flex">${o.status}</span>
+        <div class="dash-label">Estado</div>
+        <span class="status ${statusMap[estado] || 'status--pending'}" style="margin-top:6px;display:inline-flex">${statusLabel[estado] || p.estado}</span>
       </div>
     </div>
     <div class="dash-grid-2" style="margin-bottom:18px">
       <div>
-        <div class="dash-label">Date</div>
-        <div style="margin-top:4px">${o.date}</div>
+        <div class="dash-label">Fecha</div>
+        <div style="margin-top:4px">${fechaStr}</div>
       </div>
       <div>
-        <div class="dash-label">Shipping Address</div>
-        <div style="margin-top:4px;font-size:0.84rem">${o.address}</div>
+        <div class="dash-label">Total</div>
+        <div style="margin-top:4px;font-weight:700;color:var(--dash-rose)">€${parseFloat(p.total || totalCalc).toFixed(2)}</div>
       </div>
     </div>
-    <div class="dash-label" style="margin-bottom:10px">Items Ordered</div>
+    <div class="dash-label" style="margin-bottom:10px">Artículos del pedido</div>
     <table class="dash-table" style="margin-bottom:0">
-      <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+      <thead><tr><th>Producto</th><th>Cant.</th><th>Precio unit.</th><th>Subtotal</th></tr></thead>
       <tbody>
-        ${o.items.map(i => `<tr><td>${i.name}</td><td>${i.qty}</td><td>€${i.price.toFixed(2)}</td><td>€${(i.qty * i.price).toFixed(2)}</td></tr>`).join('')}
-        <tr style="font-weight:700"><td colspan="3" style="text-align:right">Total</td><td>€${o.items.reduce((s,i)=>s+i.qty*i.price,0).toFixed(2)}</td></tr>
+        ${detalles.length
+          ? detalles.map(d => `<tr><td>${escapeHtml(d.nombre || '—')}</td><td>${d.cantidad}</td><td>€${parseFloat(d.precioUnitario).toFixed(2)}</td><td>€${(parseFloat(d.precioUnitario) * d.cantidad).toFixed(2)}</td></tr>`).join('')
+          : '<tr><td colspan="4" style="text-align:center;color:var(--dash-muted)">Sin artículos</td></tr>'}
+        <tr style="font-weight:700"><td colspan="3" style="text-align:right">Total</td><td>€${parseFloat(p.total || totalCalc).toFixed(2)}</td></tr>
       </tbody>
     </table>
   `;
@@ -1241,9 +1279,18 @@ document.addEventListener('DOMContentLoaded', () => {
     staffSession = JSON.parse(localStorage.getItem('shineStaff'));
   } catch(e) {}
 
-  const currentRole = staffSession?.role || 'empleado';
-  const currentName = staffSession?.name || 'Staff';
-  const currentInitials = staffSession?.initials || 'ST';
+  // Redirigir si no hay sesión de staff
+  if (!staffSession) {
+    window.location.href = 'staff-login.html';
+    return;
+  }
+
+  const currentRole = staffSession.role || 'empleado';
+  const currentName = staffSession.name || 'Staff';
+  const currentInitials = staffSession.initials || 'ST';
+
+  // Exponer rol globalmente para el guard de goToTab
+  window._staffRole = currentRole;
 
   // Set role on HTML element for CSS-driven visibility
   document.documentElement.setAttribute('data-role', currentRole);
@@ -1432,17 +1479,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Agrupar por email: { nombre, entrada, salida }
       const map = {};
+      // eventos llegan ordenados ASC por fecha_hora
       eventos.forEach(ev => {
         const email = ev.empleadoEmail;
         if (!map[email]) map[email] = { nombre: ev.empleadoNombre, entrada: null, salida: null };
         const t = new Date(ev.fechaHora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        if (ev.tipo === 'ENTRADA') map[email].entrada = t;
-        else                       map[email].salida  = t;
+        if (ev.tipo === 'ENTRADA' && !map[email].entrada) map[email].entrada = t; // primera entrada del día
+        if (ev.tipo === 'SALIDA')  map[email].salida  = t;                        // última salida del día
       });
 
       const fechaDisplay = new Date(fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
       let total = 0, completed = 0, active = 0;
       tbody.innerHTML = '';
+
+      if (Object.keys(map).length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--dash-muted)">No hay fichajes registrados para el ${fechaDisplay}</td></tr>`;
+        const el = id => document.getElementById(id);
+        if (el('fichajesTotal'))     el('fichajesTotal').textContent     = 0;
+        if (el('fichajesCompleted')) el('fichajesCompleted').textContent = 0;
+        if (el('fichajesActive'))    el('fichajesActive').textContent    = 0;
+        if (el('fichajesAbsent'))    el('fichajesAbsent').textContent    = 0;
+        return;
+      }
 
       Object.values(map).forEach(({ nombre, entrada, salida }) => {
         total++;
@@ -1455,10 +1513,10 @@ document.addEventListener('DOMContentLoaded', () => {
           statusHtml = '<span class="status status--active">Completado</span>';
           completed++;
         } else if (entrada) {
-          statusHtml = '<span class="status status--pending">Fichado</span>';
+          statusHtml = '<span class="status status--pending">En turno</span>';
           active++;
         } else {
-          statusHtml = '<span class="status status--expired">No fichado</span>';
+          statusHtml = '<span class="status status--expired">Sin entrada</span>';
         }
         tbody.innerHTML += `<tr>
           <td><strong>${escapeHtml(nombre)}</strong></td>
@@ -1470,12 +1528,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr>`;
       });
 
-      const absent = Math.max(0, total - completed - active);
       const el = id => document.getElementById(id);
       if (el('fichajesTotal'))     el('fichajesTotal').textContent     = total;
       if (el('fichajesCompleted')) el('fichajesCompleted').textContent = completed;
       if (el('fichajesActive'))    el('fichajesActive').textContent    = active;
-      if (el('fichajesAbsent'))    el('fichajesAbsent').textContent    = absent;
+      if (el('fichajesAbsent'))    el('fichajesAbsent').textContent    = Math.max(0, total - completed - active);
     }
 
     const fichajesBtn = document.getElementById('fichajesToday');
@@ -1510,46 +1567,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createProductForm = document.getElementById('createProductForm');
     if (createProductForm) {
-      createProductForm.addEventListener('submit', (e) => {
+      createProductForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const name = document.getElementById('cp-name')?.value.trim();
         const sku = document.getElementById('cp-sku')?.value.trim();
-        const category = document.getElementById('cp-category')?.value;
+        const catVal = document.getElementById('cp-category')?.value;
         const price = parseFloat(document.getElementById('cp-price')?.value || 0);
         const stock = parseInt(document.getElementById('cp-stock')?.value || 0);
+        const desc = document.getElementById('cp-desc')?.value.trim() || '';
+        const ingredients = document.getElementById('cp-ingredients')?.value.trim() || '';
 
-        if (!name || !sku || !category || !price) {
+        if (!name || !sku || !catVal || !price) {
           if (window.showToast) window.showToast('Por favor completa los campos obligatorios', 'warn');
           return;
         }
 
-        // Add to catalogue table
-        const tbody = document.querySelector('#catalogueTable tbody');
-        if (tbody) {
-          const stockPercent = Math.min(stock * 2, 100);
-          const status = stock > 0 ? 'Active' : 'Out of Stock';
-          const statusClass = stock > 0 ? 'status--active' : 'status--expired';
-          const tr = document.createElement('tr');
-          tr.dataset.category = category;
-          tr.innerHTML = `
-            <td><strong>${name}</strong></td>
-            <td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>
-            <td>€${price.toFixed(2)}</td>
-            <td><div class="stock-cell"><span>${stock}</span><div class="stock-bar"><div class="stock-bar__fill" style="width:${stockPercent}%"></div></div></div></td>
-            <td><span class="status ${statusClass}">${status}</span></td>
-            <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Edit</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-product">Delete</button></div></td>
-          `;
-          tbody.prepend(tr);
+        const submitBtn = createProductForm.querySelector('[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creando...'; }
+
+        try {
+          const res = await fetch(`${INTRANET_API}/productos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: name, sku, idCategoria: parseInt(catVal), precio: price, stock, descripcion: desc, ingredientes: ingredients })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${res.status}`);
+          }
+
+          createProductForm.reset();
+          localStorage.removeItem('shine:productos:v2');
+          if (window.showToast) window.showToast(`Producto "${name}" creado y añadido al sistema.`, 'success');
+
+          // Navegar al catálogo y recargarlo
+          document.querySelectorAll('.sidebar-link[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === 'catalogue'));
+          document.querySelectorAll('.dash-section').forEach(s => s.classList.toggle('active', s.id === 'sec-catalogue'));
+          if (pageTitleEl) pageTitleEl.textContent = 'Catalogue';
+          if (typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
+        } catch (err) {
+          if (window.showToast) window.showToast(`Error al crear el producto: ${err.message}`, 'error');
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Crear Producto'; }
         }
-
-        createProductForm.reset();
-        if (window.showToast) window.showToast(`Producto "${name}" creado exitosamente y añadido al catálogo!`, 'success');
-
-        // Switch to catalogue tab to show the result
-        document.querySelectorAll('.sidebar-link[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === 'catalogue'));
-        document.querySelectorAll('.dash-section').forEach(s => s.classList.toggle('active', s.id === 'sec-catalogue'));
-        if (pageTitleEl) pageTitleEl.textContent = 'Catalogue';
       });
     }
 
@@ -1798,6 +1859,60 @@ document.getElementById('submitCalEvt')?.addEventListener('click', () => {
   showToast('Event added to calendar!', 'success');
 });
 
+// ── Pedidos desde API ──────────────────────
+window.loadIntranetOrders = async function () {
+  const tbody = document.getElementById('ordersTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-muted)">Cargando pedidos…</td></tr>';
+
+  const STATUS_CLS   = { procesando: 'pending',  pendiente: 'pending',  enviado: 'shipped', entregado: 'active', cancelado: 'danger' };
+  const STATUS_LABEL = { procesando: 'Procesando', pendiente: 'Pendiente', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+
+  function fmtFecha(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  try {
+    const pedidos = await fetch(`${INTRANET_API}/intranet/pedidos`).then(r => r.json());
+
+    if (!Array.isArray(pedidos) || !pedidos.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-muted)">No hay pedidos todavía.</td></tr>';
+      return;
+    }
+
+    // Cachear para el modal de detalle
+    pedidos.forEach(p => { _apiOrderCache[p.idPedido] = p; });
+
+    tbody.innerHTML = pedidos.map(p => {
+      const estado = (p.estado || '').toLowerCase();
+      const cls    = STATUS_CLS[estado]   || 'pending';
+      const label  = STATUS_LABEL[estado] || p.estado || '—';
+      const articulos = (p.detalles || []).map(d => escapeHtml(d.nombre) + (d.cantidad > 1 ? ` ×${d.cantidad}` : '')).join(', ') || '—';
+      const fecha = fmtFecha(p.fecha);
+      const total = p.total != null ? `€${parseFloat(p.total).toFixed(2)}` : '—';
+
+      return `<tr data-status="${cls}">
+        <td><strong>#${p.idPedido}</strong></td>
+        <td>${fecha}</td>
+        <td>${escapeHtml(p.nombreUsuario || '—')}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(articulos)}">${escapeHtml(articulos)}</td>
+        <td>${total}</td>
+        <td><span class="status status--${cls}">${label}</span></td>
+        <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order-api" data-id="${p.idPedido}">Ver</button></div></td>
+      </tr>`;
+    }).join('');
+
+    // Actualizar badge con pedidos activos (procesando + pendiente)
+    const activos = pedidos.filter(p => ['procesando', 'pendiente'].includes((p.estado || '').toLowerCase())).length;
+    const badge = document.querySelector('.sidebar-link[data-tab="orders"] .badge');
+    if (badge) badge.textContent = activos;
+
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-danger)">No se pudieron cargar los pedidos. Comprueba que el servidor está activo.</td></tr>';
+  }
+};
+
 // ── Lightbox ─────────────────────────────
 const lightboxOverlay = document.getElementById('lightboxOverlay');
 const lightboxImg     = document.getElementById('lightboxImg');
@@ -1819,3 +1934,227 @@ document.querySelectorAll('.infographic-img').forEach(img => {
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 document.getElementById('lightboxBackdrop').addEventListener('click', closeLightbox);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ══════════════════════════════════════════════
+//   CATÁLOGO: GESTIÓN DINÁMICA
+// ══════════════════════════════════════════════
+
+const PRODUCT_CACHE_KEY_INTRANET = 'shine:productos:v2';
+
+function getHiddenProductIds() {
+  try { return JSON.parse(localStorage.getItem('shineHiddenProducts') || '[]'); } catch { return []; }
+}
+
+function saveHiddenProductIds(ids) {
+  localStorage.setItem('shineHiddenProducts', JSON.stringify(ids));
+}
+
+function normalizeCategoryForFilter(catName) {
+  const n = (catName || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (n.includes('skin') || n.includes('facial')) return 'skincare';
+  if (n.includes('frag') || n.includes('perfume')) return 'fragrance';
+  if (n.includes('body') || n.includes('corporal') || n.includes('cuerpo')) return 'body care';
+  if (n.includes('gift') || n.includes('regalo') || n.includes('set')) return 'gift sets';
+  return n.replace(/\s+/g, '-');
+}
+
+function renderCatalogueRow(p, hiddenIds, isAdmin) {
+  const id = p.idProducto;
+  const isHidden = hiddenIds.includes(id);
+  const stock = Number(p.stock || 0);
+  const stockMax = 50;
+  const stockPct = Math.min(100, Math.round((stock / stockMax) * 100));
+  const catName = p.categoria?.nombre || '—';
+  const catFilter = normalizeCategoryForFilter(catName);
+
+  let stockCellClass = '';
+  let stockFillClass = '';
+  if (stock === 0) { stockCellClass = 'stock-cell--empty'; stockFillClass = 'stock-bar__fill--empty'; }
+  else if (stock < 15) { stockCellClass = 'stock-cell--low'; stockFillClass = 'stock-bar__fill--low'; }
+
+  const statusHtml = isHidden
+    ? '<span class="status status--draft">Oculto</span>'
+    : stock === 0
+      ? '<span class="status status--expired">Sin Stock</span>'
+      : stock < 15
+        ? '<span class="status status--pending">Stock Bajo</span>'
+        : '<span class="status status--active">Activo</span>';
+
+  const hideBtn = isAdmin
+    ? `<button class="dash-btn dash-btn--sm ${isHidden ? 'dash-btn--rose' : 'dash-btn--outline'} btn-toggle-hidden" data-id="${id}" title="${isHidden ? 'Mostrar producto en tienda' : 'Ocultar producto en tienda'}">${isHidden ? 'Mostrar' : 'Ocultar'}</button>`
+    : '';
+
+  return `
+    <tr data-category="${escapeHtml(catFilter)}" data-id="${id}" style="${isHidden ? 'opacity:.55' : ''}">
+      <td><strong>${escapeHtml(p.nombre)}</strong></td>
+      <td>${escapeHtml(catName)}</td>
+      <td>€${Number(p.precio || 0).toFixed(2)}</td>
+      <td>
+        <div class="stock-cell ${stockCellClass}">
+          <span>${stock}</span>
+          <div class="stock-bar"><div class="stock-bar__fill ${stockFillClass}" style="width:${stockPct}%"></div></div>
+        </div>
+      </td>
+      <td>${statusHtml}</td>
+      <td>
+        <div class="row-actions">
+          <button class="dash-btn dash-btn--outline dash-btn--sm btn-edit-catalogue" data-id="${id}">Editar</button>
+          ${hideBtn}
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function setupCatalogueRowActions() {
+  const isAdmin = window._staffRole === 'admin';
+
+  document.querySelectorAll('.btn-edit-catalogue').forEach(btn => {
+    btn.addEventListener('click', () => openCatalogueEditModal(btn.dataset.id));
+  });
+
+  if (isAdmin) {
+    document.querySelectorAll('.btn-toggle-hidden').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const ids = getHiddenProductIds();
+        const idx = ids.indexOf(id);
+        if (idx > -1) ids.splice(idx, 1); else ids.push(id);
+        saveHiddenProductIds(ids);
+        localStorage.removeItem(PRODUCT_CACHE_KEY_INTRANET);
+        window.loadCatalogueProducts();
+        const action = idx > -1 ? 'visible' : 'oculto';
+        if (window.showToast) window.showToast(`Producto ${action} en la tienda.`, 'success');
+      });
+    });
+  }
+}
+
+async function openCatalogueEditModal(productId) {
+  try {
+    const res = await fetch(`${INTRANET_API}/productos/${productId}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const p = await res.json();
+
+    document.getElementById('ep-id').value = p.idProducto || '';
+    document.getElementById('ep-name').value = p.nombre || '';
+    document.getElementById('ep-sku').value = p.sku || '';
+    document.getElementById('ep-price').value = Number(p.precio || 0).toFixed(2);
+    document.getElementById('ep-stock').value = p.stock || 0;
+    document.getElementById('ep-desc').value = p.descripcion || '';
+    document.getElementById('ep-ingredients').value = p.ingredientes || '';
+    document.getElementById('ep-fragancia').value = p.tipoFragancia || '';
+
+    const catSelect = document.getElementById('ep-category');
+    if (catSelect && p.categoria?.idCategoria) catSelect.value = p.categoria.idCategoria;
+
+    if (window.openModal) window.openModal('editProductModal');
+  } catch (e) {
+    if (window.showToast) window.showToast('No se pudo cargar el producto del servidor.', 'error');
+  }
+}
+
+window.loadCatalogueProducts = async function () {
+  const tbody = document.querySelector('#catalogueTable tbody');
+  if (!tbody) return;
+
+  const hiddenIds = getHiddenProductIds();
+  const isAdmin = window._staffRole === 'admin';
+
+  try {
+    const res = await fetch(`${INTRANET_API}/productos`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const products = await res.json();
+
+    if (!Array.isArray(products) || !products.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--dash-muted)">No hay productos en el catálogo.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = products.map(p => renderCatalogueRow(p, hiddenIds, isAdmin)).join('');
+    setupCatalogueRowActions();
+    filterCatalogue();
+  } catch (e) {
+    console.error('[loadCatalogueProducts]', e);
+    if (window.showToast) window.showToast(`Error al cargar el catálogo: ${e.message}`, 'warn');
+  }
+};
+
+// ── Wiring: Submit Add Product (modal rápido catálogo) ───
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('submitAddProduct')?.addEventListener('click', async () => {
+    const name = document.getElementById('ap-name')?.value.trim();
+    const sku = document.getElementById('ap-sku')?.value.trim();
+    const catId = parseInt(document.getElementById('ap-category')?.value || '0');
+    const price = parseFloat(document.getElementById('ap-price')?.value || '0');
+    const stock = parseInt(document.getElementById('ap-stock')?.value || '0');
+    const desc = document.getElementById('ap-desc')?.value.trim() || '';
+    const ingredients = document.getElementById('ap-ingredients')?.value.trim() || '';
+
+    if (!name || !sku || !catId || !price) {
+      if (window.showToast) window.showToast('Completa los campos obligatorios (*)', 'warn');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${INTRANET_API}/productos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: name, sku, idCategoria: catId, precio: price, stock, descripcion: desc, ingredientes: ingredients })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      if (window.closeModal) window.closeModal('addProductModal');
+      ['ap-name','ap-sku','ap-price','ap-stock','ap-desc','ap-ingredients'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      document.getElementById('ap-category').value = '';
+
+      localStorage.removeItem(PRODUCT_CACHE_KEY_INTRANET);
+      if (typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
+      if (window.showToast) window.showToast(`Producto "${name}" añadido al sistema.`, 'success');
+    } catch (e) {
+      if (window.showToast) window.showToast(`Error: ${e.message}`, 'error');
+    }
+  });
+
+  // ── Wiring: Submit Edit Product ───────────────────────────
+  document.getElementById('submitEditProduct')?.addEventListener('click', async () => {
+    const id = document.getElementById('ep-id')?.value;
+    const name = document.getElementById('ep-name')?.value.trim();
+    const sku = document.getElementById('ep-sku')?.value.trim();
+    const catId = parseInt(document.getElementById('ep-category')?.value || '0');
+    const price = parseFloat(document.getElementById('ep-price')?.value || '0');
+    const stock = parseInt(document.getElementById('ep-stock')?.value || '0');
+    const desc = document.getElementById('ep-desc')?.value.trim() || '';
+    const ingredients = document.getElementById('ep-ingredients')?.value.trim() || '';
+    const fragancia = document.getElementById('ep-fragancia')?.value.trim() || null;
+
+    if (!id || !name || !sku || !catId) {
+      if (window.showToast) window.showToast('Completa los campos obligatorios (*)', 'warn');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${INTRANET_API}/productos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: name, sku, idCategoria: catId, precio: price, stock, descripcion: desc, ingredientes: ingredients, tipoFragancia: fragancia || null })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      if (window.closeModal) window.closeModal('editProductModal');
+      localStorage.removeItem(PRODUCT_CACHE_KEY_INTRANET);
+      if (typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
+      if (window.showToast) window.showToast(`Producto "${name}" actualizado correctamente.`, 'success');
+    } catch (e) {
+      if (window.showToast) window.showToast(`Error al actualizar: ${e.message}`, 'error');
+    }
+  });
+});

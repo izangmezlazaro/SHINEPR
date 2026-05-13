@@ -36,7 +36,7 @@
   function getCartEndpoint() {
     const idUsuario = getUsuarioId();
     if (!idUsuario) return null;
-    return `/usuarios/${idUsuario}/carrito`;
+    return `/carrito`;
   }
 
   function leerCarritoCache() {
@@ -120,6 +120,10 @@
     });
   }
 
+  function calcularPuntosAGanar(total) {
+    return Math.round(total * 10);
+  }
+
   function updateSummary(carrito) {
     const subtotal = getCartSubtotal(carrito);
     const tax = subtotal * TAX_RATE;
@@ -128,10 +132,16 @@
     const subtotalEl = document.getElementById('summarySubtotal');
     const taxEl = document.getElementById('summaryTax');
     const totalEl = document.getElementById('summaryTotal');
+    const pointsEl = document.getElementById('summaryPoints');
 
     if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
     if (taxEl) taxEl.textContent = formatCurrency(tax);
     if (totalEl) totalEl.textContent = formatCurrency(total);
+
+    if (pointsEl) {
+      const puntos = calcularPuntosAGanar(subtotal);
+      pointsEl.textContent = puntos > 0 ? `+${puntos} pts` : '0 pts';
+    }
   }
 
   function showToast(message) {

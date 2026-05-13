@@ -50,11 +50,11 @@
       <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 22V12h6v10"/></svg>
       <span>Inicio</span>
     </a>
-    <a class="sidebar-link" data-tab="dashboard" data-tooltip="Panel">
+    <a class="sidebar-link admin-only" data-tab="dashboard" data-tooltip="Panel">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span>Panel</span>
     </a>
-    <a class="sidebar-link" data-tab="orders" data-tooltip="Pedidos">
+    <a class="sidebar-link admin-only" data-tab="orders" data-tooltip="Pedidos">
       <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span>Pedidos</span><span class="badge">5</span>
     </a>
@@ -62,7 +62,7 @@
       <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1" fill="currentColor"/></svg>
       <span>Catálogo</span>
     </a>
-    <a class="sidebar-link" data-tab="team" data-tooltip="Equipo">
+    <a class="sidebar-link admin-only" data-tab="team" data-tooltip="Equipo">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       <span>Equipo</span>
     </a>
@@ -372,7 +372,7 @@
             </h3>
           </div>
           <div class="home-quicklinks-grid">
-            <button class="home-ql-btn" data-goto="orders">
+            <button class="home-ql-btn admin-only" data-goto="orders">
               <div class="home-ql-icon home-ql-icon--rose">
                 <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
               </div>
@@ -384,19 +384,19 @@
               </div>
               <span>Catálogo</span>
             </button>
-            <button class="home-ql-btn" data-goto="planner">
+            <button class="home-ql-btn admin-only" data-goto="planner">
               <div class="home-ql-icon home-ql-icon--blue">
                 <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
               <span>Planificador</span>
             </button>
-            <button class="home-ql-btn" data-goto="team">
+            <button class="home-ql-btn admin-only" data-goto="team">
               <div class="home-ql-icon home-ql-icon--green">
                 <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
               </div>
               <span>Equipo</span>
             </button>
-            <button class="home-ql-btn" data-goto="reports">
+            <button class="home-ql-btn admin-only" data-goto="reports">
               <div class="home-ql-icon home-ql-icon--amber">
                 <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               </div>
@@ -418,7 +418,7 @@
               <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               Mis Tareas de Hoy
             </h3>
-            <button class="home-view-all" data-goto="planner">Ir al Planificador</button>
+            <button class="home-view-all admin-only" data-goto="planner">Ir al Planificador</button>
           </div>
           <div class="home-tasks-list">
             <div class="home-task-item">
@@ -632,12 +632,8 @@
           </button>
         </div>
         <div class="dash-card__body" style="padding:0; overflow-x:auto;">
-          <table class="dash-table" id="ordersTable"><thead><tr><th>ID Pedido</th><th>Fecha</th><th>Cliente</th><th>Artículos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-            <tr data-status="processing"><td><strong>#SH-1047</strong></td><td>04 May 2026</td><td>Laura Martínez</td><td>Serum, Crema</td><td>€154.00</td><td><span class="status status--pending">Procesando</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1047">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
-            <tr data-status="shipped"><td><strong>#SH-1046</strong></td><td>03 May 2026</td><td>James Kim</td><td>Glow Serum</td><td>€89.00</td><td><span class="status status--shipped">Enviado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1046">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
-            <tr data-status="delivered"><td><strong>#SH-1045</strong></td><td>02 May 2026</td><td>Sofia Petrov</td><td>Caja Regalo, Bálsamo Labial x2</td><td>€232.00</td><td><span class="status status--active">Entregado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1045">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Factura</button></div></td></tr>
-            <tr data-status="shipped"><td><strong>#SH-1044</strong></td><td>01 May 2026</td><td>Marc Torres</td><td>Velvet Cream</td><td>€65.00</td><td><span class="status status--shipped">Enviado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1044">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
-            <tr data-status="delivered"><td><strong>#SH-1043</strong></td><td>30 Abr 2026</td><td>Anna Müller</td><td>Noir Essence EDP</td><td>€120.00</td><td><span class="status status--active">Entregado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1043">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Factura</button></div></td></tr>
+          <table class="dash-table" id="ordersTable"><thead><tr><th>ID Pedido</th><th>Fecha</th><th>Cliente</th><th>Artículos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="ordersTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-muted)">Cargando pedidos…</td></tr>
           </tbody></table>
         </div>
       </div>
@@ -756,12 +752,13 @@
             <div class="video-welcome__inner">
               <!-- Miniatura / placeholder del vídeo -->
               <div class="video-thumb" id="videoPlaceholder">
+                <img src="assets/img/intranet/preview.jpg" alt="Preview vídeo comité" class="video-thumb__img">
                 <div class="video-thumb__overlay"></div>
                 <div class="video-thumb__play">
                   <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 </div>
                 <div class="video-thumb__badge">⏱ 1:30 min</div>
-                <button class="video-thumb__expand" title="Ver en grande" onclick="this.closest('.video-welcome').requestFullscreen?.()">
+                <button class="video-thumb__expand" title="Ver en grande" onclick="document.getElementById('videoPlaceholder').requestFullscreen?.()">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                 </button>
               </div>
@@ -1426,10 +1423,10 @@
                 <label class="dash-label">Categoría <span style="color:var(--dash-danger)">*</span></label>
                 <select class="dash-input" id="cp-category" required>
                   <option value="">Seleccionar...</option>
-                  <option value="skincare">Skincare</option>
-                  <option value="fragrance">Fragrance</option>
-                  <option value="body care">Body Care</option>
-                  <option value="gift sets">Gift Sets</option>
+                  <option value="1">Skincare</option>
+                  <option value="2">Fragrance</option>
+                  <option value="3">Body Care</option>
+                  <option value="4">Gift Sets</option>
                 </select>
               </div>
               <div class="dash-form-group">
@@ -1544,20 +1541,70 @@
       <button class="modal__close" data-close="addProductModal">✕</button>
     </div>
     <div class="modal__body">
-      <div class="dash-form-group"><label class="dash-label">Nombre del Producto</label><input class="dash-input" placeholder="ej. Pearl Glow Essence"></div>
+      <div class="dash-form-group"><label class="dash-label">Nombre del Producto <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ap-name" placeholder="ej. Pearl Glow Essence"></div>
       <div class="dash-grid-2">
-        <div class="dash-form-group"><label class="dash-label">Categoría</label><select class="dash-input"><option>Cuidado de piel</option><option>Fragancias</option><option>Cuidado corporal</option><option>Sets de regalo</option></select></div>
-        <div class="dash-form-group"><label class="dash-label">Precio (€)</label><input class="dash-input" type="number" placeholder="0.00"></div>
+        <div class="dash-form-group">
+          <label class="dash-label">Categoría <span style="color:var(--dash-danger)">*</span></label>
+          <select class="dash-input" id="ap-category">
+            <option value="">Seleccionar...</option>
+            <option value="1">Skincare</option>
+            <option value="2">Fragrance</option>
+            <option value="3">Body Care</option>
+            <option value="4">Gift Sets</option>
+          </select>
+        </div>
+        <div class="dash-form-group"><label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ap-price" type="number" step="0.01" min="0" placeholder="0.00"></div>
       </div>
       <div class="dash-grid-2">
-        <div class="dash-form-group"><label class="dash-label">Stock Inicial</label><input class="dash-input" type="number" placeholder="0"></div>
-        <div class="dash-form-group"><label class="dash-label">SKU</label><input class="dash-input" placeholder="SH-XXX"></div>
+        <div class="dash-form-group"><label class="dash-label">Stock Inicial</label><input class="dash-input" id="ap-stock" type="number" min="0" placeholder="0" value="0"></div>
+        <div class="dash-form-group"><label class="dash-label">SKU <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ap-sku" placeholder="SH-XXX"></div>
       </div>
-      <div class="dash-form-group"><label class="dash-label">Descripción</label><textarea class="dash-input" rows="2" placeholder="Descripción breve del producto…" style="resize:vertical"></textarea></div>
+      <div class="dash-form-group"><label class="dash-label">Descripción</label><textarea class="dash-input" id="ap-desc" rows="2" placeholder="Descripción breve del producto…" style="resize:vertical"></textarea></div>
+      <div class="dash-form-group"><label class="dash-label">Ingredientes</label><textarea class="dash-input" id="ap-ingredients" rows="2" placeholder="Lista de ingredientes…" style="resize:vertical"></textarea></div>
     </div>
     <div class="modal__footer">
       <button class="dash-btn dash-btn--outline" data-close="addProductModal">Cancelar</button>
-      <button class="dash-btn dash-btn--rose" onclick="closeModal('addProductModal');showToast('Producto añadido correctamente','success')">Añadir Producto</button>
+      <button class="dash-btn dash-btn--rose" id="submitAddProduct">Añadir Producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Producto -->
+<div class="modal-overlay" id="editProductModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Editar Producto</h3>
+      <button class="modal__close" data-close="editProductModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <input type="hidden" id="ep-id">
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Nombre <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ep-name" placeholder="Nombre del producto"></div>
+        <div class="dash-form-group"><label class="dash-label">SKU <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ep-sku" placeholder="SH-XXX"></div>
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group">
+          <label class="dash-label">Categoría <span style="color:var(--dash-danger)">*</span></label>
+          <select class="dash-input" id="ep-category">
+            <option value="">Seleccionar...</option>
+            <option value="1">Skincare</option>
+            <option value="2">Fragrance</option>
+            <option value="3">Body Care</option>
+            <option value="4">Gift Sets</option>
+          </select>
+        </div>
+        <div class="dash-form-group"><label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ep-price" type="number" step="0.01" min="0" placeholder="0.00"></div>
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Stock</label><input class="dash-input" id="ep-stock" type="number" min="0" placeholder="0"></div>
+        <div class="dash-form-group"><label class="dash-label">Tipo Fragancia</label><input class="dash-input" id="ep-fragancia" placeholder="EDP, EDT…"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Descripción</label><textarea class="dash-input" id="ep-desc" rows="3" placeholder="Descripción del producto…" style="resize:vertical"></textarea></div>
+      <div class="dash-form-group"><label class="dash-label">Ingredientes</label><textarea class="dash-input" id="ep-ingredients" rows="2" placeholder="Lista de ingredientes…" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="editProductModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitEditProduct">Guardar Cambios</button>
     </div>
   </div>
 </div>

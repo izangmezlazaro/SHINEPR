@@ -1356,6 +1356,25 @@ main { padding-top: var(--header-h); }
   color: var(--text-muted);
 }
 
+.type-price-reveal {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  margin-top: var(--sp-sm);
+  padding-top: var(--sp-sm);
+  border-top: 1px solid var(--border-light);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.25s ease, margin-top 0.25s ease, padding-top 0.25s ease;
+}
+
+.type-price-reveal.visible {
+  max-height: 2rem;
+  opacity: 1;
+}
+
 /* Notes carousel */
 .notes-carousel-wrapper {
   position: relative;
