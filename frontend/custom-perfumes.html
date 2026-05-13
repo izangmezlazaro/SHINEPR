@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shine — Create Your Custom Fragrance</title>
+  <meta name="description" content="Design your own bespoke perfume with Shine. Choose your fragrance type, base, notes, and packaging — a scent as unique as you.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
+      <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="custom-perfumes.html" class="active">Custom Perfume</a>
+        <a href="about.html">Our Brand</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+          </svg>
+          Cart
+        </a>
+      </nav>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a href="cart.html">Cart</a>
+  </div>
+
+  <main>
+    <!-- Hero -->
+    <section class="section section--petal" style="padding-bottom:var(--sp-xl)">
+      <div class="container text-center">
+        <p class="hero__tagline reveal">Bespoke Experience</p>
+        <h1 class="reveal">Create Your Fragrance</h1>
+        <p class="reveal" style="margin:0 auto var(--sp-xl);max-width:560px;text-align:center">Design a scent that's uniquely yours. Choose your fragrance type, select your notes, pick your bottle — and we'll craft it by hand.</p>
+      </div>
+    </section>
+
+    <!-- Stepper -->
+    <section class="section" style="padding-top:var(--sp-xl)">
+      <div class="container">
+        <!-- Progress Bar -->
+        <div class="stepper-progress reveal" id="stepperProgress">
+          <div class="stepper-step active" data-step="0">
+            <div class="stepper-circle">1</div>
+            <div class="stepper-label">Type</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" data-step="1">
+            <div class="stepper-circle">2</div>
+            <div class="stepper-label">Base</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" data-step="2">
+            <div class="stepper-circle">3</div>
+            <div class="stepper-label">Notes</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" data-step="3">
+            <div class="stepper-circle">4</div>
+            <div class="stepper-label">Bottle</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" data-step="4">
+            <div class="stepper-circle">5</div>
+            <div class="stepper-label">Review</div>
+          </div>
+        </div>
+
+        <div id="stepperPanels">
+          <!-- STEP 1: Fragrance Type -->
+          <div class="step-panel active" data-panel="0">
+            <div class="step-panel__inner">
+              <h2>Choose Your Fragrance Type</h2>
+              <p>Select the concentration that suits your style. Higher concentrations last longer on the skin.</p>
+              <div class="notes-carousel-wrapper mt-xl">
+                <button class="carousel-btn carousel-btn--prev" id="typePrev" aria-label="Previous">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="options-carousel" id="typeCarousel" data-group="type" data-mode="single">
+                  <div class="option-card" data-value="edp">
+                    <img src="assets/img/types/elixir.png" alt="Elixir">
+                    <div class="option-card__label">Elixir</div>
+                    <div class="option-card__desc">15&ndash;40% oils &middot; 6&ndash;8 hours</div>
+                  </div>
+                  <div class="option-card" data-value="edp">
+                    <img src="assets/img/types/eau_de_parfum.png" alt="Eau de Parfum">
+                    <div class="option-card__label">Eau de Parfum</div>
+                    <div class="option-card__desc">12&ndash;15% oils &middot; 4&ndash;6 hours</div>
+                  </div>
+                  <div class="option-card" data-value="edt">
+                    <img src="assets/img/types/eau_de_toilette.png" alt="Eau de Toilette">
+                    <div class="option-card__label">Eau de Toilette</div>
+                    <div class="option-card__desc">6&ndash;12% oils &middot; 3&ndash;5 hours</div>
+                  </div>
+                  <div class="option-card" data-value="edt">
+                    <img src="assets/img/types/eau_de_cologne.png" alt="Eau de Cologne">
+                    <div class="option-card__label">Eau de Cologne</div>
+                    <div class="option-card__desc">4&ndash;6% oils &middot; 3&ndash;4 hours</div>
+                  </div>
+                  <div class="option-card" data-value="mist">
+                    <img src="assets/img/types/eau_solide.png" alt="Eau Solide">
+                    <div class="option-card__label">Eau Solide</div>
+                    <div class="option-card__desc">1% oils &middot; Light &amp; fresh</div>
+                  </div>
+                </div>
+                <button class="carousel-btn carousel-btn--next" id="typeNext" aria-label="Next">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Base Note (rendered dynamically) -->
+          <div class="step-panel" data-panel="1">
+            <div class="step-panel__inner">
+              <h2>Select Your Base Note</h2>
+              <p>The base note is the foundation of your fragrance &mdash; it lingers longest and anchors the scent.</p>
+              <div class="notes-carousel-wrapper mt-xl">
+                <button class="carousel-btn carousel-btn--prev" id="basePrev" aria-label="Previous">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="options-carousel" id="baseCarousel" data-group="base" data-mode="single">
+                  <p class="text-sm text-muted" style="padding:var(--sp-xl)">Loading bases&hellip;</p>
+                </div>
+                <button class="carousel-btn carousel-btn--next" id="baseNext" aria-label="Next">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Heart & Top Notes (rendered dynamically) -->
+          <div class="step-panel" data-panel="2">
+            <div class="step-panel__inner">
+              <h2>Choose Your Notes</h2>
+              <p>Select up to 5 notes that will define the character of your fragrance.</p>
+              <div class="notes-carousel-wrapper mt-xl">
+                <button class="carousel-btn carousel-btn--prev" id="notesPrev" aria-label="Previous">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="options-carousel" id="notesCarousel" data-group="notes" data-mode="multi" data-max="5">
+                  <p class="text-sm text-muted" style="padding:var(--sp-xl)">Loading olfactory notes…</p>
+                </div>
+                <button class="carousel-btn carousel-btn--next" id="notesNext" aria-label="Next">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Bottle (rendered dynamically) -->
+          <div class="step-panel" data-panel="3">
+            <div class="step-panel__inner">
+              <h2>Pick Your Bottle</h2>
+              <p>Choose the vessel for your unique creation.</p>
+              <div class="notes-carousel-wrapper mt-xl">
+                <button class="carousel-btn carousel-btn--prev" id="bottlePrev" aria-label="Previous">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="options-carousel" id="bottleCarousel" data-group="bottle" data-mode="single">
+                  <p class="text-sm text-muted" style="padding:var(--sp-xl)">Loading bottles&hellip;</p>
+                </div>
+                <button class="carousel-btn carousel-btn--next" id="bottleNext" aria-label="Next">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5: Review -->
+          <div class="step-panel" data-panel="4">
+            <div class="step-panel__inner">
+              <h2>Review Your Creation</h2>
+              <p>Name your fragrance and review your selections before we begin crafting.</p>
+              <div class="grid grid-2 mt-xl" style="gap:var(--sp-2xl)">
+                <div>
+                  <div class="form-group">
+                    <label class="form-label" for="perfumeName">Name Your Fragrance</label>
+                    <input type="text" class="form-input" id="perfumeName" placeholder="e.g. Midnight Bloom">
+                  </div>
+                  <div style="padding:var(--sp-xl);background:var(--petal);border-radius:var(--r-lg);margin-top:var(--sp-lg)">
+                    <h4 style="margin-bottom:var(--sp-md)">Your Selections</h4>
+                    <div id="reviewType" style="margin-bottom:var(--sp-sm)"><strong>Type:</strong> —</div>
+                    <div id="reviewBase" style="margin-bottom:var(--sp-sm)"><strong>Base:</strong> —</div>
+                    <div id="reviewNotes" style="margin-bottom:var(--sp-sm)"><strong>Notes:</strong> —</div>
+                    <div id="reviewBottle"><strong>Bottle:</strong> —</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp-2xl);background:var(--petal);border-radius:var(--r-lg);text-align:center">
+                  <div style="font-family:var(--font-heading);font-size:var(--fs-xl);margin-bottom:var(--sp-sm)" id="previewLabel">Your Fragrance</div>
+                  <div class="text-sm text-muted" id="previewComposition">—</div>
+                  <img src="assets/img/product-perfume.png" alt="Perfume preview" style="max-height:200px;margin-top:var(--sp-lg);border-radius:var(--r-md)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-2xl" id="stepperNav">
+          <button class="btn" id="prevStepBtn" disabled>Previous</button>
+          <button class="btn btn--primary" id="nextStepBtn">Next Step</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><div class="footer-brand">Shine.</div><p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain.</p></div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html">Skincare</a><a href="shop.html">Fragrances</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="#">Shipping & Returns</a><a href="#">FAQ</a><a href="#">Privacy Policy</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Shine. All rights reserved.</p><p><a href="staff-login.html" style="color:rgba(255,250,245,0.5)">Staff Login</a></p></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/api.js" defer></script>
+  <script src="assets/js/carrito.js" defer></script>
+  <script src="assets/js/custom.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script type="text/plain" id="legacy-custom-stepper-disabled">
+    // Custom Perfume Stepper Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const panels = document.querySelectorAll('.step-panel');
+      const steps = document.querySelectorAll('.stepper-step');
+      const lines = document.querySelectorAll('.stepper-line');
+      const prevBtn = document.getElementById('prevStepBtn');
+      const nextBtn = document.getElementById('nextStepBtn');
+      const nameInput = document.getElementById('perfumeName');
+      let current = 0;
+      const selections = { type: null, base: null, notes: [], bottle: null };
+
+      function updateStepper() {
+        panels.forEach((p, i) => p.classList.toggle('active', i === current));
+        steps.forEach((s, i) => {
+          s.classList.remove('active', 'completed');
+          if (i < current) s.classList.add('completed');
+          if (i === current) s.classList.add('active');
+        });
+        lines.forEach((l, i) => l.classList.toggle('filled', i < current));
+        prevBtn.disabled = current === 0;
+        nextBtn.textContent = current === panels.length - 1 ? 'Request Quote' : 'Next Step';
+      }
+
+      // Option selection — works for both .options-grid and .options-carousel
+      document.querySelectorAll('.options-grid, .options-carousel').forEach(grid => {
+        grid.querySelectorAll('.option-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const mode = grid.dataset.mode;
+            const group = grid.dataset.group;
+            if (mode === 'single') {
+              grid.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+              card.classList.add('selected');
+              selections[group] = card.dataset.value;
+            } else {
+              const max = parseInt(grid.dataset.max) || 5;
+              if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+                selections[group] = selections[group].filter(v => v !== card.dataset.value);
+              } else if (selections[group].length < max) {
+                card.classList.add('selected');
+                selections[group].push(card.dataset.value);
+              }
+            }
+            updateReview();
+          });
+        });
+      });
+
+      // Notes carousel arrow buttons
+      const notesCarousel = document.getElementById('notesCarousel');
+      const scrollAmount = 176;
+      document.getElementById('notesPrev').addEventListener('click', () => {
+        notesCarousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      });
+      document.getElementById('notesNext').addEventListener('click', () => {
+        notesCarousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      });
+
+      function updateReview() {
+        document.getElementById('reviewType').innerHTML = '<strong>Type:</strong> ' + (selections.type || '—');
+        document.getElementById('reviewBase').innerHTML = '<strong>Base:</strong> ' + (selections.base || '—');
+        document.getElementById('reviewNotes').innerHTML = '<strong>Notes:</strong> ' + (selections.notes.length ? selections.notes.join(', ') : '—');
+        document.getElementById('reviewBottle').innerHTML = '<strong>Bottle:</strong> ' + (selections.bottle || '—');
+        const comp = [selections.type, selections.base, ...selections.notes].filter(Boolean).join(' · ');
+        document.getElementById('previewComposition').textContent = comp || '—';
+      }
+
+      if (nameInput) {
+        nameInput.addEventListener('input', () => {
+          document.getElementById('previewLabel').textContent = nameInput.value || 'Your Fragrance';
+        });
+      }
+
+      nextBtn.addEventListener('click', () => {
+        if (current < panels.length - 1) {
+          current++;
+          updateStepper();
+          window.scrollTo({ top: document.getElementById('stepperProgress').offsetTop - 100, behavior: 'smooth' });
+        } else {
+          alert('Quote requested! We\'ll get back to you within 24 hours with pricing for "' + (nameInput.value || 'Your Fragrance') + '".');
+        }
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (current > 0) { current--; updateStepper(); }
+      });
+
+      updateStepper();
+    });
+  </script>
+  <script src="assets/js/search.js" defer></script>
+</body>
+</html>

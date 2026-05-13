@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shine — Checkout</title>
+  <meta name="description" content="Complete your Shine order securely in 3 easy steps.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
+      <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+          </svg>
+          Cart
+        </a>
+      </nav>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a href="cart.html">Cart</a>
+  </div>
+
+  <main>
+    <section class="section">
+      <div class="container" style="max-width:960px">
+
+        <!-- Stepper -->
+        <div class="stepper-progress reveal" id="coStepper" style="margin-bottom:var(--sp-3xl);max-width:480px;margin-left:auto;margin-right:auto">
+          <div class="stepper-step active" data-step="0">
+            <div class="stepper-circle" id="coCircle0">1</div>
+            <div class="stepper-label">Address</div>
+          </div>
+          <div class="stepper-line" id="coLine0"></div>
+          <div class="stepper-step" data-step="1">
+            <div class="stepper-circle" id="coCircle1">2</div>
+            <div class="stepper-label">Shipping</div>
+          </div>
+          <div class="stepper-line" id="coLine1"></div>
+          <div class="stepper-step" data-step="2">
+            <div class="stepper-circle" id="coCircle2">3</div>
+            <div class="stepper-label">Payment</div>
+          </div>
+        </div>
+
+        <!-- Panels -->
+        <div id="coPanels">
+
+          <!-- ── STEP 1: Address ── -->
+          <div class="co-panel active" data-panel="0">
+            <h2 style="margin-bottom:var(--sp-xs)">Select Address</h2>
+            <p class="text-sm text-muted">Choose a saved address or add a new one.</p>
+
+            <div class="co-address-list" id="coAddressList">
+              <label class="co-address-option">
+                <input type="radio" name="co-address" value="1" checked>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:var(--sp-sm);margin-bottom:var(--sp-xs);flex-wrap:wrap">
+                    <span style="font-weight:700">Home</span>
+                    <span class="co-addr-badge">Default</span>
+                  </div>
+                  <p class="text-sm text-muted" style="margin:0;line-height:1.7">
+                    Calle el Globo 13, 50055, Zaragoza, España<br>+34 600 17 29 99
+                  </p>
+                </div>
+                <div class="co-addr-actions">
+                  <button class="co-icon-btn" title="Edit" onclick="event.preventDefault()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="co-icon-btn" title="Remove" onclick="event.preventDefault()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </label>
+
+              <label class="co-address-option">
+                <input type="radio" name="co-address" value="2">
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:var(--sp-sm);margin-bottom:var(--sp-xs);flex-wrap:wrap">
+                    <span style="font-weight:700">Work</span>
+                    <span class="co-addr-badge co-addr-badge--new">New</span>
+                  </div>
+                  <p class="text-sm text-muted" style="margin:0;line-height:1.7">
+                    Avenida Romanada 5, 50020, Zaragoza, España<br>+34 876 70 25 30
+                  </p>
+                </div>
+                <div class="co-addr-actions">
+                  <button class="co-icon-btn" title="Edit" onclick="event.preventDefault()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="co-icon-btn" title="Remove" onclick="event.preventDefault()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </label>
+            </div>
+
+            <!-- Add new address -->
+            <button class="btn btn--outline mt-xl" id="coAddAddrBtn" style="display:flex;align-items:center;gap:var(--sp-sm)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add new address
+            </button>
+
+            <!-- Inline add form -->
+            <div class="add-address-form" id="coAddressForm" style="margin-top:var(--sp-lg)">
+              <h4 style="margin-bottom:var(--sp-lg)">New Address</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)">
+                <div class="form-group">
+                  <label class="form-label" for="coAddrLabel">Label</label>
+                  <input type="text" class="form-input" id="coAddrLabel" placeholder="Home, Work…">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="coAddrPhone">Phone</label>
+                  <input type="tel" class="form-input" id="coAddrPhone" placeholder="+34 600 000 000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="coAddrLine">Street Address</label>
+                <input type="text" class="form-input" id="coAddrLine" placeholder="Street, number, floor…">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-md)">
+                <div class="form-group">
+                  <label class="form-label" for="coAddrCity">City</label>
+                  <input type="text" class="form-input" id="coAddrCity" placeholder="Zaragoza">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="coAddrZip">Postcode</label>
+                  <input type="text" class="form-input" id="coAddrZip" placeholder="50001">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="coAddrCountry">Country</label>
+                  <select class="form-input form-select" id="coAddrCountry">
+                    <option value="ES" selected>Spain</option>
+                    <option value="FR">France</option>
+                    <option value="DE">Germany</option>
+                    <option value="IT">Italy</option>
+                    <option value="PT">Portugal</option>
+                    <option value="GB">United Kingdom</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex gap-md">
+                <button class="btn btn--primary btn--sm" id="coSaveAddrBtn">Save Address</button>
+                <button class="btn btn--outline btn--sm" id="coCancelAddrBtn">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── STEP 2: Shipping ── -->
+          <div class="co-panel" data-panel="1">
+            <h2 style="margin-bottom:var(--sp-xs)">Shipment Method</h2>
+            <p class="text-sm text-muted">Select how you'd like your order delivered.</p>
+
+            <div class="co-shipping-list">
+              <label class="co-shipping-option">
+                <input type="radio" name="co-shipping" value="free" checked>
+                <div class="co-shipping-price">Free</div>
+                <div class="co-shipping-info">
+                  <strong>Regular shipment</strong>
+                  <span>Standard delivery to your door</span>
+                </div>
+                <div class="co-shipping-date">20 Apr 2026</div>
+              </label>
+
+              <label class="co-shipping-option">
+                <input type="radio" name="co-shipping" value="express">
+                <div class="co-shipping-price">€4.00</div>
+                <div class="co-shipping-info">
+                  <strong>Express delivery</strong>
+                  <span>Get it as soon as possible</span>
+                </div>
+                <div class="co-shipping-date">1 May 2026</div>
+              </label>
+
+              <label class="co-shipping-option" style="flex-wrap:wrap">
+                <input type="radio" name="co-shipping" value="scheduled">
+                <div class="co-shipping-price">€2.00</div>
+                <div class="co-shipping-info">
+                  <strong>Scheduled</strong>
+                  <span>Pick a date when you want your delivery</span>
+                  <input type="date" class="co-date-input" id="coScheduledDate">
+                </div>
+                <div class="co-shipping-date">Select Date</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- ── STEP 3: Payment ── -->
+          <div class="co-panel" data-panel="2" style="max-width:1100px">
+            <div class="co-payment-layout">
+
+              <!-- Left: Order Summary -->
+              <div class="co-summary-box">
+                <h3>Summary</h3>
+                <div id="coSummaryItems">
+                  <!-- Filled by JS from cart -->
+                </div>
+
+                <div style="height:1px;background:var(--border-light);margin:var(--sp-lg) 0"></div>
+
+                <div class="co-summary-meta" id="coSummaryAddress">
+                  <strong>Address</strong>
+                  Calle el Globo 13, 50055, Zaragoza, España
+                </div>
+                <div class="co-summary-meta" id="coSummaryShipping">
+                  <strong>Shipping method</strong>
+                  Free — Regular shipment
+                </div>
+
+                <div style="height:1px;background:var(--border-light);margin:var(--sp-lg) 0"></div>
+
+                <div class="summary-row"><span>Subtotal</span><span id="coSubtotal">€0.00</span></div>
+                <div class="summary-row"><span>Estimated Tax (6%)</span><span id="coTax">€0.00</span></div>
+                <div class="summary-row"><span>Shipping &amp; handling</span><span id="coShippingCost">Free</span></div>
+                <div class="summary-row summary-row--total"><span>Total</span><span id="coTotal">€0.00</span></div>
+              </div>
+
+              <!-- Right: Payment -->
+              <div class="co-payment-box">
+                <h3>Payment</h3>
+
+                <div style="padding:var(--sp-xl);background:var(--petal);border-radius:var(--r-lg);text-align:center;margin-bottom:var(--sp-lg)">
+                  <h4 style="margin-bottom:var(--sp-sm)">Pago Bizum</h4>
+                  <p class="text-sm text-muted" style="margin:0">
+                    By clicking "Pay with Bizum", Shine will create the order and register the payment with payment method "bizum".
+                  </p>
+                </div>
+
+                <!-- Payment method tabs -->
+                <div class="payment-tabs" style="display:none">
+                  <button class="payment-tab active" data-tab="card">Credit Card</button>
+                  <button class="payment-tab" data-tab="stripe">Stripe</button>
+                  <button class="payment-tab" data-tab="paypal">PayPal Credit</button>
+                </div>
+
+                <!-- Credit card panel -->
+                <div id="tabCard" style="display:none">
+                  <!-- Card visual -->
+                  <div class="card-visual">
+                    <div class="card-visual__chip"></div>
+                    <div class="card-visual__number" id="cvNumber">•••• •••• •••• ••••</div>
+                    <div class="card-visual__bottom">
+                      <div>
+                        <div class="card-visual__label">Cardholder</div>
+                        <div class="card-visual__value" id="cvName">Full Name</div>
+                      </div>
+                      <div style="text-align:right">
+                        <div class="card-visual__label">Expires</div>
+                        <div class="card-visual__value" id="cvExpiry">MM / YY</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card form -->
+                  <div class="form-group">
+                    <label class="form-label" for="cardNumber">Card Number</label>
+                    <input type="text" class="form-input" id="cardNumber" placeholder="4005 9530 6475 6530" maxlength="19" inputmode="numeric">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="cardName">Cardholder Name</label>
+                    <input type="text" class="form-input" id="cardName" placeholder="Full Name">
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)">
+                    <div class="form-group">
+                      <label class="form-label" for="cardExpiry">Expiry Date</label>
+                      <input type="text" class="form-input" id="cardExpiry" placeholder="MM / YY" maxlength="7" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="cardCvv">CVV</label>
+                      <input type="text" class="form-input" id="cardCvv" placeholder="•••" maxlength="4" inputmode="numeric">
+                    </div>
+                  </div>
+
+                  <div class="login-terms" style="margin-bottom:0">
+                    <input type="checkbox" id="sameBilling" style="width:16px;height:16px;accent-color:var(--rose);cursor:pointer;flex-shrink:0;margin-top:2px" checked>
+                    <label for="sameBilling" style="font-size:var(--fs-sm);color:var(--text-secondary);cursor:pointer">Same as billing address</label>
+                  </div>
+                </div>
+
+                <!-- Stripe panel (placeholder) -->
+                <div id="tabStripe" style="display:none;text-align:center;padding:var(--sp-2xl) 0">
+                  <p class="text-muted" style="margin:0">Stripe payment form would load here.</p>
+                </div>
+
+                <!-- PayPal panel (placeholder) -->
+                <div id="tabPaypal" style="display:none;text-align:center;padding:var(--sp-2xl) 0">
+                  <p class="text-muted" style="margin:0">PayPal Credit form would load here.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="co-nav">
+          <button class="btn" id="coPrevBtn" disabled>Back</button>
+          <button class="btn btn--primary" id="coNextBtn">Next</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Trust badges -->
+    <div class="trust-strip">
+      <div class="container">
+        <div class="trust-strip-inner">
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            No Tests On Animals
+          </div>
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 8v4l3 3"/></svg>
+            No Animal-Derived Ingredients
+          </div>
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            No Gluten, Or Gluten By-products
+          </div>
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            Recyclable Packaging
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><div class="footer-brand">Shine.</div><p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain.</p></div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html">Skincare</a><a href="shop.html">Fragrances</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="#">Shipping & Returns</a><a href="#">FAQ</a><a href="#">Privacy Policy</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Shine. All rights reserved.</p><p><a href="staff-login.html" style="color:rgba(255,250,245,0.5)">Staff Login</a></p></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/api.js" defer></script>
+  <script src="assets/js/checkout.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script type="text/plain" id="legacy-checkout-disabled">
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // ── Stepper state ──
+    const panels  = document.querySelectorAll('.co-panel');
+    const steps   = document.querySelectorAll('#coStepper .stepper-step');
+    const lines   = document.querySelectorAll('#coStepper .stepper-line');
+    const prevBtn = document.getElementById('coPrevBtn');
+    const nextBtn = document.getElementById('coNextBtn');
+    let current = 0;
+
+    const checkSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    function updateStepper() {
+      panels.forEach((p, i) => p.classList.toggle('active', i === current));
+      steps.forEach((s, i) => {
+        s.classList.remove('active', 'completed');
+        const circle = s.querySelector('.stepper-circle');
+        if (i < current) {
+          s.classList.add('completed');
+          circle.innerHTML = checkSVG;
+        } else {
+          circle.textContent = i + 1;
+          if (i === current) s.classList.add('active');
+        }
+      });
+      lines.forEach((l, i) => l.classList.toggle('filled', i < current));
+      prevBtn.disabled = current === 0;
+      nextBtn.textContent = current === panels.length - 1 ? 'Pay' : 'Next';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (current === panels.length - 1) {
+        // Final submit
+        const name = document.getElementById('cardName').value.trim();
+        const num  = document.getElementById('cardNumber').value.trim();
+        if (!name || num.replace(/\s/g,'').length < 12) {
+          alert('Please complete your payment details.');
+          return;
+        }
+        alert('Order placed! Thank you for your purchase with Shine.');
+        window.location.href = 'index.html';
+        return;
+      }
+      if (current === 1) syncShippingToSummary();
+      current++;
+      if (current === 2) renderSummary();
+      updateStepper();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (current > 0) { current--; updateStepper(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    });
+
+    updateStepper();
+
+    // ── Sync shipping label to summary ──
+    function syncShippingToSummary() {
+      const checked = document.querySelector('input[name="co-shipping"]:checked');
+      if (!checked) return;
+      const label = checked.closest('.co-shipping-option').querySelector('strong').textContent;
+      const price = checked.value === 'free' ? 'Free' : (checked.value === 'express' ? '€4.00' : '€2.00');
+      document.getElementById('coSummaryShipping').innerHTML = `<strong>Shipping method</strong>${price} — ${label}`;
+      document.getElementById('coShippingCost').textContent = price;
+      recalcTotals();
+    }
+
+    // ── Address to summary ──
+    document.querySelectorAll('input[name="co-address"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const card = r.closest('.co-address-option');
+        const text = card.querySelector('p').innerText;
+        document.getElementById('coSummaryAddress').innerHTML = `<strong>Address</strong>${text}`;
+      });
+    });
+
+    // ── Render cart items in step 3 ──
+    function renderSummary() {
+      const items = (window.ShineCart && ShineCart.get) ? ShineCart.get() : [];
+      const container = document.getElementById('coSummaryItems');
+
+      if (!items.length) {
+        container.innerHTML = '<p class="text-sm text-muted">Your cart is empty.</p>';
+        recalcTotals();
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="co-summary-item">
+          <img src="${item.img}" alt="${item.name}">
+          <div>
+            <div class="co-summary-item__name">${item.name}</div>
+            <div class="co-summary-item__price">€${(item.price * item.qty).toFixed(2)} × ${item.qty}</div>
+          </div>
+          <span style="margin-left:auto;font-weight:600;font-size:var(--fs-sm)">€${(item.price * item.qty).toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      recalcTotals();
+    }
+
+    function recalcTotals() {
+      const items    = (window.ShineCart && ShineCart.get) ? ShineCart.get() : [];
+      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+      const tax      = subtotal * 0.06;
+      const shipText = document.getElementById('coShippingCost').textContent;
+      const shipCost = shipText === 'Free' ? 0 : parseFloat(shipText.replace('€',''));
+      const total    = subtotal + tax + shipCost;
+
+      document.getElementById('coSubtotal').textContent = `€${subtotal.toFixed(2)}`;
+      document.getElementById('coTax').textContent      = `€${tax.toFixed(2)}`;
+      document.getElementById('coTotal').textContent    = `€${total.toFixed(2)}`;
+    }
+
+    // ── Payment tabs ──
+    document.querySelectorAll('.payment-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tabCard').style.display   = tab.dataset.tab === 'card'   ? 'block' : 'none';
+        document.getElementById('tabStripe').style.display = tab.dataset.tab === 'stripe' ? 'block' : 'none';
+        document.getElementById('tabPaypal').style.display = tab.dataset.tab === 'paypal' ? 'block' : 'none';
+      });
+    });
+
+    // ── Card visual live update ──
+    const cardNumberEl = document.getElementById('cardNumber');
+    const cardNameEl   = document.getElementById('cardName');
+    const cardExpiryEl = document.getElementById('cardExpiry');
+
+    cardNumberEl.addEventListener('input', () => {
+      let v = cardNumberEl.value.replace(/\D/g, '').substring(0, 16);
+      cardNumberEl.value = v.replace(/(.{4})/g, '$1 ').trim();
+      const display = (v + '•'.repeat(Math.max(0, 16 - v.length))).replace(/(.{4})/g, '$1 ').trim();
+      document.getElementById('cvNumber').textContent = display;
+    });
+
+    cardNameEl.addEventListener('input', () => {
+      document.getElementById('cvName').textContent = cardNameEl.value.trim() || 'Full Name';
+    });
+
+    cardExpiryEl.addEventListener('input', () => {
+      let v = cardExpiryEl.value.replace(/\D/g, '').substring(0, 4);
+      if (v.length >= 3) v = v.substring(0,2) + ' / ' + v.substring(2);
+      cardExpiryEl.value = v;
+      document.getElementById('cvExpiry').textContent = v || 'MM / YY';
+    });
+
+    // ── Add address form ──
+    document.getElementById('coAddAddrBtn').addEventListener('click', () => {
+      const form = document.getElementById('coAddressForm');
+      form.classList.toggle('open');
+    });
+    document.getElementById('coCancelAddrBtn').addEventListener('click', () => {
+      document.getElementById('coAddressForm').classList.remove('open');
+    });
+    document.getElementById('coSaveAddrBtn').addEventListener('click', () => {
+      const label = document.getElementById('coAddrLabel').value.trim();
+      const line  = document.getElementById('coAddrLine').value.trim();
+      const city  = document.getElementById('coAddrCity').value.trim();
+      if (!label || !line || !city) { alert('Please fill in required fields.'); return; }
+
+      const zip     = document.getElementById('coAddrZip').value.trim();
+      const country = document.getElementById('coAddrCountry').options[document.getElementById('coAddrCountry').selectedIndex].text;
+      const phone   = document.getElementById('coAddrPhone').value.trim();
+      const id      = Date.now();
+
+      const item = document.createElement('label');
+      item.className = 'co-address-option';
+      item.innerHTML = `
+        <input type="radio" name="co-address" value="${id}">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:var(--sp-sm);margin-bottom:var(--sp-xs)">
+            <span style="font-weight:700">${label}</span>
+            <span class="co-addr-badge co-addr-badge--new">New</span>
+          </div>
+          <p class="text-sm text-muted" style="margin:0;line-height:1.7">
+            ${line}, ${city}${zip ? ' ' + zip : ''}, ${country}${phone ? '<br>' + phone : ''}
+          </p>
+        </div>
+        <div class="co-addr-actions">
+          <button class="co-icon-btn" title="Remove" onclick="event.preventDefault();this.closest('.co-address-option').remove()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>`;
+      document.getElementById('coAddressList').appendChild(item);
+      document.getElementById('coAddressForm').classList.remove('open');
+      ['coAddrLabel','coAddrPhone','coAddrLine','coAddrCity','coAddrZip'].forEach(f => document.getElementById(f).value = '');
+    });
+
+  });
+  </script>
+  <script src="assets/js/search.js" defer></script>
+</body>
+</html>

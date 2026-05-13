@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shine — Product Detail</title>
+  <meta name="description" content="Product detail by Shine.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
+      <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="shop.html" class="active">Shop</a>
+        <a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+          </svg>
+          Cart
+        </a>
+      </nav>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a href="cart.html">Cart</a>
+  </div>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <p class="text-sm text-muted" style="margin-bottom:var(--sp-xl)">
+          <a href="index.html" style="color:var(--camel)">Home</a> &nbsp;/&nbsp;
+          <a href="shop.html" style="color:var(--camel)">Shop</a> &nbsp;/&nbsp; <span id="productBreadcrumbName">Product</span>
+        </p>
+
+        <div class="product-detail">
+          <!-- Gallery -->
+          <div class="product-gallery reveal visible">
+            <div class="gallery-main">
+              <img src="assets/img/product-perfume.png" alt="Product main view" id="mainProductImage">
+            </div>
+            <div class="gallery-thumbs">
+              <button class="gallery-thumb active" type="button" data-img="assets/img/product-perfume.png"><img src="assets/img/product-perfume.png" alt="Product view"></button>
+            </div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="reveal reveal--delay-1 visible">
+            <span class="product-card__badge" id="productBadge" style="position:relative;display:inline-block;margin-bottom:var(--sp-md)">Shine</span>
+            <h1 id="productName" style="font-size:var(--fs-2xl)">Loading product...</h1>
+            <div class="product-meta__price" id="productPrice">€0.00</div>
+            <p id="productDescription">Loading product details...</p>
+
+            <!-- Quantity + Add to bag -->
+            <div class="flex items-center gap-lg mt-xl" style="margin-bottom:var(--sp-xl)">
+              <div class="qty-selector">
+                <button data-qty="minus" aria-label="Decrease quantity">−</button>
+                <span>1</span>
+                <button data-qty="plus" aria-label="Increase quantity">+</button>
+              </div>
+              <button class="btn btn--primary btn--lg" id="addToBagBtn">Add to Cart</button>
+            </div>
+
+            <a href="custom-perfumes.html" class="btn btn--outline" style="margin-bottom:var(--sp-xl)">Or Create a Custom Fragrance</a>
+
+            <!-- Accordion Details -->
+            <div class="accordion" id="productAccordion">
+              <div class="accordion__item open">
+                <button class="accordion__trigger">Ingredients <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="accordion__content">
+                  <div class="accordion__inner">
+                    Loading product description...
+                  </div>
+                </div>
+              </div>
+              <div class="accordion__item">
+                <button class="accordion__trigger">How to Use <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="accordion__content">
+                  <div class="accordion__inner">
+                    Loading product details...
+                  </div>
+                </div>
+              </div>
+              <div class="accordion__item">
+                <button class="accordion__trigger">Shipping & Returns <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="accordion__content">
+                  <div class="accordion__inner">
+                    Free standard shipping on orders over €50. Express delivery available (1-2 business days). We offer a 30-day satisfaction guarantee — if you're not happy with your purchase, return it for a full refund. See our returns policy for details.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Products -->
+    <section class="section section--petal">
+      <div class="container">
+        <h2 class="reveal">You May Also Like</h2>
+        <div class="product-grid reveal visible" id="relatedProductsGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><div class="footer-brand">Shine.</div><p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain.</p></div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html">Skincare</a><a href="shop.html">Fragrances</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="#">Shipping & Returns</a><a href="#">FAQ</a><a href="#">Privacy Policy</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Shine. All rights reserved.</p><p><a href="staff-login.html" style="color:rgba(255,250,245,0.5)">Staff Login</a></p></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/api.js" defer></script>
+  <script src="assets/js/carrito.js" defer></script>
+  <script src="assets/js/producto.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/search.js" defer></script>
+</body>
+</html>

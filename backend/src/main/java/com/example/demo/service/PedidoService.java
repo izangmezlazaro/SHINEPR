@@ -1,0 +1,140 @@
+package com.example.demo.service;
+
+import com.example.demo.dao.DetallePedidoDAO;
+import com.example.demo.dao.DireccionDAO;
+import com.example.demo.dao.PedidoDAO;
+import com.example.demo.dao.UsuarioDAO;
+import com.example.demo.dto.DetallePedidoDTO;
+import com.example.demo.dto.PedidoRequestDTO;
+import com.example.demo.dto.PedidoResponseDTO;
+import com.example.demo.entity.*;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.EntityNotFoundException;
+import com.example.demo.util.ConexionDB;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class PedidoService {
+
+    private final PedidoDAO       pedidoDAO;
+    private final UsuarioDAO      usuarioDAO;
+    private final DireccionDAO    direccionDAO;
+    private final DetallePedidoDAO detallePedidoDAO;
+    private final CarritoService  carritoService;
+
+    public PedidoService() {
+        this.pedidoDAO       = new PedidoDAO();
+        this.usuarioDAO      = new UsuarioDAO();
+        this.direccionDAO    = new DireccionDAO();
+        this.detallePedidoDAO = new DetallePedidoDAO();
+        this.carritoService  = new CarritoService();
+    }
+
+    public List<PedidoResponseDTO> listarPorUsuario(Integer idUsuario) {
+        try {
+            return pedidoDAO.findByUsuarioId(idUsuario).stream()
+                    .map(this::toResponse)
+                    .collect(Collectors.toList());
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    public PedidoResponseDTO obtenerPorId(Integer id) {
+        try {
+            return toResponse(findPedido(id));
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    public PedidoResponseDTO crearDesdeCarrito(PedidoRequestDTO request) {
+        try (Connection conn = ConexionDB.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Usuario usuario = usuarioDAO.findById(request.getIdUsuario())
+                        .orElseThrow(() -> new EntityNotFoundException("Usuario", request.getIdUsuario()));
+                Direccion direccion = direccionDAO.findById(request.getIdDireccion())
+                        .orElseThrow(() -> new EntityNotFoundException("Direccion", request.getIdDireccion()));
+
+                if (!direccion.getUsuario().getId().equals(usuario.getId())) {
+                    throw new BadRequestException("La direccion no pertenece al usuario indicado");
+                }
+
+                Carrito carrito = carritoService.findCarritoPorUsuario(usuario.getId());
+                if (carrito.getItems().isEmpty()) {
+                    throw new BadRequestException("No se puede crear un pedido con el carrito vacío");
+                }
+
+                Pedido pedido = new Pedido();
+                pedido.setUsuario(usuario);
+                pedido.setDireccion(direccion);
+                pedido.setEstado("pendiente");
+                pedido.setTotal(BigDecimal.ZERO);
+
+                BigDecimal total = BigDecimal.ZERO;
+                List<DetallePedido> detalles = new ArrayList<>();
+                for (CarritoItem item : carrito.getItems()) {
+                    BigDecimal precioUnitario = carritoService.obtenerPrecioUnitario(item);
+                    DetallePedido detalle = new DetallePedido();
+                    detalle.setPedido(pedido);
+                    detalle.setProducto(item.getProducto());
+                    detalle.setPerfumeCustom(item.getPerfumeCustom());
+                    detalle.setCantidad(item.getCantidad());
+                    detalle.setPrecioUnitario(precioUnitario);
+                    detalles.add(detalle);
+                    total = total.add(precioUnitario.multiply(BigDecimal.valueOf(item.getCantidad())));
+                }
+                pedido.setTotal(total);
+
+                // Insertar pedido en la transacción compartida
+                pedidoDAO.save(pedido, conn);
+
+                // Insertar detalles en la misma transacción
+                for (DetallePedido detalle : detalles) {
+                    detalle.setPedido(pedido);
+                    detallePedidoDAO.save(detalle, conn);
+                }
+
+                // Vaciar carrito (usa su propio conn)
+                conn.commit();
+                carritoService.vaciar(usuario.getId());
+
+                pedido.setDetalles(detalles);
+                return toResponse(pedido);
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    Pedido findPedido(Integer id) throws SQLException {
+        return pedidoDAO.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Pedido", id));
+    }
+
+    PedidoResponseDTO toResponse(Pedido pedido) {
+        try {
+            List<DetallePedido> detalles = pedido.getDetalles().isEmpty()
+                    ? detallePedidoDAO.findByPedidoId(pedido.getIdPedido())
+                    : pedido.getDetalles();
+            return new PedidoResponseDTO(
+                    pedido.getIdPedido(), pedido.getUsuario().getId(), pedido.getDireccion().getId(),
+                    pedido.getEstado(), pedido.getTotal(), pedido.getFecha(),
+                    detalles.stream().map(this::toDetalleDto).collect(Collectors.toList()));
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    private DetallePedidoDTO toDetalleDto(DetallePedido d) {
+        BigDecimal subtotal = d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()));
+        String nombre = d.getProducto() != null ? d.getProducto().getNombre()
+                : (d.getPerfumeCustom().getNombrePersonalizado() == null || d.getPerfumeCustom().getNombrePersonalizado().isBlank()
+                    ? "Perfume personalizado" : d.getPerfumeCustom().getNombrePersonalizado());
+        return new DetallePedidoDTO(d.getId(),
+            d.getProducto() != null ? d.getProducto().getIdProducto() : null,
+            d.getPerfumeCustom() != null ? d.getPerfumeCustom().getIdPerfCust() : null,
+            nombre, d.getCantidad(), d.getPrecioUnitario(), subtotal);
+    }
+}

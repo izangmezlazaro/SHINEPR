@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shine — My Addresses</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
+      <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+          </svg>
+          Cart
+        </a>
+      </nav>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a href="cart.html">Cart</a>
+  </div>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <p class="text-sm text-muted" style="margin-bottom:var(--sp-xl)">
+          <a href="index.html" style="color:var(--camel)">Home</a> &nbsp;/&nbsp;
+          <a href="account.html" style="color:var(--camel)">My Account</a> &nbsp;/&nbsp; My Addresses
+        </p>
+
+        <div class="account-layout">
+          <!-- Sidebar -->
+          <aside class="account-sidebar">
+            <div class="account-sidebar__user">
+              <div class="account-sidebar__avatar" id="sidebarAvatar">?</div>
+              <div style="font-weight:600;font-size:var(--fs-sm);margin-bottom:2px" id="sidebarName">Loading…</div>
+              <div style="font-size:var(--fs-xs);color:var(--text-muted)" id="sidebarEmail"></div>
+            </div>
+            <nav style="margin-bottom:var(--sp-lg)">
+              <a href="account.html" class="account-nav-link">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                My Account
+              </a>
+              <a href="profile.html" class="account-nav-link">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Mis datos
+              </a>
+              <a href="addresses.html" class="account-nav-link active">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                My Addresses
+              </a>
+              <a href="orders.html" class="account-nav-link">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>
+                My Orders
+              </a>
+            </nav>
+            <button class="btn btn--outline btn--sm" id="sidebarLogout" style="width:100%">Sign Out</button>
+          </aside>
+
+          <!-- Main -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-2xl);flex-wrap:wrap;gap:var(--sp-md)">
+              <div>
+                <h1 style="font-size:var(--fs-2xl);margin-bottom:var(--sp-xs)">My Addresses</h1>
+                <p class="text-sm text-muted" style="margin:0">Manage your saved delivery addresses.</p>
+              </div>
+              <button class="btn btn--primary btn--sm" id="addAddressBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Address
+              </button>
+            </div>
+
+            <!-- Success toast -->
+            <div class="success-toast" id="addrToast">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span id="addrToastMsg">Address saved successfully.</span>
+            </div>
+
+            <!-- Saved addresses -->
+            <div id="addressList"></div>
+            <div id="addressEmpty" style="text-align:center;padding:var(--sp-2xl) 0;display:none">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--sand)" stroke-width="1.5" style="margin-bottom:var(--sp-md)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <p class="text-sm text-muted" style="margin-bottom:var(--sp-lg)">You haven't saved any addresses yet.</p>
+            </div>
+
+            <!-- Add / Edit address form -->
+            <div class="add-address-form" id="addressForm">
+              <h3 style="margin-bottom:var(--sp-lg);font-size:var(--fs-md)" id="formTitle">Add New Address</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)">
+                <div class="form-group">
+                  <label class="form-label" for="addrLabel">Address Label</label>
+                  <input type="text" class="form-input" id="addrLabel" placeholder="e.g. Home, Work…">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="addrPhone">Phone</label>
+                  <input type="tel" class="form-input" id="addrPhone" placeholder="+34 600 000 000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="addrLine">Street Address</label>
+                <input type="text" class="form-input" id="addrLine" placeholder="Street name, number, floor…">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-md)">
+                <div class="form-group">
+                  <label class="form-label" for="addrCity">City</label>
+                  <input type="text" class="form-input" id="addrCity" placeholder="Madrid">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="addrZip">Postcode</label>
+                  <input type="text" class="form-input" id="addrZip" placeholder="28001">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="addrCountry">Country</label>
+                  <select class="form-input form-select" id="addrCountry">
+                    <option value="ES" selected>Spain</option>
+                    <option value="FR">France</option>
+                    <option value="DE">Germany</option>
+                    <option value="IT">Italy</option>
+                    <option value="PT">Portugal</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="NL">Netherlands</option>
+                    <option value="BE">Belgium</option>
+                  </select>
+                </div>
+              </div>
+              <div class="login-terms" style="margin-bottom:var(--sp-xl)">
+                <input type="checkbox" id="setAsDefault" style="width:16px;height:16px;accent-color:var(--rose);cursor:pointer;flex-shrink:0;margin-top:2px">
+                <label for="setAsDefault" style="font-size:var(--fs-sm);color:var(--text-secondary);cursor:pointer">Set as default shipping address</label>
+              </div>
+              <div class="flex gap-md">
+                <button class="btn btn--primary" id="saveAddrBtn">Save Address</button>
+                <button class="btn btn--outline" id="cancelAddrBtn">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><div class="footer-brand">Shine.</div><p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain.</p></div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html">Skincare</a><a href="shop.html">Fragrances</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="#">Shipping & Returns</a><a href="#">FAQ</a><a href="#">Privacy Policy</a></div></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Shine. All rights reserved.</p><p><a href="staff-login.html" style="color:rgba(255,250,245,0.5)">Staff Login</a></p></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js" defer></script>
+  <script>
+    (function () {
+      const user = JSON.parse(localStorage.getItem('shineUser') || 'null');
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      document.getElementById('sidebarAvatar').textContent = user.initials || '?';
+      document.getElementById('sidebarName').textContent = user.name || '';
+      document.getElementById('sidebarEmail').textContent = user.email || '';
+      document.getElementById('sidebarLogout').addEventListener('click', () => {
+        localStorage.removeItem('shineUser');
+        localStorage.removeItem('shineToken');
+        localStorage.removeItem('shineUserId');
+        window.location.href = 'index.html';
+      });
+
+      // ── Storage keyed per user ──────────────────
+      const STORAGE_KEY = `shine:addresses:${user.id}`;
+
+      function loadAddresses() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+        catch (_) { return []; }
+      }
+
+      function saveAddresses(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+
+      // ── Toast ───────────────────────────────────
+      function showToast(msg) {
+        const toast = document.getElementById('addrToast');
+        document.getElementById('addrToastMsg').textContent = msg || 'Done.';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+
+      // ── Render ──────────────────────────────────
+      function renderAddresses() {
+        const list = loadAddresses();
+        const container = document.getElementById('addressList');
+        const empty = document.getElementById('addressEmpty');
+
+        if (!list.length) {
+          container.innerHTML = '';
+          empty.style.display = '';
+          return;
+        }
+        empty.style.display = 'none';
+        container.innerHTML = list.map(addr => {
+          const isDefault = !!addr.isDefault;
+          const country = addr.country || '';
+          const zip = addr.zip ? ' ' + addr.zip : '';
+          const phone = addr.phone ? `<br>${addr.phone}` : '';
+          return `
+            <div class="address-card${isDefault ? ' address-card--default' : ''}" data-id="${addr.id}">
+              ${isDefault ? '<div class="address-card__badge">Default</div>' : ''}
+              <div style="padding-right:${isDefault ? '80px' : '0'}">
+                <div style="font-weight:700;margin-bottom:var(--sp-xs)">${addr.label}</div>
+                <p class="text-sm text-muted" style="margin:0;line-height:1.7">
+                  ${addr.line}<br>${addr.city}${zip}, ${country}${phone}
+                </p>
+              </div>
+              <div class="address-card__actions">
+                ${!isDefault ? `<button class="btn btn--outline btn--sm" data-action="default" data-id="${addr.id}">Set as default</button>` : ''}
+                <button class="btn btn--outline btn--sm" data-action="edit" data-id="${addr.id}">Edit</button>
+                <button class="btn btn--sm" style="border:1.5px solid var(--border-light);color:var(--text-muted)" data-action="delete" data-id="${addr.id}">Delete</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      // ── Actions via delegation ──────────────────
+      let editingId = null;
+
+      document.getElementById('addressList').addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const id = Number(btn.dataset.id);
+        const action = btn.dataset.action;
+        const list = loadAddresses();
+
+        if (action === 'delete') {
+          if (!confirm('Remove this address?')) return;
+          saveAddresses(list.filter(a => a.id !== id));
+          renderAddresses();
+          showToast('Address removed.');
+        }
+
+        if (action === 'default') {
+          saveAddresses(list.map(a => ({ ...a, isDefault: a.id === id })));
+          renderAddresses();
+          showToast('Default address updated.');
+        }
+
+        if (action === 'edit') {
+          const addr = list.find(a => a.id === id);
+          if (!addr) return;
+          editingId = id;
+          document.getElementById('formTitle').textContent = 'Edit Address';
+          document.getElementById('addrLabel').value = addr.label || '';
+          document.getElementById('addrPhone').value = addr.phone || '';
+          document.getElementById('addrLine').value = addr.line || '';
+          document.getElementById('addrCity').value = addr.city || '';
+          document.getElementById('addrZip').value = addr.zip || '';
+          document.getElementById('setAsDefault').checked = !!addr.isDefault;
+          const sel = document.getElementById('addrCountry');
+          for (let i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].text === addr.country) { sel.selectedIndex = i; break; }
+          }
+          const form = document.getElementById('addressForm');
+          form.classList.add('open');
+          form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+
+      document.getElementById('addAddressBtn').addEventListener('click', () => {
+        editingId = null;
+        document.getElementById('formTitle').textContent = 'Add New Address';
+        ['addrLabel','addrPhone','addrLine','addrCity','addrZip'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('setAsDefault').checked = false;
+        const form = document.getElementById('addressForm');
+        form.classList.add('open');
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      document.getElementById('cancelAddrBtn').addEventListener('click', () => {
+        editingId = null;
+        document.getElementById('addressForm').classList.remove('open');
+      });
+
+      document.getElementById('saveAddrBtn').addEventListener('click', () => {
+        const label = document.getElementById('addrLabel').value.trim();
+        const line  = document.getElementById('addrLine').value.trim();
+        const city  = document.getElementById('addrCity').value.trim();
+        if (!label || !line || !city) { alert('Please fill in the required fields.'); return; }
+
+        const isDefault = document.getElementById('setAsDefault').checked;
+        const country = document.getElementById('addrCountry').options[document.getElementById('addrCountry').selectedIndex].text;
+        const zip   = document.getElementById('addrZip').value.trim();
+        const phone = document.getElementById('addrPhone').value.trim();
+
+        let list = loadAddresses();
+        if (isDefault) list = list.map(a => ({ ...a, isDefault: false }));
+
+        if (editingId) {
+          list = list.map(a => a.id === editingId ? { ...a, label, line, city, zip, phone, country, isDefault } : a);
+        } else {
+          list.push({ id: Date.now(), label, line, city, zip, phone, country, isDefault });
+        }
+
+        saveAddresses(list);
+        editingId = null;
+        renderAddresses();
+        document.getElementById('addressForm').classList.remove('open');
+        showToast('Address saved successfully.');
+      });
+
+      renderAddresses();
+    })();
+  </script>
+  <script src="assets/js/search.js" defer></script>
+</body>
+</html>
+

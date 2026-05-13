@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\SHINE\\\\SHINE\" -Recurse -Force)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

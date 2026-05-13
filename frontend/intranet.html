@@ -1,0 +1,1884 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="light" data-role="empleado">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shine — Intranet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="assets/css/intranet.css">
+  <script>
+    // Auth guard: redirect immediately if not logged in as staff
+    (function() {
+      try {
+        var session = JSON.parse(localStorage.getItem('shineStaff'));
+        if (!session || !session.role) {
+          window.location.replace('staff-login.html');
+        }
+      } catch(e) {
+        window.location.replace('staff-login.html');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Ambient Background -->
+<div class="ambient-bg" id="ambientBg">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon"><img src="assets/img/Shine.png" alt="Shine logo"></div>
+    <small>Intranet</small>
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-indicator" id="sidebarIndicator"></div>
+    <div class="sidebar-section"><span>Principal</span></div>
+    <a class="sidebar-link active" data-tab="home" data-tooltip="Inicio">
+      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Inicio</span>
+    </a>
+    <a class="sidebar-link" data-tab="dashboard" data-tooltip="Panel">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Panel</span>
+    </a>
+    <a class="sidebar-link" data-tab="orders" data-tooltip="Pedidos">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span>Pedidos</span><span class="badge">5</span>
+    </a>
+    <a class="sidebar-link" data-tab="catalogue" data-tooltip="Catálogo">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1" fill="currentColor"/></svg>
+      <span>Catálogo</span>
+    </a>
+    <a class="sidebar-link" data-tab="team" data-tooltip="Equipo">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Equipo</span>
+    </a>
+    <div class="sidebar-section"><span>Gestión</span></div>
+    <a class="sidebar-link" data-tab="comite" data-tooltip="Comité">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M5 21c0-3 2.5-5 7-5s7 2 7 5"/><path d="M3 12c1.7-1.5 4.3-2 6.5-2s4.8.5 6.5 2"/></svg>
+      <span>Comité de Empleados</span>
+    </a>
+    <a class="sidebar-link" data-tab="agreements" data-tooltip="Acuerdos">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none"/><path d="M7 7h10v3H7zM7 12h10v2H7zM7 16h7v2H7z"/></svg>
+      <span>Acuerdos y Leyes</span>
+    </a>
+    <a class="sidebar-link" data-tab="documents-info" data-tooltip="Documentos">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      <span>Documentos e Info</span>
+    </a>
+    <a class="sidebar-link" data-tab="objectives-2026" data-tooltip="Objetivos">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+      <span>Objetivos 2026</span>
+    </a>
+
+    <div class="sidebar-section admin-only"><span>Admin</span></div>
+    <a class="sidebar-link admin-only" data-tab="admin-roles" data-tooltip="Roles">
+      <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-10 0V7a5 5 0 015-5z"/><path d="M20 21v-2a4 4 0 00-3-3.87"/><path d="M4 21v-2a4 4 0 013-3.87"/><circle cx="12" cy="13" r="1" fill="currentColor"/><path d="M12 14v3"/></svg>
+      <span>Roles</span>
+    </a>
+    <a class="sidebar-link admin-only" data-tab="admin-fichajes" data-tooltip="Fichajes">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/><path d="M3 12h2"/><path d="M19 12h2"/></svg>
+      <span>Fichajes</span>
+    </a>
+    <a class="sidebar-link admin-only" data-tab="admin-creacion" data-tooltip="Creación">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>Creación</span>
+    </a>
+
+    <div class="sidebar-section"><span>Sistema</span></div>
+    <a class="sidebar-link" data-tab="settings" data-tooltip="Ajustes">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Ajustes</span>
+    </a>
+  </nav>
+
+  <button class="sidebar-collapse-btn" id="sidebarCollapseBtn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>Colapsar</span>
+  </button>
+
+  <div class="sidebar-footer">
+    <div class="avatar avatar--rose" title="Personal" id="sidebarAvatar">ER</div>
+    <div class="sidebar-footer-info">
+      <div class="user-name" id="sidebarUserName">Personal</div>
+      <div class="user-role" id="sidebarUserRole">Online · Personal</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="dash-main" id="dashMain">
+
+  <!-- Announcement Banner -->
+  <div class="announce-banner" id="announceBanner">
+    <span>🌸 Nueva línea de fragancias lanzándose en junio 2026 — <a href="#">Ver plan de lanzamiento →</a></span>
+    <button class="announce-close" id="announceClose">✕</button>
+  </div>
+
+  <!-- Topbar -->
+  <div class="dash-topbar">
+    <button class="hamburger-dash" id="menuToggle"><span></span><span></span><span></span></button>
+    <h2 id="pageTitle">Panel</h2>
+
+    <div class="topbar-search" id="searchWrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="globalSearch" placeholder="Buscar pedidos, productos, equipo…" autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-pulse" id="topbarPulse">
+        <span class="topbar-pulse-label">Pulso</span>
+        <svg viewBox="0 0 60 18" preserveAspectRatio="none">
+          <polyline id="pulsePolyline" points="0,12 8,10 14,14 20,6 26,9 32,4 38,8 44,3 50,7 56,5 60,9" fill="none" stroke="var(--dash-rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="topbar-clock" id="topbarClock"></div>
+
+      <button class="theme-toggle" id="themeToggle" title="Cambiar modo oscuro">
+        <svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+
+      <div class="notif-wrap">
+        <button class="notif-bell" id="notifBell">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-count" id="notifCount">3</span>
+        </button>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-header"><span>Notificaciones</span><button class="notif-mark-all" id="markAllRead">Marcar todo como leído</button></div>
+          <div class="notif-list">
+            <div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-success)"></div><div><p>Nuevo pedido <strong>#SH-1047</strong> recibido</p><small>hace 2 horas</small></div></div>
+            <div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-info)"></div><div><p>Acuerdo con <strong>Sephora ES</strong> firmado</p><small>hace 5 horas</small></div></div>
+            <div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-warning)"></div><div><p><strong>Rose Mist Toner</strong> con stock bajo (12 unidades)</p><small>Ayer</small></div></div>
+            <div class="notif-item"><div class="notif-dot" style="background:var(--dash-rose)"></div><div><p>Sofia Chen se unió al equipo</p><small>hace 2 días</small></div></div>
+          </div>
+        </div>
+      </div>
+
+      <a href="index.html" class="topbar-link">← Tienda</a>
+      <button id="intranetSignOut" class="topbar-link topbar-link--signout" style="background:none;border:none;cursor:pointer;">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- ════ CONTENT ════ -->
+  <div class="dash-content">
+
+    <!-- ══ HOME ══ -->
+    <div class="dash-section active" id="sec-home">
+
+      <!-- Welcome Hero -->
+      <div class="home-hero">
+        <div class="hero-glow-1"></div>
+        <div class="hero-glow-2"></div>
+        <div class="hero-glow-3"></div>
+        <div class="home-hero-left">
+          <p class="home-greeting" id="homeGreeting">Buenos días</p>
+          <h1 class="home-username">Bienvenida de vuelta, Elena 👋</h1>
+          <p class="home-subtitle">Esto es lo que ocurre en Shine hoy</p>
+        </div>
+        <div class="home-hero-right">
+          <div class="home-stat-pill">
+            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+            <span><strong>5</strong> pedidos pendientes</span>
+          </div>
+          <div class="home-stat-pill">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span><strong>3</strong> mensajes sin leer</span>
+          </div>
+          <div class="home-stat-pill">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span><strong>2</strong> reuniones hoy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="home-grid">
+        <div class="home-card home-card--punch">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              Fichaje
+            </h3>
+          </div>
+          <div class="home-punch-panel" id="homePunchPanel">
+            <div class="home-punch-status-line" id="homePunchStatusLine">
+              <span class="home-punch-indicator" id="punchIndicator"></span>
+              <span id="punchStatus" class="home-punch-status">Estado: No fichado</span>
+            </div>
+            <button class="dash-btn dash-btn--rose" id="punchBtn" type="button">Fichar</button>
+          </div>
+        </div>
+
+        <!-- Anuncios -->
+        <div class="home-card home-card--announcements">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 004 2.83V20h8v-.17A3 3 0 0022 17z"/><path d="M21 11V5a1 1 0 00-1.45-.89L12 8H5a3 3 0 000 6h1v3l4-2h2l8 3.89A1 1 0 0021 18v-7z"/></svg>
+              Anuncios
+            </h3>
+            <div class="home-card-actions">
+              <button class="home-view-all">Ver todos</button>
+              <button class="home-admin-btn admin-only" id="openNewAnnouncement">+ Nuevo</button>
+            </div>
+          </div>
+          <div class="home-annc-list" id="homeanncList">
+            <div class="home-annc-item home-annc-item--new">
+              <div class="home-annc-dot"></div>
+              <div class="home-annc-body">
+                <span class="home-annc-tag home-annc-tag--rose">Nuevo</span>
+                <p class="home-annc-title">🌸 Nueva línea de fragancias lanzándose en junio 2026</p>
+                <p class="home-annc-meta">Publicado por Elena Ruiz · hace 2 horas</p>
+              </div>
+            </div>
+            <div class="home-annc-item">
+              <div class="home-annc-dot home-annc-dot--muted"></div>
+              <div class="home-annc-body">
+                <span class="home-annc-tag home-annc-tag--blue">RRHH</span>
+                <p class="home-annc-title">Actualización de horario de verano — Junio a Septiembre</p>
+                <p class="home-annc-meta">Publicado por RRHH · Ayer</p>
+              </div>
+            </div>
+            <div class="home-annc-item">
+              <div class="home-annc-dot home-annc-dot--muted"></div>
+              <div class="home-annc-body">
+                <span class="home-annc-tag home-annc-tag--green">Evento</span>
+                <p class="home-annc-title">Comida de equipo — Viernes 9 Mayo a las 13:30</p>
+                <p class="home-annc-meta">Publicado por Marco Torres · hace 2 días</p>
+              </div>
+            </div>
+            <div class="home-annc-item">
+              <div class="home-annc-dot home-annc-dot--muted"></div>
+              <div class="home-annc-body">
+                <span class="home-annc-tag home-annc-tag--amber">Recordatorio</span>
+                <p class="home-annc-title">Informes de gastos del Q2 con fecha límite el 15 Mayo</p>
+                <p class="home-annc-meta">Publicado por Finanzas · hace 3 días</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Próximas Reuniones -->
+        <div class="home-card home-card--meetings">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Próximas Reuniones
+            </h3>
+            <div class="home-card-actions">
+              <button class="home-view-all">Ver todas</button>
+              <button class="home-admin-btn admin-only" id="openNewMeeting">+ Programar</button>
+            </div>
+          </div>
+          <div class="home-meetings-list" id="homeMeetingsList">
+            <div class="home-meeting-item home-meeting-item--today">
+              <div class="home-meeting-date">
+                <span class="home-meeting-day">Hoy</span>
+                <span class="home-meeting-time">10:00</span>
+              </div>
+              <div class="home-meeting-bar home-meeting-bar--rose"></div>
+              <div class="home-meeting-info">
+                <p class="home-meeting-title">Revisión Semanal de Operaciones</p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Elena R., Marco T., Sofia C.
+                </p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  Google Meet
+                </p>
+              </div>
+              <a class="home-meeting-join" href="#">Unirse</a>
+            </div>
+            <div class="home-meeting-item home-meeting-item--today">
+              <div class="home-meeting-date">
+                <span class="home-meeting-day">Hoy</span>
+                <span class="home-meeting-time">15:30</span>
+              </div>
+              <div class="home-meeting-bar home-meeting-bar--blue"></div>
+              <div class="home-meeting-info">
+                <p class="home-meeting-title">Lanzamiento de Línea de Fragancias</p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Equipo completo · 8 asistentes
+                </p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Sala de Reuniones B
+                </p>
+              </div>
+              <a class="home-meeting-join home-meeting-join--outline" href="#">Ver</a>
+            </div>
+            <div class="home-meeting-item">
+              <div class="home-meeting-date">
+                <span class="home-meeting-day">Jue 8</span>
+                <span class="home-meeting-time">09:00</span>
+              </div>
+              <div class="home-meeting-bar home-meeting-bar--green"></div>
+              <div class="home-meeting-info">
+                <p class="home-meeting-title">Revisión Q2 con Finanzas</p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Elena R., Anna K., Lucas P.
+                </p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  Zoom
+                </p>
+              </div>
+              <a class="home-meeting-join home-meeting-join--outline" href="#">Ver</a>
+            </div>
+            <div class="home-meeting-item">
+              <div class="home-meeting-date">
+                <span class="home-meeting-day">Vie 9</span>
+                <span class="home-meeting-time">13:30</span>
+              </div>
+              <div class="home-meeting-bar home-meeting-bar--amber"></div>
+              <div class="home-meeting-info">
+                <p class="home-meeting-title">Comida de Equipo 🍽️</p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Todo el equipo
+                </p>
+                <p class="home-meeting-meta">
+                  <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Restaurante La Terrace
+                </p>
+              </div>
+              <a class="home-meeting-join home-meeting-join--outline" href="#">Ver</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceso Rápido -->
+        <div class="home-card home-card--quicklinks">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Acceso Rápido
+            </h3>
+          </div>
+          <div class="home-quicklinks-grid">
+            <button class="home-ql-btn" data-goto="orders">
+              <div class="home-ql-icon home-ql-icon--rose">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              </div>
+              <span>Pedidos</span>
+            </button>
+            <button class="home-ql-btn" data-goto="catalogue">
+              <div class="home-ql-icon home-ql-icon--purple">
+                <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1" fill="currentColor"/></svg>
+              </div>
+              <span>Catálogo</span>
+            </button>
+            <button class="home-ql-btn" data-goto="planner">
+              <div class="home-ql-icon home-ql-icon--blue">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <span>Planificador</span>
+            </button>
+            <button class="home-ql-btn" data-goto="team">
+              <div class="home-ql-icon home-ql-icon--green">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+              <span>Equipo</span>
+            </button>
+            <button class="home-ql-btn" data-goto="reports">
+              <div class="home-ql-icon home-ql-icon--amber">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
+              <span>Informes</span>
+            </button>
+            <button class="home-ql-btn" data-goto="documents-info">
+              <div class="home-ql-icon home-ql-icon--teal">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <span>Documentos</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tareas de Hoy -->
+        <div class="home-card home-card--tasks">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              Mis Tareas de Hoy
+            </h3>
+            <button class="home-view-all" data-goto="planner">Ir al Planificador</button>
+          </div>
+          <div class="home-tasks-list">
+            <div class="home-task-item">
+              <input type="checkbox" class="home-task-check" id="ht1">
+              <label for="ht1">
+                <span class="home-task-title">Revisar borrador del acuerdo Douglas</span>
+                <span class="home-task-badge home-task-badge--urgent">Urgente</span>
+              </label>
+            </div>
+            <div class="home-task-item">
+              <input type="checkbox" class="home-task-check" id="ht2">
+              <label for="ht2">
+                <span class="home-task-title">Enviar informe Q2 a Finanzas</span>
+                <span class="home-task-badge home-task-badge--high">Alta</span>
+              </label>
+            </div>
+            <div class="home-task-item">
+              <input type="checkbox" class="home-task-check" id="ht3" checked>
+              <label for="ht3">
+                <span class="home-task-title">Actualizar fotos del catálogo de productos</span>
+                <span class="home-task-badge home-task-badge--medium">Media</span>
+              </label>
+            </div>
+            <div class="home-task-item">
+              <input type="checkbox" class="home-task-check" id="ht4">
+              <label for="ht4">
+                <span class="home-task-title">Incorporar nuevo proveedor — Aroma Trends</span>
+                <span class="home-task-badge home-task-badge--medium">Media</span>
+              </label>
+            </div>
+            <div class="home-task-item">
+              <input type="checkbox" class="home-task-check" id="ht5">
+              <label for="ht5">
+                <span class="home-task-title">Preparar presentación de lanzamiento de fragancias</span>
+                <span class="home-task-badge home-task-badge--low">Baja</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendario -->
+        <div class="home-card home-card--calendar">
+          <div class="home-card-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Calendario
+            </h3>
+            <div class="home-card-actions">
+              <button class="home-view-all" id="openAnnualCalendar">Ver año completo</button>
+              <button class="home-admin-btn admin-only" id="openCalendarEdit">+ Evento</button>
+            </div>
+          </div>
+          <div id="miniCalendar"></div>
+          <div class="cal-legend" id="calLegendMini"></div>
+        </div>
+
+      </div><!-- /home-grid -->
+    </div><!-- /sec-home -->
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="dash-section" id="sec-dashboard">
+
+      <div class="quick-actions">
+        <button class="quick-action" data-goto="orders" id="qNewOrder">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo Pedido
+        </button>
+        <button class="quick-action" data-goto="catalogue">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Producto
+        </button>
+        <button class="quick-action" data-goto="agreements">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Nuevo Acuerdo
+        </button>
+        <button class="quick-action" data-goto="planner">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planificador
+        </button>
+        <button class="quick-action" data-goto="reports">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Ver Informes
+        </button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-card--green" data-tip="Ingresos acumulados del mes">
+          <div class="kpi-card__top">
+            <div class="kpi-card__icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            <div class="kpi-card__change up">↑ 14.2%</div>
+          </div>
+          <div class="kpi-card__label">Ingresos (MTM)</div>
+          <div class="kpi-card__value" id="kpiRevenue">€12,840</div>
+          <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
+            <defs><linearGradient id="sg1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#16A34A" stop-opacity="0.3"/><stop offset="100%" stop-color="#16A34A" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,34 L17,28 L34,30 L51,20 L68,24 L85,12 L102,8 L120,4" fill="none" stroke="#16A34A" stroke-width="2"/>
+            <path d="M0,34 L17,28 L34,30 L51,20 L68,24 L85,12 L102,8 L120,4 L120,44 L0,44Z" fill="url(#sg1)"/>
+          </svg>
+        </div>
+        <div class="kpi-card kpi-card--blue" data-tip="Total de pedidos este mes">
+          <div class="kpi-card__top">
+            <div class="kpi-card__icon" style="background:#DBEAFE"><svg viewBox="0 0 24 24" stroke="#2563EB"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+            <div class="kpi-card__change up">↑ 8 esta semana</div>
+          </div>
+          <div class="kpi-card__label">Pedidos</div>
+          <div class="kpi-card__value">47</div>
+          <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
+            <defs><linearGradient id="sg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563EB" stop-opacity="0.3"/><stop offset="100%" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,28 L17,32 L34,20 L51,26 L68,14 L85,18 L102,8 L120,4" fill="none" stroke="#2563EB" stroke-width="2"/>
+            <path d="M0,28 L17,32 L34,20 L51,26 L68,14 L85,18 L102,8 L120,4 L120,44 L0,44Z" fill="url(#sg2)"/>
+          </svg>
+        </div>
+        <div class="kpi-card kpi-card--rose" data-tip="Total de clientes registrados">
+          <div class="kpi-card__top">
+            <div class="kpi-card__icon" style="background:var(--dash-blush)"><svg viewBox="0 0 24 24" stroke="var(--dash-rose)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="kpi-card__change up">↑ 23 nuevos</div>
+          </div>
+          <div class="kpi-card__label">Clientes</div>
+          <div class="kpi-card__value">312</div>
+          <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
+            <defs><linearGradient id="sg3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D4919A" stop-opacity="0.3"/><stop offset="100%" stop-color="#D4919A" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,30 L17,26 L34,22 L51,18 L68,16 L85,12 L102,8 L120,5" fill="none" stroke="#D4919A" stroke-width="2"/>
+            <path d="M0,30 L17,26 L34,22 L51,18 L68,16 L85,12 L102,8 L120,5 L120,44 L0,44Z" fill="url(#sg3)"/>
+          </svg>
+        </div>
+        <div class="kpi-card kpi-card--amber" data-tip="Acuerdos con socios activos">
+          <div class="kpi-card__top">
+            <div class="kpi-card__icon" style="background:#FEF3C7"><svg viewBox="0 0 24 24" stroke="#D97706"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="kpi-card__change">2 pendientes</div>
+          </div>
+          <div class="kpi-card__label">Acuerdos Activos</div>
+          <div class="kpi-card__value">6</div>
+          <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
+            <defs><linearGradient id="sg4" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D97706" stop-opacity="0.3"/><stop offset="100%" stop-color="#D97706" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,22 L30,22 L50,26 L70,22 L90,20 L110,18 L120,18" fill="none" stroke="#D97706" stroke-width="2"/>
+            <path d="M0,22 L30,22 L50,26 L70,22 L90,20 L110,18 L120,18 L120,44 L0,44Z" fill="url(#sg4)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="dash-grid-2">
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <span class="dash-card__title">Tendencia de Ingresos</span>
+            <div class="period-toggle">
+              <button class="active" data-period="week">7D</button>
+              <button data-period="month">30D</button>
+              <button data-period="year">12M</button>
+            </div>
+          </div>
+          <div class="dash-card__body" style="padding-bottom:10px">
+            <canvas id="revenueChart" height="155"></canvas>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card__header"><span class="dash-card__title">Actividad Reciente</span><span class="notif-count-sm">5</span></div>
+          <div class="dash-card__body" style="padding:0 20px">
+            <div class="timeline">
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-success)"></div><div><p>Nuevo pedido <strong>#SH-1047</strong> recibido</p><small>hace 2 horas</small></div></div>
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-info)"></div><div><p>Acuerdo con <strong>Sephora ES</strong> firmado</p><small>hace 5 horas</small></div></div>
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-warning)"></div><div><p><strong>Rose Mist Toner</strong> con stock bajo (12 unidades)</p><small>Ayer</small></div></div>
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-rose)"></div><div><p>Nuevo miembro <strong>Sofia Chen</strong> añadido</p><small>hace 2 días</small></div></div>
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-success)"></div><div><p>Pedido personalizado <strong>#CP-018</strong> completado</p><small>hace 3 días</small></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid-2">
+        <div class="dash-card">
+          <div class="dash-card__header"><span class="dash-card__title">Pedidos Recientes</span><a class="dash-btn dash-btn--outline dash-btn--sm" data-goto="orders">Ver Todo</a></div>
+          <div class="dash-card__body" style="padding:0">
+            <table class="dash-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>
+              <tr><td>#SH-1047</td><td>Laura M.</td><td>€154.00</td><td><span class="status status--pending">Procesando</span></td></tr>
+              <tr><td>#SH-1046</td><td>James K.</td><td>€89.00</td><td><span class="status status--shipped">Enviado</span></td></tr>
+              <tr><td>#SH-1045</td><td>Sofia P.</td><td>€232.00</td><td><span class="status status--active">Entregado</span></td></tr>
+              <tr><td>#SH-1044</td><td>Marc T.</td><td>€65.00</td><td><span class="status status--shipped">Enviado</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card__header"><span class="dash-card__title">Mejores Productos</span></div>
+          <div class="dash-card__body" style="padding:6px 0">
+            <div class="top-product"><div class="top-product__rank gold">1</div><div class="top-product__info"><span>Radiant Glow Serum</span><div class="top-product__bar"><div style="width:78%"></div></div></div><span class="top-product__val">€4,272</span></div>
+            <div class="top-product"><div class="top-product__rank silver">2</div><div class="top-product__info"><span>Noir Essence EDP</span><div class="top-product__bar"><div style="width:55%"></div></div></div><span class="top-product__val">€2,640</span></div>
+            <div class="top-product"><div class="top-product__rank bronze">3</div><div class="top-product__info"><span>Velvet Hydra Cream</span><div class="top-product__bar"><div style="width:42%"></div></div></div><span class="top-product__val">€1,950</span></div>
+            <div class="top-product"><div class="top-product__rank">4</div><div class="top-product__info"><span>Signature Gift Box</span><div class="top-product__bar"><div style="width:30%"></div></div></div><span class="top-product__val">€1,160</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PEDIDOS ══ -->
+    <div class="dash-section" id="sec-orders">
+      <div class="filter-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="orderSearch" placeholder="Buscar pedidos…">
+        </div>
+        <select class="filter-select" id="orderStatusFilter">
+          <option value="">Todos los estados</option>
+          <option value="processing">Procesando</option>
+          <option value="shipped">Enviado</option>
+          <option value="delivered">Entregado</option>
+        </select>
+        <button class="dash-btn dash-btn--outline dash-btn--sm" id="exportOrdersCSV">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M9 12l3 3 3-3"/><path d="M4 21h16"/></svg>
+          Exportar CSV
+        </button>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">Todos los Pedidos</span>
+          <button class="dash-btn dash-btn--rose" id="openNewOrderModal">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo Pedido
+          </button>
+        </div>
+        <div class="dash-card__body" style="padding:0; overflow-x:auto;">
+          <table class="dash-table" id="ordersTable"><thead><tr><th>ID Pedido</th><th>Fecha</th><th>Cliente</th><th>Artículos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+            <tr data-status="processing"><td><strong>#SH-1047</strong></td><td>04 May 2026</td><td>Laura Martínez</td><td>Serum, Crema</td><td>€154.00</td><td><span class="status status--pending">Procesando</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1047">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-status="shipped"><td><strong>#SH-1046</strong></td><td>03 May 2026</td><td>James Kim</td><td>Glow Serum</td><td>€89.00</td><td><span class="status status--shipped">Enviado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1046">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-status="delivered"><td><strong>#SH-1045</strong></td><td>02 May 2026</td><td>Sofia Petrov</td><td>Caja Regalo, Bálsamo Labial x2</td><td>€232.00</td><td><span class="status status--active">Entregado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1045">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Factura</button></div></td></tr>
+            <tr data-status="shipped"><td><strong>#SH-1044</strong></td><td>01 May 2026</td><td>Marc Torres</td><td>Velvet Cream</td><td>€65.00</td><td><span class="status status--shipped">Enviado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1044">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-status="delivered"><td><strong>#SH-1043</strong></td><td>30 Abr 2026</td><td>Anna Müller</td><td>Noir Essence EDP</td><td>€120.00</td><td><span class="status status--active">Entregado</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order" data-id="SH-1043">Ver</button><button class="dash-btn dash-btn--outline dash-btn--sm">Factura</button></div></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CATÁLOGO ══ -->
+    <div class="dash-section" id="sec-catalogue">
+      <div class="filter-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="catalogueSearch" placeholder="Buscar productos…">
+        </div>
+        <select class="filter-select" id="categoryFilter">
+          <option value="">Todas las categorías</option>
+          <option value="skincare">Cuidado de piel</option>
+          <option value="fragrance">Fragancias</option>
+          <option value="body care">Cuidado corporal</option>
+          <option value="gift sets">Sets de regalo</option>
+        </select>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">Catálogo de Productos</span>
+          <button class="dash-btn dash-btn--rose" id="openAddProductModal">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Producto
+          </button>
+        </div>
+        <div class="dash-card__body" style="padding:0; overflow-x:auto;">
+          <table class="dash-table" id="catalogueTable"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+            <tr data-category="skincare"><td><strong>Radiant Glow Serum</strong></td><td>Cuidado de piel</td><td>€89.00</td><td><div class="stock-cell"><span>48</span><div class="stock-bar"><div class="stock-bar__fill" style="width:96%"></div></div></div></td><td><span class="status status--active">Activo</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-category="skincare"><td><strong>Velvet Hydra Cream</strong></td><td>Cuidado de piel</td><td>€65.00</td><td><div class="stock-cell"><span>35</span><div class="stock-bar"><div class="stock-bar__fill" style="width:70%"></div></div></div></td><td><span class="status status--active">Activo</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-category="fragrance"><td><strong>Noir Essence EDP</strong></td><td>Fragancias</td><td>€120.00</td><td><div class="stock-cell"><span>22</span><div class="stock-bar"><div class="stock-bar__fill" style="width:44%"></div></div></div></td><td><span class="status status--active">Activo</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+            <tr data-category="skincare"><td><strong>Rose Mist Toner</strong></td><td>Cuidado de piel</td><td>€32.00</td><td><div class="stock-cell stock-cell--low"><span>12</span><div class="stock-bar"><div class="stock-bar__fill stock-bar__fill--low" style="width:24%"></div></div></div></td><td><span class="status status--pending">Stock Bajo</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Reabastecer</button></div></td></tr>
+            <tr data-category="body care"><td><strong>Golden Body Oil</strong></td><td>Cuidado corporal</td><td>€54.00</td><td><div class="stock-cell stock-cell--empty"><span>0</span><div class="stock-bar"><div class="stock-bar__fill stock-bar__fill--empty" style="width:0%"></div></div></div></td><td><span class="status status--expired">Sin Stock</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Reabastecer</button></div></td></tr>
+            <tr data-category="gift sets"><td><strong>Signature Gift Box</strong></td><td>Sets de regalo</td><td>€145.00</td><td><div class="stock-cell"><span>8</span><div class="stock-bar"><div class="stock-bar__fill" style="width:16%"></div></div></div></td><td><span class="status status--active">Activo</span></td><td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button></div></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PLANIFICADOR DE TAREAS ══ -->
+    <div class="dash-section" id="sec-planner">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">Planificador de Tareas</span>
+          <button class="dash-btn dash-btn--rose" id="openAddTaskModal">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Tarea
+          </button>
+        </div>
+        <div class="dash-card__body" style="padding-top:8px">
+          <div class="kanban-board" id="kanbanBoard">
+            <div class="kanban-col" data-col="todo" id="col-todo">
+              <div class="kanban-col-header">
+                <span class="kanban-col-title">📋 Por Hacer</span>
+                <span class="kanban-col-count" id="cnt-todo">3</span>
+              </div>
+              <div class="kanban-cards" id="cards-todo">
+                <div class="kanban-card" draggable="true" data-id="t1">
+                  <div class="kanban-card__title">Lanzar nueva línea de fragancias</div>
+                  <div class="kanban-card__meta"><span class="status status--pending">Alta</span><span>Sofia · 15 Jun</span></div>
+                </div>
+                <div class="kanban-card" draggable="true" data-id="t2">
+                  <div class="kanban-card__title">Actualizar fotos del catálogo de productos</div>
+                  <div class="kanban-card__meta"><span class="status status--shipped">Media</span><span>Marco · 20 Jun</span></div>
+                </div>
+                <div class="kanban-card" draggable="true" data-id="t3">
+                  <div class="kanban-card__title">Renovar acuerdo con Primor</div>
+                  <div class="kanban-card__meta"><span class="status status--expired">Urgente</span><span>Elena · 31 Jul</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="kanban-col" data-col="inprogress" id="col-inprogress">
+              <div class="kanban-col-header">
+                <span class="kanban-col-title">⚡ En Progreso</span>
+                <span class="kanban-col-count" id="cnt-inprogress">2</span>
+              </div>
+              <div class="kanban-cards" id="cards-inprogress">
+                <div class="kanban-card" draggable="true" data-id="t4">
+                  <div class="kanban-card__title">Revisión financiera Q2</div>
+                  <div class="kanban-card__meta"><span class="status status--active">Normal</span><span>Elena · 31 May</span></div>
+                </div>
+                <div class="kanban-card" draggable="true" data-id="t5">
+                  <div class="kanban-card__title">Borrador de contrato Douglas EU</div>
+                  <div class="kanban-card__meta"><span class="status status--pending">Alta</span><span>Marco · 1 Jun</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="kanban-col" data-col="done" id="col-done">
+              <div class="kanban-col-header">
+                <span class="kanban-col-title">✅ Hecho</span>
+                <span class="kanban-col-count" id="cnt-done">2</span>
+              </div>
+              <div class="kanban-cards" id="cards-done">
+                <div class="kanban-card" draggable="true" data-id="t6">
+                  <div class="kanban-card__title">Acuerdo Sephora firmado</div>
+                  <div class="kanban-card__meta"><span class="status status--active">Completado</span><span>Ene 2026</span></div>
+                </div>
+                <div class="kanban-card" draggable="true" data-id="t7">
+                  <div class="kanban-card__title">Rediseño web MVP</div>
+                  <div class="kanban-card__meta"><span class="status status--active">Completado</span><span>Abr 2026</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COMITÉ DE EMPLEADOS ══ -->
+    <div class="dash-section" id="sec-comite">
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Comité de Empleados</span></div>
+        <div class="dash-card__body">
+          <div class="section-block">
+            <h3>1.1 Quiénes Somos</h3>
+            <p>En Shine, la comunicación es clave. El Comité de Empleados está formado por compañeros elegidos por todos para actuar como puente oficial entre el personal y la dirección. Su propósito es simple pero vital: garantizar que tus derechos sean respetados y tu voz sea escuchada.</p>
+            <ul class="info-list">
+              <li><strong>Tu voz ante la Dirección:</strong> El Comité traslada preocupaciones, sugerencias o quejas de forma colectiva, dándoles mucho más peso que el feedback individual.</li>
+              <li><strong>Asesoramiento y apoyo:</strong> Si tienes dudas sobre tu salario, contrato o vacaciones, son tus expertos de confianza.</li>
+              <li><strong>Protección de derechos:</strong> Supervisan el cumplimiento legal, especialmente en seguridad, salud e igualdad, garantizando un entorno digno.</li>
+              <li><strong>Transparencia real:</strong> El Comité recibe información de primera mano sobre los planes de negocio y comparte lo relevante con los empleados.</li>
+            </ul>
+          </div>
+          <div class="org-chart">
+            <div class="org-chart__title">Estructura del Comité</div>
+            <div class="org-chart__row">
+              <div class="org-card org-card--top">
+                <img src="assets/img/intranet/persona1.jpg" alt="CEO / Director General" class="org-card__photo">
+                <strong>Dirección</strong><span>CEO / Director General</span>
+              </div>
+            </div>
+            <div class="org-chart__row">
+              <div class="org-card">
+                <img src="assets/img/intranet/persona2.jpg" alt="Presidente" class="org-card__photo">
+                <strong>Presidente</strong><span>Representa a los empleados</span>
+              </div>
+              <div class="org-card">
+                <img src="assets/img/intranet/persona3.jpg" alt="Secretario" class="org-card__photo">
+                <strong>Secretario</strong><span>Comunicaciones y actas</span>
+              </div>
+            </div>
+            <div class="org-chart__row">
+              <div class="org-card">
+                <img src="assets/img/intranet/persona4.jpg" alt="Delegado de Calidad" class="org-card__photo">
+                <strong>Delegado de Calidad</strong><span>Seguridad y salud</span>
+              </div>
+              <div class="org-card">
+                <img src="assets/img/intranet/persona5.jpg" alt="Delegado de Igualdad" class="org-card__photo">
+                <strong>Delegado de Igualdad</strong><span>Bienestar e inclusión</span>
+              </div>
+              <div class="org-card">
+                <img src="assets/img/intranet/persona6.jpg" alt="Delegado Financiero" class="org-card__photo">
+                <strong>Delegado Financiero</strong><span>Acuerdos y condiciones</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.3 Infografías: Modificación de Contrato y Despido -->
+          <div class="section-block">
+            <h3>1.3 Cambios de Contrato de un Vistazo</h3>
+          </div>
+          <div class="infographic-img-grid reveal-on-scroll">
+            <img src="assets/img/intranet/infografia-modificacion-contrato.jpg" alt="Infografía Modificación de Contrato" class="infographic-img">
+            <img src="assets/img/intranet/infografia-despido-disciplinario.jpg" alt="Infografía Despido Disciplinario" class="infographic-img">
+          </div>
+
+          <!-- 1.4 Logros del Comité (estilo noticias) -->
+          <div class="section-block" style="margin-top:24px">
+            <h3>1.4 Logros Recientes</h3>
+            <p>Acuerdos clave que el Comité de Empleados ha conseguido para el equipo.</p>
+          </div>
+          <div class="news-grid reveal-on-scroll">
+            <div class="news-card">
+              <div class="news-card__ribbon"></div>
+              <div class="news-card__body">
+                <span class="news-card__tag">Acuerdo</span>
+                <div class="news-card__title">Viernes Flexibles Aprobados para el Verano</div>
+                <div class="news-card__excerpt">A partir de junio 2026, todos los empleados podrán trabajar menos horas los viernes durante los meses de verano (junio–septiembre), manteniendo el salario íntegro.</div>
+                <div class="news-card__meta">Comité · Marzo 2026</div>
+              </div>
+            </div>
+            <div class="news-card">
+              <div class="news-card__ribbon news-card__ribbon--blue"></div>
+              <div class="news-card__body">
+                <span class="news-card__tag">Salud y Seguridad</span>
+                <div class="news-card__title">Mejora Ergonómica de los Puestos de Trabajo</div>
+                <div class="news-card__excerpt">Todos los puestos de trabajo recibirán sillas ergonómicas, monitores regulables y mejor iluminación antes del Q3 2026. Presupuesto asegurado: €12.000.</div>
+                <div class="news-card__meta">Comité · Febrero 2026</div>
+              </div>
+            </div>
+            <div class="news-card">
+              <div class="news-card__ribbon news-card__ribbon--green"></div>
+              <div class="news-card__body">
+                <span class="news-card__tag">Formación</span>
+                <div class="news-card__title">Presupuesto de Formación Anual Aumentado un 40%</div>
+                <div class="news-card__excerpt">La empresa ha acordado destinar €8.000 a cursos de desarrollo profesional y certificaciones, disponibles para todos los departamentos.</div>
+                <div class="news-card__meta">Comité · Enero 2026</div>
+              </div>
+            </div>
+            <div class="news-card">
+              <div class="news-card__ribbon news-card__ribbon--amber"></div>
+              <div class="news-card__body">
+                <span class="news-card__tag">Igualdad</span>
+                <div class="news-card__title">Auditoría de Brecha Salarial de Género Completada</div>
+                <div class="news-card__excerpt">El Comité impulsó una auditoría salarial independiente. Los resultados muestran una brecha del 2,1%, con medidas correctoras acordadas para 2026.</div>
+                <div class="news-card__meta">Comité · Diciembre 2025</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Vídeo de Bienvenida -->
+          <div class="video-welcome reveal-on-scroll" style="margin-top:24px">
+            <div class="video-welcome__header">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <h3>Bienvenido a la Intranet</h3>
+            </div>
+            <div class="video-welcome__body">
+              <div class="video-placeholder" id="videoPlaceholder">
+                <div class="video-play-btn">
+                  <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <span>Haz clic para reproducir el vídeo de bienvenida</span>
+              </div>
+              <div class="video-info">
+                <h4>🎬 Bienvenida del Comité</h4>
+                <p>Un recorrido rápido por la intranet a cargo de tu Comité de Empleados — todo lo que necesitas saber sobre este espacio, tus derechos y cómo mantenerte informado.</p>
+                <div class="video-duration">⏱ Duración: 1:30 min</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ACUERDOS ══ -->
+    <div class="dash-section" id="sec-agreements">
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Acuerdos y Leyes</span></div>
+        <div class="dash-card__body">
+
+          <!-- Marco legal -->
+          <div class="ag-legal-block">
+            <div class="ag-legal-icon">⚖️</div>
+            <div class="ag-legal-content">
+              <h3 class="ag-legal-title">Convenio y Normativa Laboral Aplicable</h3>
+              <p class="ag-legal-desc">Principales referencias legales que se aplican a tu trabajo: el convenio colectivo de la empresa, el Estatuto de los Trabajadores y las normativas clave de salud y seguridad.</p>
+              <div class="ag-legal-pill">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Documentos legales completos disponibles en la sección <strong>Documentos e Info</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acuerdos del comité -->
+          <div class="ag-section-header">
+            <span class="ag-section-line"></span>
+            <span class="ag-section-label">Acuerdos del Comité</span>
+            <span class="ag-section-line"></span>
+          </div>
+
+          <div class="acuerdo-grid">
+
+            <div class="acuerdo-card acuerdo-card--blue">
+              <div class="acuerdo-card__banner"></div>
+              <div class="acuerdo-card__body">
+                <div class="acuerdo-card__meta">
+                  <span class="acuerdo-card__tag">Jornada laboral</span>
+                  <span class="acuerdo-card__date">Mayo 2025</span>
+                </div>
+                <div class="acuerdo-card__title">Acuerdo de flexibilidad horaria para el equipo de almacén y logística</div>
+                <p class="acuerdo-card__desc">El comité ha negociado una bolsa de horas flexible de 40 h anuales para el personal de almacén, permitiendo adaptar la entrada y salida en ±1 hora según las necesidades del trabajador, sin reducción salarial.</p>
+              </div>
+            </div>
+
+            <div class="acuerdo-card acuerdo-card--amber">
+              <div class="acuerdo-card__banner"></div>
+              <div class="acuerdo-card__body">
+                <div class="acuerdo-card__meta">
+                  <span class="acuerdo-card__tag">Contratación</span>
+                  <span class="acuerdo-card__date">Abril 2025</span>
+                </div>
+                <div class="acuerdo-card__title">Límite pactado en el uso de contratos temporales en el área de atención al cliente</div>
+                <p class="acuerdo-card__desc">Tras varias rondas de negociación, la empresa se compromete a que los contratos temporales en customer care no superen el 20 % de la plantilla total, con revisión trimestral y preferencia de conversión a indefinido tras 12 meses.</p>
+              </div>
+            </div>
+
+            <div class="acuerdo-card acuerdo-card--green">
+              <div class="acuerdo-card__banner"></div>
+              <div class="acuerdo-card__body">
+                <div class="acuerdo-card__meta">
+                  <span class="acuerdo-card__tag">Salario y retribución</span>
+                  <span class="acuerdo-card__date">Marzo 2025</span>
+                </div>
+                <div class="acuerdo-card__title">Complemento salarial por objetivos vinculado a la campaña de primavera</div>
+                <p class="acuerdo-card__desc">El comité ha logrado establecer un complemento variable de hasta el 6 % del salario bruto anual para todos los puestos vinculados a ventas y marketing digital, ligado a los resultados de la campaña de primavera-verano.</p>
+              </div>
+            </div>
+
+            <div class="acuerdo-card acuerdo-card--purple">
+              <div class="acuerdo-card__banner"></div>
+              <div class="acuerdo-card__body">
+                <div class="acuerdo-card__meta">
+                  <span class="acuerdo-card__tag">Teletrabajo</span>
+                  <span class="acuerdo-card__date">Febrero 2026</span>
+                </div>
+                <div class="acuerdo-card__title">Protocolo de teletrabajo con derecho a desconexión digital garantizado</div>
+                <p class="acuerdo-card__desc">Se ha firmado un acuerdo que reconoce dos días de teletrabajo semanales para puestos administrativos y de contenido digital, incluyendo un protocolo de desconexión digital a partir de las 18:00 h con carácter vinculante.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Píldoras del convenio -->
+          <div class="ag-section-header" style="margin-top:28px">
+            <span class="ag-section-line"></span>
+            <span class="ag-section-label">Convenio y Normativa Laboral Aplicable</span>
+            <span class="ag-section-line"></span>
+          </div>
+          <p style="font-size:0.83rem;color:var(--dash-muted);margin-bottom:16px;line-height:1.6">Principales referencias legales que se aplican a tu trabajo: el convenio colectivo de la empresa, el Estatuto de los Trabajadores y las normativas clave de salud y seguridad.</p>
+          <div class="pildoras-grid">
+            <div class="pildora"><strong>Seguro de vida 🛡️</strong> El convenio obliga a la empresa a ofrecer cobertura de vida y accidentes, incluyendo situaciones fuera del trabajo.</div>
+            <div class="pildora"><strong>Día personal 🗓️</strong> Los convenios suelen incluir días discrecionales de descanso personal una vez equilibrada la jornada anual.</div>
+            <div class="pildora"><strong>Plus nocturno 🌙</strong> Trabajar entre las 22:00 y las 06:00 suele generar un plus específico sobre la tarifa horaria base.</div>
+            <div class="pildora"><strong>Ayuda escolar 🎒</strong> Ayuda para empleados con hijos en edad escolar. Consulta los plazos anuales de solicitud.</div>
+            <div class="pildora"><strong>Plus de penosidad 🥽</strong> Los puestos con riesgo o condiciones difíciles pueden tener derecho a compensación adicional.</div>
+            <div class="pildora"><strong>Acompañamiento médico 🏥</strong> El convenio suele permitir tiempo para acompañar a familiares de primer grado a consultas médicas.</div>
+            <div class="pildora"><strong>Reconocimiento por antigüedad 🎖️</strong> La experiencia se reconoce mediante aumentos salariales o beneficios vinculados a los años de servicio.</div>
+            <div class="pildora"><strong>Ropa de trabajo 👕</strong> El empresario debe proporcionar uniformes y equipos de protección sin coste.</div>
+          </div>
+          <div class="ag-legal-pill" style="margin-top:16px;display:inline-flex">
+            <svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Documentos legales completos disponibles en la sección <strong>Documentos e Info</strong>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ OBJETIVOS 2026 ══ -->
+    <div class="dash-section" id="sec-objectives-2026">
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Objetivos 2026</span><span class="status status--active">4 En Curso</span></div>
+        <div class="dash-card__body">
+          <div class="section-block">
+            <p>El Comité de Empleados ha definido los objetivos prioritarios para 2026 orientados a mejorar las condiciones laborales y el bienestar de toda la plantilla.</p>
+          </div>
+          <div class="objectives-grid">
+            <div class="objective-card">
+              <span class="objective-number">01</span>
+              <h4>Mejorar las condiciones laborales</h4>
+              <p>Negociar ajustes de horario, equilibrio de carga de trabajo y medidas de conciliación para crear un entorno laboral más saludable y sostenible.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>65%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:65%"></div></div>
+              </div>
+            </div>
+            <div class="objective-card">
+              <span class="objective-number">02</span>
+              <h4>Aumentar la seguridad y el bienestar</h4>
+              <p>Reforzar las políticas de prevención de riesgos y promover iniciativas que apoyen tanto la salud física como mental.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>80%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:80%"></div></div>
+              </div>
+            </div>
+            <div class="objective-card">
+              <span class="objective-number">03</span>
+              <h4>Revisar y mejorar salarios</h4>
+              <p>Impulsar actualizaciones salariales acordes con el coste de vida y garantizar que el rendimiento de los empleados sea debidamente reconocido.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>40%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:40%"></div></div>
+              </div>
+            </div>
+            <div class="objective-card">
+              <span class="objective-number">04</span>
+              <h4>Promover la formación y el desarrollo</h4>
+              <p>Impulsar programas de aprendizaje continuo para que los trabajadores puedan mejorar sus habilidades y crecer profesionalmente.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>55%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:55%"></div></div>
+              </div>
+            </div>
+            <div class="objective-card">
+              <span class="objective-number">05</span>
+              <h4>Fomentar la igualdad y la diversidad</h4>
+              <p>Trabajar para garantizar igualdad de oportunidades, prevenir la discriminación y construir una cultura laboral más inclusiva.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>70%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:70%"></div></div>
+              </div>
+            </div>
+            <div class="objective-card">
+              <span class="objective-number">06</span>
+              <h4>Mejorar la comunicación interna</h4>
+              <p>Establecer canales más efectivos entre empleados y dirección para que todas las inquietudes y propuestas sean escuchadas.</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>Progreso</span><span>90%</span></div>
+                <div class="progress-bar"><div class="progress-bar__fill" style="width:90%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENTOS ══ -->
+    <div class="dash-section" id="sec-documents-info">
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Documentos e Información</span></div>
+        <div class="dash-card__body">
+          <div class="section-block">
+            <p>Descarga los documentos más relevantes para tu puesto. Haz clic en cualquier elemento para guardar una copia local en tu dispositivo.</p>
+          </div>
+          <div class="download-list">
+            <div class="document-item">
+              <div>
+                <div class="document-title">📄 Convenio Colectivo</div>
+                <div class="document-desc">Términos clave, derechos y condiciones laborales que aplican en nuestra empresa.</div>
+              </div>
+              <a href="docs/convenio-colectivo.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+            </div>
+            <div class="document-item">
+              <div>
+                <div class="document-title">📜 Estatuto de los Trabajadores</div>
+                <div class="document-desc">Derechos laborales fundamentales y protecciones establecidas por la legislación española.</div>
+              </div>
+              <a href="docs/estatuto-trabajadores.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+            </div>
+            <div class="document-item">
+              <div>
+                <div class="document-title">⚠️ Riesgos Laborales (PRL)</div>
+                <div class="document-desc">Obligaciones de salud y seguridad en el trabajo y prevención de riesgos laborales.</div>
+              </div>
+              <a href="docs/prl.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+            </div>
+            <div class="document-item">
+              <div>
+                <div class="document-title">⚠️ Riesgos Laborales — PRL Reducida</div>
+                <div class="document-desc">Versión resumida de la PRL con los puntos esenciales de prevención de riesgos laborales.</div>
+              </div>
+              <a href="docs/prl-reducida.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+            </div>
+            <div class="document-item">
+              <div>
+                <div class="document-title">🌍 Plan de Igualdad</div>
+                <div class="document-desc">Compromisos de la empresa con la igualdad de género y políticas de no discriminación.</div>
+              </div>
+              <a href="docs/plan-igualdad.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EQUIPO ══ -->
+    <div class="dash-section" id="sec-team">
+      <div class="filter-bar">
+        <div class="filter-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="teamSearch" placeholder="Buscar miembros del equipo…">
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">Miembros del Equipo <span style="color:var(--dash-muted);font-weight:400;font-size:0.82rem">(7)</span></span>
+          <button class="dash-btn dash-btn--rose" id="openAddMemberModal">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Miembro
+          </button>
+        </div>
+        <div class="dash-card__body">
+          <div class="team-grid" id="teamGrid">
+            <div class="team-card" data-name="elena ruiz">
+              <div class="team-card__avatar avatar--rose">ER</div>
+              <div class="team-card__name">Elena Ruiz</div>
+              <div class="team-card__role">Directora Creativa</div>
+              <div class="team-card__email">elena@shine-beauty.com</div>
+              <span class="status status--active">Activa</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Elena Ruiz')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="marco torres">
+              <div class="team-card__avatar avatar--blue">MT</div>
+              <div class="team-card__name">Marco Torres</div>
+              <div class="team-card__role">Jefe de I+D</div>
+              <div class="team-card__email">marco@shine-beauty.com</div>
+              <span class="status status--active">Activo</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Marco Torres')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="sofia chen">
+              <div class="team-card__avatar avatar--green">SC</div>
+              <div class="team-card__name">Sofia Chen</div>
+              <div class="team-card__role">Operaciones</div>
+              <div class="team-card__email">sofia@shine-beauty.com</div>
+              <span class="status status--active">Activa</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Sofia Chen')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="lucas pena">
+              <div class="team-card__avatar avatar--amber">LP</div>
+              <div class="team-card__name">Lucas Peña</div>
+              <div class="team-card__role">Director de Ventas</div>
+              <div class="team-card__email">lucas@shine-beauty.com</div>
+              <span class="status status--active">Activo</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Lucas Peña')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="anna kowalski">
+              <div class="team-card__avatar avatar--teal">AK</div>
+              <div class="team-card__name">Anna Kowalski</div>
+              <div class="team-card__role">Responsable de Marketing</div>
+              <div class="team-card__email">anna@shine-beauty.com</div>
+              <span class="status status--active">Activa</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Anna Kowalski')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="david obi">
+              <div class="team-card__avatar avatar--orange">DO</div>
+              <div class="team-card__name">David Obi</div>
+              <div class="team-card__role">Logística</div>
+              <div class="team-card__email">david@shine-beauty.com</div>
+              <span class="status status--draft">Ausente</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('David Obi')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+            <div class="team-card" data-name="claire dupont">
+              <div class="team-card__avatar avatar--purple">CD</div>
+              <div class="team-card__name">Claire Dupont</div>
+              <div class="team-card__role">Finanzas</div>
+              <div class="team-card__email">claire@shine-beauty.com</div>
+              <span class="status status--active">Activa</span>
+              <div class="team-card__actions">
+                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Claire Dupont')">Mensaje</button>
+                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ INFORMES ══ -->
+    <div class="dash-section" id="sec-reports">
+      <div class="reports-grid">
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <span class="dash-card__title">Ingresos Mensuales</span>
+            <button class="dash-btn dash-btn--outline dash-btn--sm" id="exportReportsCSV">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M9 12l3 3 3-3"/><path d="M4 21h16"/></svg>
+              Exportar
+            </button>
+          </div>
+          <div class="dash-card__body"><canvas id="revenueBarChart" height="200"></canvas></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card__header"><span class="dash-card__title">Ventas por Categoría</span></div>
+          <div class="dash-card__body" style="display:flex;flex-direction:column;align-items:center;gap:14px">
+            <canvas id="categoryChart" style="max-width:170px;max-height:170px"></canvas>
+            <div class="chart-legend" id="categoryLegend"></div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Resumen de Rendimiento</span></div>
+        <div class="dash-card__body">
+          <div class="perf-grid">
+            <div class="perf-item"><div class="perf-label">Valor Medio de Pedido</div><div class="perf-value">€152</div><div class="perf-change up">↑ 5,3%</div></div>
+            <div class="perf-item"><div class="perf-label">Tasa de Conversión</div><div class="perf-value">3,8%</div><div class="perf-change up">↑ 0,4pp</div></div>
+            <div class="perf-item"><div class="perf-label">Tasa de Devolución</div><div class="perf-value">1,2%</div><div class="perf-change down">↓ 0,2pp</div></div>
+            <div class="perf-item"><div class="perf-label">Valor de Vida del Cliente</div><div class="perf-value">€480</div><div class="perf-change up">↑ 12%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AJUSTES ══ -->
+    <div class="dash-section" id="sec-settings">
+      <div class="dash-tabs">
+        <button class="dash-tab active" data-settings-tab="general">General</button>
+        <button class="dash-tab" data-settings-tab="branding">Marca</button>
+        <button class="dash-tab" data-settings-tab="notifications">Notificaciones</button>
+        <button class="dash-tab" data-settings-tab="security">Seguridad</button>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card__header"><span class="dash-card__title">Ajustes</span><button class="dash-btn dash-btn--rose" id="saveSettings">Guardar Cambios</button></div>
+        <div class="dash-card__body">
+          <div id="settings-general">
+            <div class="dash-grid-2">
+              <div>
+                <div class="dash-form-group"><label class="dash-label">Nombre de la Empresa</label><input class="dash-input" value="Shine Beauty S.L."></div>
+                <div class="dash-form-group"><label class="dash-label">Email de Contacto</label><input class="dash-input" value="hello@shine-beauty.com"></div>
+                <div class="dash-form-group"><label class="dash-label">Teléfono</label><input class="dash-input" value="+34 912 345 678"></div>
+              </div>
+              <div>
+                <div class="dash-form-group"><label class="dash-label">Dirección</label><input class="dash-input" value="Calle Gran Vía 28, Madrid"></div>
+                <div class="dash-form-group"><label class="dash-label">CIF</label><input class="dash-input" value="B-12345678"></div>
+                <div class="dash-form-group"><label class="dash-label">Moneda</label><select class="dash-input"><option>EUR (€)</option><option>USD ($)</option><option>GBP (£)</option></select></div>
+              </div>
+            </div>
+          </div>
+          <div id="settings-branding" style="display:none">
+            <div class="dash-grid-2">
+              <div>
+                <div class="dash-form-group"><label class="dash-label">Color de Marca</label><input class="dash-input" value="#D4919A" type="color" style="height:42px;padding:4px 8px;cursor:pointer"></div>
+                <div class="dash-form-group"><label class="dash-label">Eslogan</label><input class="dash-input" value="Luxury Beauty, Naturally."></div>
+              </div>
+              <div>
+                <div class="dash-form-group"><label class="dash-label">Sitio Web</label><input class="dash-input" value="https://shine-beauty.com"></div>
+                <div class="dash-form-group"><label class="dash-label">URL del Logo</label><input class="dash-input" placeholder="https://…"></div>
+              </div>
+            </div>
+          </div>
+          <div id="settings-notifications" style="display:none">
+            <div class="settings-toggles">
+              <div class="settings-toggle-row"><div><div class="settings-toggle-label">Notificaciones de pedidos</div><div class="settings-toggle-desc">Alerta cuando llegan nuevos pedidos</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle__track"></span></label></div>
+              <div class="settings-toggle-row"><div><div class="settings-toggle-label">Alertas de stock bajo</div><div class="settings-toggle-desc">Alerta cuando el stock cae por debajo de 15 unidades</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle__track"></span></label></div>
+              <div class="settings-toggle-row"><div><div class="settings-toggle-label">Recordatorios de acuerdos</div><div class="settings-toggle-desc">Recordatorios de 30 días para acuerdos que vencen</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle__track"></span></label></div>
+              <div class="settings-toggle-row"><div><div class="settings-toggle-label">Informes semanales</div><div class="settings-toggle-desc">Resumen automático semanal de rendimiento</div></div><label class="toggle"><input type="checkbox"><span class="toggle__track"></span></label></div>
+              <div class="settings-toggle-row"><div><div class="settings-toggle-label">Modo oscuro</div><div class="settings-toggle-desc">Cambiar al tema oscuro automáticamente</div></div><label class="toggle"><input type="checkbox" id="darkModeToggleSetting"><span class="toggle__track"></span></label></div>
+            </div>
+          </div>
+          <div id="settings-security" style="display:none">
+            <div class="dash-grid-2">
+              <div>
+                <div class="dash-form-group"><label class="dash-label">Contraseña Actual</label><input class="dash-input" type="password" placeholder="••••••••"></div>
+                <div class="dash-form-group"><label class="dash-label">Nueva Contraseña</label><input class="dash-input" type="password" placeholder="••••••••"></div>
+                <div class="dash-form-group"><label class="dash-label">Confirmar Nueva Contraseña</label><input class="dash-input" type="password" placeholder="••••••••"></div>
+                <button class="dash-btn dash-btn--rose">Actualizar Contraseña</button>
+              </div>
+              <div>
+                <div class="dash-form-group">
+                  <label class="dash-label">Autenticación de Dos Factores</label>
+                  <div class="settings-toggles" style="margin-top:6px">
+                    <div class="settings-toggle-row" style="padding-top:0"><div><div class="settings-toggle-label">Activar 2FA</div><div class="settings-toggle-desc">Asegura tu cuenta con una app de autenticación</div></div><label class="toggle"><input type="checkbox"><span class="toggle__track"></span></label></div>
+                  </div>
+                </div>
+                <div class="dash-form-group"><label class="dash-label">Tiempo de Sesión</label><select class="dash-input"><option>30 minutos</option><option>1 hora</option><option>4 horas</option><option>8 horas</option></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN: ROLES ══ -->
+    <div class="dash-section admin-only" id="sec-admin-roles">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">🛡️ Gestión de Roles</span>
+          <button class="dash-btn dash-btn--rose" id="openCreateAccountModal">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Crear Cuenta
+          </button>
+        </div>
+        <div class="dash-card__body" style="padding:0;overflow-x:auto">
+          <table class="dash-table" id="rolesTable"><thead><tr><th>Empleado</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+            <tr data-email="admin@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--rose" style="width:32px;height:32px;font-size:0.65rem">ER</div><strong>Elena Ruiz</strong></div></td>
+              <td>admin@shine-beauty.com</td>
+              <td><span class="status status--active">Admin</span></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm" disabled>Protegido</button></div></td>
+            </tr>
+            <tr data-email="elena@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--rose" style="width:32px;height:32px;font-size:0.65rem">ER</div><strong>Elena Ruiz</strong></div></td>
+              <td>elena@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="marco@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--blue" style="width:32px;height:32px;font-size:0.65rem">MT</div><strong>Marco Torres</strong></div></td>
+              <td>marco@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="sofia@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--green" style="width:32px;height:32px;font-size:0.65rem">SC</div><strong>Sofia Chen</strong></div></td>
+              <td>sofia@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="lucas@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--amber" style="width:32px;height:32px;font-size:0.65rem">LP</div><strong>Lucas Peña</strong></div></td>
+              <td>lucas@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="anna@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--teal" style="width:32px;height:32px;font-size:0.65rem">AK</div><strong>Anna Kowalski</strong></div></td>
+              <td>anna@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="david@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--orange" style="width:32px;height:32px;font-size:0.65rem">DO</div><strong>David Obi</strong></div></td>
+              <td>david@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--draft">Ausente</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+            <tr data-email="claire@shine-beauty.com">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--purple" style="width:32px;height:32px;font-size:0.65rem">CD</div><strong>Claire Dupont</strong></div></td>
+              <td>claire@shine-beauty.com</td>
+              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
+              <td><span class="status status--active">Activa</span></td>
+              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN: FICHAJES ══ -->
+    <div class="dash-section admin-only" id="sec-admin-fichajes">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">⏱️ Registro de Fichajes</span>
+          <button class="dash-btn dash-btn--outline dash-btn--sm" id="exportFichajesCSV">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M9 12l3 3 3-3"/><path d="M4 21h16"/></svg>
+            Exportar CSV
+          </button>
+        </div>
+        <div class="dash-card__body">
+          <div class="fichajes-date-filter" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <label class="dash-label" style="margin:0">Fecha:</label>
+            <input type="date" class="dash-input" id="fichajesDateFilter" style="width:auto">
+            <button class="dash-btn dash-btn--outline dash-btn--sm" id="fichajesToday">Hoy</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="dash-table" id="fichajesTable"><thead><tr><th>Empleado</th><th>Fecha</th><th>Hora Entrada</th><th>Hora Salida</th><th>Duración</th><th>Estado</th></tr></thead><tbody id="fichajesBody">
+              <tr id="fichajesLoadingRow"><td colspan="6" style="text-align:center;padding:24px;color:var(--dash-muted)">Cargando fichajes…</td></tr>
+            </tbody></table>
+          </div>
+          <div class="fichajes-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px">
+            <div class="perf-item"><div class="perf-label">Total Fichados</div><div class="perf-value" id="fichajesTotal">6</div></div>
+            <div class="perf-item"><div class="perf-label">Completados</div><div class="perf-value" id="fichajesCompleted" style="color:#16A34A">3</div></div>
+            <div class="perf-item"><div class="perf-label">En Turno</div><div class="perf-value" id="fichajesActive" style="color:#D97706">3</div></div>
+            <div class="perf-item"><div class="perf-label">No Fichados</div><div class="perf-value" id="fichajesAbsent" style="color:var(--dash-danger)">1</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN: CREACIÓN ══ -->
+    <div class="dash-section admin-only" id="sec-admin-creacion">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">✨ Creación de Productos</span>
+        </div>
+        <div class="dash-card__body">
+          <div class="section-block">
+            <p>Completa el formulario para crear un nuevo producto. Todos los campos marcados con <span style="color:var(--dash-danger)">*</span> son obligatorios.</p>
+          </div>
+          <form id="createProductForm">
+            <div class="dash-grid-2">
+              <div class="dash-form-group">
+                <label class="dash-label">Nombre del Producto <span style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="cp-name" placeholder="e.g. Pearl Glow Essence" required>
+              </div>
+              <div class="dash-form-group">
+                <label class="dash-label">SKU <span style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="cp-sku" placeholder="SH-XXX" required>
+              </div>
+            </div>
+            <div class="dash-grid-2">
+              <div class="dash-form-group">
+                <label class="dash-label">Categoría <span style="color:var(--dash-danger)">*</span></label>
+                <select class="dash-input" id="cp-category" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="skincare">Skincare</option>
+                  <option value="fragrance">Fragrance</option>
+                  <option value="body care">Body Care</option>
+                  <option value="gift sets">Gift Sets</option>
+                </select>
+              </div>
+              <div class="dash-form-group">
+                <label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="cp-price" type="number" step="0.01" min="0" placeholder="0.00" required>
+              </div>
+            </div>
+            <div class="dash-grid-2">
+              <div class="dash-form-group">
+                <label class="dash-label">Stock Inicial <span style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="cp-stock" type="number" min="0" placeholder="0" required>
+              </div>
+              <div class="dash-form-group">
+                <label class="dash-label">Peso (g)</label>
+                <input class="dash-input" id="cp-weight" type="number" min="0" placeholder="0">
+              </div>
+            </div>
+            <div class="dash-form-group">
+              <label class="dash-label">Descripción <span style="color:var(--dash-danger)">*</span></label>
+              <textarea class="dash-input" id="cp-desc" rows="3" placeholder="Descripción detallada del producto..." style="resize:vertical" required></textarea>
+            </div>
+            <div class="dash-form-group">
+              <label class="dash-label">Ingredientes</label>
+              <textarea class="dash-input" id="cp-ingredients" rows="2" placeholder="Lista de ingredientes separados por coma..." style="resize:vertical"></textarea>
+            </div>
+            <div class="dash-grid-2">
+              <div class="dash-form-group">
+                <label class="dash-label">Notas Olfativas (para fragancias)</label>
+                <input class="dash-input" id="cp-notes" placeholder="e.g. Bergamot · Rose · Amber">
+              </div>
+              <div class="dash-form-group">
+                <label class="dash-label">URL de Imagen</label>
+                <input class="dash-input" id="cp-image" placeholder="https://...">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button type="submit" class="dash-btn dash-btn--rose">Crear Producto</button>
+              <button type="reset" class="dash-btn dash-btn--outline">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dash-content -->
+</div><!-- /dash-main -->
+
+<!-- ═══════ MODAL: CREATE ACCOUNT ═══════ -->
+<div class="modal-overlay" id="createAccountModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Crear Cuenta de Empleado</h3>
+      <button class="modal__close" data-close="createAccountModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Nombre</label><input class="dash-input" id="ca-fname" placeholder="Nombre"></div>
+        <div class="dash-form-group"><label class="dash-label">Apellido</label><input class="dash-input" id="ca-lname" placeholder="Apellido"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Email</label><input class="dash-input" id="ca-email" type="email" placeholder="nombre@shine-beauty.com"></div>
+      <div class="dash-form-group"><label class="dash-label">Contraseña</label><input class="dash-input" id="ca-password" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <div class="dash-form-group">
+        <label class="dash-label">Rol</label>
+        <select class="dash-input" id="ca-role">
+          <option value="empleado">Empleado</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Puesto / Departamento</label>
+        <input class="dash-input" id="ca-position" placeholder="e.g. Sales Assistant">
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="createAccountModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitCreateAccount">Crear Cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Modal Nuevo Pedido -->
+<div class="modal-overlay" id="newOrderModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Nuevo Pedido</h3>
+      <button class="modal__close" data-close="newOrderModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group"><label class="dash-label">Nombre del Cliente</label><input class="dash-input" id="no-customer" placeholder="Nombre completo"></div>
+      <div class="dash-form-group"><label class="dash-label">Email del Cliente</label><input class="dash-input" id="no-email" type="email" placeholder="email@ejemplo.com"></div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Producto</label><select class="dash-input" id="no-product"><option>Radiant Glow Serum — €89</option><option>Velvet Hydra Cream — €65</option><option>Noir Essence EDP — €120</option><option>Rose Mist Toner — €32</option><option>Signature Gift Box — €145</option></select></div>
+        <div class="dash-form-group"><label class="dash-label">Cantidad</label><input class="dash-input" id="no-qty" type="number" value="1" min="1"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Dirección de Envío</label><input class="dash-input" id="no-addr" placeholder="Calle, Ciudad, País"></div>
+      <div class="dash-form-group"><label class="dash-label">Notas</label><textarea class="dash-input" rows="2" placeholder="Instrucciones especiales…" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="newOrderModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitNewOrder">Crear Pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Añadir Producto -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Añadir Producto</h3>
+      <button class="modal__close" data-close="addProductModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group"><label class="dash-label">Nombre del Producto</label><input class="dash-input" placeholder="ej. Pearl Glow Essence"></div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Categoría</label><select class="dash-input"><option>Cuidado de piel</option><option>Fragancias</option><option>Cuidado corporal</option><option>Sets de regalo</option></select></div>
+        <div class="dash-form-group"><label class="dash-label">Precio (€)</label><input class="dash-input" type="number" placeholder="0.00"></div>
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Stock Inicial</label><input class="dash-input" type="number" placeholder="0"></div>
+        <div class="dash-form-group"><label class="dash-label">SKU</label><input class="dash-input" placeholder="SH-XXX"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Descripción</label><textarea class="dash-input" rows="2" placeholder="Descripción breve del producto…" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="addProductModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" onclick="closeModal('addProductModal');showToast('Producto añadido correctamente','success')">Añadir Producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Añadir Tarea -->
+<div class="modal-overlay" id="addTaskModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Nueva Tarea</h3>
+      <button class="modal__close" data-close="addTaskModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group"><label class="dash-label">Título de la Tarea</label><input class="dash-input" id="task-title" placeholder="¿Qué hay que hacer?"></div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Responsable</label><select class="dash-input" id="task-assignee"><option>Elena Ruiz</option><option>Marco Torres</option><option>Sofia Chen</option><option>Lucas Peña</option><option>Anna Kowalski</option></select></div>
+        <div class="dash-form-group"><label class="dash-label">Fecha Límite</label><input class="dash-input" type="date" id="task-date"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Prioridad</label>
+        <select class="dash-input" id="task-priority"><option value="urgent">🔴 Urgente</option><option value="high">🟡 Alta</option><option value="medium" selected>🔵 Media</option><option value="low">⚪ Baja</option></select>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="addTaskModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitTask">Añadir Tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Añadir Miembro -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Añadir Miembro del Equipo</h3>
+      <button class="modal__close" data-close="addMemberModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Nombre</label><input class="dash-input" placeholder="Nombre"></div>
+        <div class="dash-form-group"><label class="dash-label">Apellido</label><input class="dash-input" placeholder="Apellido"></div>
+      </div>
+      <div class="dash-form-group"><label class="dash-label">Email</label><input class="dash-input" type="email" placeholder="nombre@shine-beauty.com"></div>
+      <div class="dash-form-group"><label class="dash-label">Cargo / Puesto</label><input class="dash-input" placeholder="ej. Asistente de Ventas"></div>
+      <div class="dash-form-group"><label class="dash-label">Departamento</label><select class="dash-input"><option>Creativo</option><option>I+D</option><option>Operaciones</option><option>Ventas</option><option>Marketing</option><option>Finanzas</option><option>Logística</option></select></div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="addMemberModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" onclick="closeModal('addMemberModal');showToast('¡Invitación enviada!','success')">Enviar Invitación</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal modal--wide">
+    <div class="modal__header">
+      <h3 id="orderDetailTitle">Order #SH-1047</h3>
+      <button class="modal__close" data-close="orderDetailModal">✕</button>
+    </div>
+    <div class="modal__body" id="orderDetailBody">
+      <!-- Filled by JS -->
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="orderDetailModal">Cerrar</button>
+      <button class="dash-btn dash-btn--rose">Imprimir Factura</button>
+    </div>
+  </div>
+</div>
+
+<!-- Annual Calendar Modal -->
+<div class="modal-overlay" id="annualCalendarModal">
+  <div class="modal modal--fullcal">
+    <div class="modal__header">
+      <h3>📅 Calendario Anual 2026</h3>
+      <button class="modal__close" data-close="annualCalendarModal">✕</button>
+    </div>
+    <div class="modal__body" style="padding:16px">
+      <div class="cal-legend" id="calLegendAnnual" style="margin-bottom:16px"></div>
+      <div class="annual-calendar-grid" id="annualCalendarGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ TOAST STACK ═════ -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ═════ CHAT WIDGET ═════ -->
+<!-- ═════ SPEED DIAL FAB ═════ -->
+<div class="speed-dial" id="speedDial">
+  <div class="speed-dial-actions">
+    <div class="speed-dial-action">
+      <span>Chat del Equipo</span>
+      <button class="sd-btn sd-btn--chat" id="sdChat">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+    <div class="speed-dial-action">
+      <span>Nota Rápida</span>
+      <button class="sd-btn sd-btn--note" id="sdNote">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    </div>
+    <div class="speed-dial-action">
+      <span>Alertar Equipo</span>
+      <button class="sd-btn sd-btn--alert" id="sdAlert">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </button>
+    </div>
+  </div>
+  <button class="sd-main" id="sdMain">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span class="sd-badge">2</span>
+  </button>
+</div>
+
+<!-- ═════ ADMIN: MODAL NUEVO ANUNCIO ═════ -->
+<div class="modal-overlay" id="newAnnouncementModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Nuevo Anuncio</h3>
+      <button class="modal__close" data-close="newAnnouncementModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group">
+        <label class="dash-label">Etiqueta</label>
+        <select class="dash-input" id="anncTag">
+          <option value="new">Nuevo</option>
+          <option value="hr">RRHH</option>
+          <option value="event">Evento</option>
+          <option value="reminder">Recordatorio</option>
+          <option value="info">Info</option>
+        </select>
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Título</label>
+        <input class="dash-input" id="anncTitle" placeholder="Título del anuncio…">
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Detalles (opcional)</label>
+        <textarea class="dash-input" id="anncMessage" rows="3" placeholder="Detalles adicionales…" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="newAnnouncementModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitNewAnnouncement">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ ADMIN: MODAL PROGRAMAR REUNIÓN ═════ -->
+<div class="modal-overlay" id="newMeetingModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Programar Reunión</h3>
+      <button class="modal__close" data-close="newMeetingModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group">
+        <label class="dash-label">Título</label>
+        <input class="dash-input" id="meetingTitle" placeholder="ej. Revisión Semanal de Operaciones">
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group">
+          <label class="dash-label">Fecha</label>
+          <input class="dash-input" id="meetingDate" type="date">
+        </div>
+        <div class="dash-form-group">
+          <label class="dash-label">Hora</label>
+          <input class="dash-input" id="meetingTime" type="time">
+        </div>
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group">
+          <label class="dash-label">Plataforma</label>
+          <select class="dash-input" id="meetingPlatform">
+            <option value="meet">Google Meet</option>
+            <option value="zoom">Zoom</option>
+            <option value="teams">MS Teams</option>
+            <option value="presencial">Presencial</option>
+          </select>
+        </div>
+        <div class="dash-form-group">
+          <label class="dash-label">Color</label>
+          <select class="dash-input" id="meetingColor">
+            <option value="rose">Rosa</option>
+            <option value="blue">Azul</option>
+            <option value="green">Verde</option>
+            <option value="amber">Ámbar</option>
+          </select>
+        </div>
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Asistentes</label>
+        <input class="dash-input" id="meetingAttendees" placeholder="ej. Elena R., Marco T. o Equipo completo">
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="newMeetingModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitNewMeeting">Programar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ ADMIN: MODAL EVENTO DEL CALENDARIO ═════ -->
+<div class="modal-overlay" id="editCalendarModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal__header">
+      <h3>Evento del Calendario</h3>
+      <button class="modal__close" data-close="editCalendarModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group">
+        <label class="dash-label">Título del Evento</label>
+        <input class="dash-input" id="calEvtTitle" placeholder="ej. Fiesta de Lanzamiento de Producto">
+      </div>
+      <div class="dash-grid-2">
+        <div class="dash-form-group">
+          <label class="dash-label">Fecha</label>
+          <input class="dash-input" id="calEvtDate" type="date">
+        </div>
+        <div class="dash-form-group">
+          <label class="dash-label">Color</label>
+          <select class="dash-input" id="calEvtColor">
+            <option value="#D4919A">Rosa</option>
+            <option value="#2563EB">Azul</option>
+            <option value="#16A34A">Verde</option>
+            <option value="#D97706">Ámbar</option>
+            <option value="#7c3aed">Morado</option>
+          </select>
+        </div>
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Eventos Guardados</label>
+        <div id="calEvtList" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="editCalendarModal">Cerrar</button>
+      <button class="dash-btn dash-btn--rose" id="submitCalEvt">Añadir Evento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ MODAL ALERTA AL EQUIPO ═════ -->
+<div class="modal-overlay" id="alertTeamModal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3>Enviar Alerta al Equipo</h3>
+      <button class="modal__close" data-close="alertTeamModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group">
+        <label class="dash-label">Prioridad</label>
+        <div class="alert-priority-grid" id="alertPriorityGrid">
+          <button class="alert-priority-btn active" data-priority="urgent">🔴 Urgente</button>
+          <button class="alert-priority-btn" data-priority="high">🟠 Alta</button>
+          <button class="alert-priority-btn" data-priority="normal">🟡 Normal</button>
+          <button class="alert-priority-btn" data-priority="info">🔵 Info</button>
+        </div>
+      </div>
+      <div class="dash-form-group">
+        <label class="dash-label">Mensaje</label>
+        <textarea class="dash-input" id="alertMessage" rows="4" placeholder="Escribe tu mensaje de alerta aquí…" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="alertTeamModal">Cancelar</button>
+      <button class="dash-btn dash-btn--rose" id="submitAlert">Enviar Alerta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ MODAL NOTA RÁPIDA ═════ -->
+<div class="modal-overlay" id="quickNoteModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal__header">
+      <h3>Nota Rápida</h3>
+      <button class="modal__close" data-close="quickNoteModal">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="dash-form-group">
+        <input class="dash-input" id="noteTitle" placeholder="Título de la nota (opcional)…">
+      </div>
+      <div class="dash-form-group">
+        <textarea class="dash-input" id="noteBody" rows="3" placeholder="Escribe tu nota aquí…" style="resize:vertical"></textarea>
+      </div>
+      <div class="notes-list" id="notesList"></div>
+    </div>
+    <div class="modal__footer">
+      <button class="dash-btn dash-btn--outline" data-close="quickNoteModal">Cerrar</button>
+      <button class="dash-btn dash-btn--rose" id="submitNote">Guardar Nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ PANEL DE CHAT DEL EQUIPO ═════ -->
+<div class="chat-panel-overlay" id="chatPanelOverlay"></div>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel__header">
+    <div class="chat-panel__title">
+      <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Chat del Equipo
+    </div>
+    <button class="chat-panel__close" id="chatPanelClose">✕</button>
+  </div>
+  <div class="chat-panel__messages" id="chatMessages"></div>
+  <div class="chat-panel__input">
+    <input class="dash-input" id="chatInput" placeholder="Escribe un mensaje…" autocomplete="off">
+    <button class="chat-send-btn" id="chatSend">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightboxOverlay" role="dialog" aria-modal="true">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">&times;</button>
+      <img id="lightboxImg" src="" alt="">
+    </div>
+  </div>
+
+  <script src="assets/js/intranet.js"></script>
+</body>
+</html>
