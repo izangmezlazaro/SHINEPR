@@ -24,6 +24,7 @@
 
   const selections = {
     intensidad: null,
+    cantidad: null,
     idFrasco: null,
     base: null,
     notes: []
@@ -235,14 +236,20 @@
 
   function updateReview() {
     const reviewType = document.getElementById('reviewType');
+    const reviewQuantity = document.getElementById('reviewQuantity');
     const reviewBase = document.getElementById('reviewBase');
     const reviewNotes = document.getElementById('reviewNotes');
     const reviewBottle = document.getElementById('reviewBottle');
     const previewComposition = document.getElementById('previewComposition');
 
-    const noteLabels = selections.notes.map(getFraganciaLabel).filter(label => label !== '—');
+    const noteLabels = selections.notes
+      .map(id => notasOlfativas.find(n => Number(n.idNota) === Number(id))?.nombre || getFraganciaLabel(id))
+      .filter(label => label !== '—');
+
+    const cantidadLabel = selections.cantidad ? `${selections.cantidad} ml` : '—';
 
     if (reviewType) reviewType.innerHTML = `<strong>Type:</strong> ${escapeHtml(labelIntensidad(selections.intensidad))}`;
+    if (reviewQuantity) reviewQuantity.innerHTML = `<strong>Quantity:</strong> ${escapeHtml(cantidadLabel)}`;
     if (reviewBase) reviewBase.innerHTML = `<strong>Base:</strong> ${escapeHtml(getFraganciaLabel(selections.base))}`;
     if (reviewNotes) reviewNotes.innerHTML = `<strong>Notes:</strong> ${escapeHtml(noteLabels.length ? noteLabels.join(', ') : '—')}`;
     if (reviewBottle) reviewBottle.innerHTML = `<strong>Bottle:</strong> ${escapeHtml(getFrascoLabel(selections.idFrasco))}`;
@@ -250,6 +257,7 @@
     if (previewComposition) {
       const composition = [
         labelIntensidad(selections.intensidad),
+        cantidadLabel,
         getFraganciaLabel(selections.base),
         ...noteLabels,
         getFrascoLabel(selections.idFrasco),
@@ -266,6 +274,7 @@
     card.classList.add('selected');
 
     if (group === 'type') selections.intensidad = card.dataset.apiValue || intensidadDesdeCard(card);
+    if (group === 'quantity') selections.cantidad = card.dataset.value;
     if (group === 'base') selections.base = Number(card.dataset.apiValue || card.dataset.value);
     if (group === 'bottle') selections.idFrasco = Number(card.dataset.apiValue || card.dataset.value);
   }
@@ -310,9 +319,10 @@
 
   function validarPaso() {
     if (currentStep === 0 && !selections.intensidad) return 'Please select a fragrance type.';
-    if (currentStep === 1 && !selections.base) return 'Please select a base note.';
-    if (currentStep === 2 && !selections.notes.length) return 'Please select at least one note.';
-    if (currentStep === 3 && !selections.idFrasco) return 'Please select a bottle.';
+    if (currentStep === 1 && !selections.cantidad) return 'Please select a size.';
+    if (currentStep === 2 && !selections.base) return 'Please select a base note.';
+    if (currentStep === 3 && !selections.notes.length) return 'Please select at least one note.';
+    if (currentStep === 4 && !selections.idFrasco) return 'Please select a bottle.';
     return '';
   }
 
@@ -441,10 +451,11 @@
       }, true);
     }
 
-    bindCarousel('typeCarousel',   'typePrev',   'typeNext');
-    bindCarousel('baseCarousel',   'basePrev',   'baseNext');
-    bindCarousel('notesCarousel',  'notesPrev',  'notesNext');
-    bindCarousel('bottleCarousel', 'bottlePrev', 'bottleNext');
+    bindCarousel('typeCarousel',     'typePrev',     'typeNext');
+    bindCarousel('quantityCarousel', 'quantityPrev', 'quantityNext');
+    bindCarousel('baseCarousel',     'basePrev',     'baseNext');
+    bindCarousel('notesCarousel',    'notesPrev',    'notesNext');
+    bindCarousel('bottleCarousel',   'bottlePrev',   'bottleNext');
   }
 
   async function cargarOpcionesBackend() {
@@ -457,7 +468,7 @@
       const [frascosData, fraganciasData, notasData] = await Promise.all([
         window.ShineAPI.get('/frascos'),
         window.ShineAPI.get('/fragancias'),
-        window.ShineAPI.get('/fragancias/notas')
+        window.ShineAPI.get('/notas-olfativas')
       ]);
 
       frascos          = Array.isArray(frascosData)    ? frascosData    : [];

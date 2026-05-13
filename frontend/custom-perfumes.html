@@ -58,21 +58,26 @@
           <div class="stepper-line"></div>
           <div class="stepper-step" data-step="1">
             <div class="stepper-circle">2</div>
-            <div class="stepper-label">Base</div>
+            <div class="stepper-label">Quantity</div>
           </div>
           <div class="stepper-line"></div>
           <div class="stepper-step" data-step="2">
             <div class="stepper-circle">3</div>
-            <div class="stepper-label">Notes</div>
+            <div class="stepper-label">Base</div>
           </div>
           <div class="stepper-line"></div>
           <div class="stepper-step" data-step="3">
             <div class="stepper-circle">4</div>
-            <div class="stepper-label">Bottle</div>
+            <div class="stepper-label">Notes</div>
           </div>
           <div class="stepper-line"></div>
           <div class="stepper-step" data-step="4">
             <div class="stepper-circle">5</div>
+            <div class="stepper-label">Bottle</div>
+          </div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step" data-step="5">
+            <div class="stepper-circle">6</div>
             <div class="stepper-label">Review</div>
           </div>
         </div>
@@ -121,8 +126,46 @@
             </div>
           </div>
 
-          <!-- STEP 2: Base Note (rendered dynamically) -->
+          <!-- STEP 2: Quantity -->
           <div class="step-panel" data-panel="1">
+            <div class="step-panel__inner">
+              <h2>Choose Your Size</h2>
+              <p>Select the volume that best suits your needs.</p>
+              <div class="notes-carousel-wrapper mt-xl">
+                <button class="carousel-btn carousel-btn--prev" id="quantityPrev" aria-label="Previous">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="options-carousel" id="quantityCarousel" data-group="quantity" data-mode="single">
+                  <div class="option-card" data-value="50">
+                    <img src="assets/img/types/eau_de_cologne.png" alt="50ml">
+                    <div class="option-card__label">50 ml</div>
+                    <div class="option-card__desc">Travel size</div>
+                  </div>
+                  <div class="option-card" data-value="75">
+                    <img src="assets/img/types/eau_de_toilette.png" alt="75ml">
+                    <div class="option-card__label">75 ml</div>
+                    <div class="option-card__desc">Standard</div>
+                  </div>
+                  <div class="option-card" data-value="100">
+                    <img src="assets/img/types/eau_de_parfum.png" alt="100ml">
+                    <div class="option-card__label">100 ml</div>
+                    <div class="option-card__desc">Full size</div>
+                  </div>
+                  <div class="option-card" data-value="125">
+                    <img src="assets/img/types/elixir.png" alt="125ml">
+                    <div class="option-card__label">125 ml</div>
+                    <div class="option-card__desc">Generous</div>
+                  </div>
+                </div>
+                <button class="carousel-btn carousel-btn--next" id="quantityNext" aria-label="Next">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Base Note (rendered dynamically) -->
+          <div class="step-panel" data-panel="2">
             <div class="step-panel__inner">
               <h2>Select Your Base Note</h2>
               <p>The base note is the foundation of your fragrance &mdash; it lingers longest and anchors the scent.</p>
@@ -140,8 +183,8 @@
             </div>
           </div>
 
-          <!-- STEP 3: Heart & Top Notes (rendered dynamically) -->
-          <div class="step-panel" data-panel="2">
+          <!-- STEP 4: Heart & Top Notes (rendered dynamically) -->
+          <div class="step-panel" data-panel="3">
             <div class="step-panel__inner">
               <h2>Choose Your Notes</h2>
               <p>Select up to 5 notes that will define the character of your fragrance.</p>
@@ -159,8 +202,8 @@
             </div>
           </div>
 
-          <!-- STEP 4: Bottle (rendered dynamically) -->
-          <div class="step-panel" data-panel="3">
+          <!-- STEP 5: Bottle (rendered dynamically) -->
+          <div class="step-panel" data-panel="4">
             <div class="step-panel__inner">
               <h2>Pick Your Bottle</h2>
               <p>Choose the vessel for your unique creation.</p>
@@ -178,8 +221,8 @@
             </div>
           </div>
 
-          <!-- STEP 5: Review -->
-          <div class="step-panel" data-panel="4">
+          <!-- STEP 6: Review -->
+          <div class="step-panel" data-panel="5">
             <div class="step-panel__inner">
               <h2>Review Your Creation</h2>
               <p>Name your fragrance and review your selections before we begin crafting.</p>
@@ -192,6 +235,7 @@
                   <div style="padding:var(--sp-xl);background:var(--petal);border-radius:var(--r-lg);margin-top:var(--sp-lg)">
                     <h4 style="margin-bottom:var(--sp-md)">Your Selections</h4>
                     <div id="reviewType" style="margin-bottom:var(--sp-sm)"><strong>Type:</strong> —</div>
+                    <div id="reviewQuantity" style="margin-bottom:var(--sp-sm)"><strong>Quantity:</strong> —</div>
                     <div id="reviewBase" style="margin-bottom:var(--sp-sm)"><strong>Base:</strong> —</div>
                     <div id="reviewNotes" style="margin-bottom:var(--sp-sm)"><strong>Notes:</strong> —</div>
                     <div id="reviewBottle"><strong>Bottle:</strong> —</div>

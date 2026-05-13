@@ -69,7 +69,7 @@
     <div class="sidebar-section"><span>Gestión</span></div>
     <a class="sidebar-link" data-tab="comite" data-tooltip="Comité">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M5 21c0-3 2.5-5 7-5s7 2 7 5"/><path d="M3 12c1.7-1.5 4.3-2 6.5-2s4.8.5 6.5 2"/></svg>
-      <span>Comité de Empleados</span>
+      <span>Comité de Empresa</span>
     </a>
     <a class="sidebar-link" data-tab="agreements" data-tooltip="Acuerdos">
       <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none"/><path d="M7 7h10v3H7zM7 12h10v2H7zM7 16h7v2H7z"/></svg>
@@ -746,14 +746,40 @@
       </div>
     </div>
 
-    <!-- ══ COMITÉ DE EMPLEADOS ══ -->
+    <!-- ══ COMITÉ DE Empresa ══ -->
     <div class="dash-section" id="sec-comite">
       <div class="dash-card">
-        <div class="dash-card__header"><span class="dash-card__title">Comité de Empleados</span></div>
+        <div class="dash-card__header"><span class="dash-card__title">Comité de Empresa</span></div>
         <div class="dash-card__body">
+          <!-- Vídeo de Bienvenida -->
+          <div class="video-welcome reveal-on-scroll" style="margin-bottom:28px">
+            <div class="video-welcome__inner">
+              <!-- Miniatura / placeholder del vídeo -->
+              <div class="video-thumb" id="videoPlaceholder">
+                <div class="video-thumb__overlay"></div>
+                <div class="video-thumb__play">
+                  <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div class="video-thumb__badge">⏱ 1:30 min</div>
+                <button class="video-thumb__expand" title="Ver en grande" onclick="this.closest('.video-welcome').requestFullscreen?.()">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                </button>
+              </div>
+              <!-- Info lateral -->
+              <div class="video-welcome__info">
+                <div class="video-welcome__tag">Vídeo de bienvenida</div>
+                <h3 class="video-welcome__title">Bienvenido a la Intranet de Shine</h3>
+                <p class="video-welcome__desc">Un recorrido rápido por la intranet a cargo de tu Comité de Empresa — todo lo que necesitas saber sobre este espacio, tus derechos y cómo mantenerte informado.</p>
+                <button class="video-welcome__cta" onclick="document.getElementById('videoPlaceholder').click()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Reproducir vídeo
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="section-block">
             <h3>1.1 Quiénes Somos</h3>
-            <p>En Shine, la comunicación es clave. El Comité de Empleados está formado por compañeros elegidos por todos para actuar como puente oficial entre el personal y la dirección. Su propósito es simple pero vital: garantizar que tus derechos sean respetados y tu voz sea escuchada.</p>
+            <p>En Shine, la comunicación es clave. El Comité de Empresa está formado por compañeros elegidos por todos para actuar como puente oficial entre el personal y la dirección. Su propósito es simple pero vital: garantizar que tus derechos sean respetados y tu voz sea escuchada.</p>
             <ul class="info-list">
               <li><strong>Tu voz ante la Dirección:</strong> El Comité traslada preocupaciones, sugerencias o quejas de forma colectiva, dándoles mucho más peso que el feedback individual.</li>
               <li><strong>Asesoramiento y apoyo:</strong> Si tienes dudas sobre tu salario, contrato o vacaciones, son tus expertos de confianza.</li>
@@ -763,34 +789,30 @@
           </div>
           <div class="org-chart">
             <div class="org-chart__title">Estructura del Comité</div>
+            <!-- Fila 1: cargos obligatorios -->
             <div class="org-chart__row">
               <div class="org-card org-card--top">
-                <img src="assets/img/intranet/persona1.jpg" alt="CEO / Director General" class="org-card__photo">
-                <strong>Dirección</strong><span>CEO / Director General</span>
-              </div>
-            </div>
-            <div class="org-chart__row">
-              <div class="org-card">
                 <img src="assets/img/intranet/persona2.jpg" alt="Presidente" class="org-card__photo">
                 <strong>Presidente</strong><span>Representa a los empleados</span>
               </div>
-              <div class="org-card">
+              <div class="org-card org-card--top">
                 <img src="assets/img/intranet/persona3.jpg" alt="Secretario" class="org-card__photo">
                 <strong>Secretario</strong><span>Comunicaciones y actas</span>
               </div>
             </div>
+            <!-- Fila 2: vocales -->
             <div class="org-chart__row">
               <div class="org-card">
-                <img src="assets/img/intranet/persona4.jpg" alt="Delegado de Calidad" class="org-card__photo">
-                <strong>Delegado de Calidad</strong><span>Seguridad y salud</span>
+                <img src="assets/img/intranet/persona1.jpg" alt="Vocal de PRL" class="org-card__photo">
+                <strong>Vocal de PRL</strong><span>Seguridad y salud laboral</span>
               </div>
               <div class="org-card">
-                <img src="assets/img/intranet/persona5.jpg" alt="Delegado de Igualdad" class="org-card__photo">
-                <strong>Delegado de Igualdad</strong><span>Bienestar e inclusión</span>
+                <img src="assets/img/intranet/persona4.jpg" alt="Vocal de Igualdad" class="org-card__photo">
+                <strong>Vocal de Igualdad</strong><span>Igualdad y no discriminación</span>
               </div>
               <div class="org-card">
-                <img src="assets/img/intranet/persona6.jpg" alt="Delegado Financiero" class="org-card__photo">
-                <strong>Delegado Financiero</strong><span>Acuerdos y condiciones</span>
+                <img src="assets/img/intranet/persona5.jpg" alt="Vocal de Relaciones Laborales" class="org-card__photo">
+                <strong>Vocal de Relaciones Laborales</strong><span>Horarios, turnos y vacaciones</span>
               </div>
             </div>
           </div>
@@ -807,7 +829,7 @@
           <!-- 1.4 Logros del Comité (estilo noticias) -->
           <div class="section-block" style="margin-top:24px">
             <h3>1.4 Logros Recientes</h3>
-            <p>Acuerdos clave que el Comité de Empleados ha conseguido para el equipo.</p>
+            <p>Acuerdos clave que el Comité de Empresa ha conseguido para el equipo.</p>
           </div>
           <div class="news-grid reveal-on-scroll">
             <div class="news-card">
@@ -848,27 +870,6 @@
             </div>
           </div>
 
-          <!-- 2. Vídeo de Bienvenida -->
-          <div class="video-welcome reveal-on-scroll" style="margin-top:24px">
-            <div class="video-welcome__header">
-              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <h3>Bienvenido a la Intranet</h3>
-            </div>
-            <div class="video-welcome__body">
-              <div class="video-placeholder" id="videoPlaceholder">
-                <div class="video-play-btn">
-                  <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </div>
-                <span>Haz clic para reproducir el vídeo de bienvenida</span>
-              </div>
-              <div class="video-info">
-                <h4>🎬 Bienvenida del Comité</h4>
-                <p>Un recorrido rápido por la intranet a cargo de tu Comité de Empleados — todo lo que necesitas saber sobre este espacio, tus derechos y cómo mantenerte informado.</p>
-                <div class="video-duration">⏱ Duración: 1:30 min</div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
@@ -887,7 +888,7 @@
               <p class="ag-legal-desc">Principales referencias legales que se aplican a tu trabajo: el convenio colectivo de la empresa, el Estatuto de los Trabajadores y las normativas clave de salud y seguridad.</p>
               <div class="ag-legal-pill">
                 <svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Documentos legales completos disponibles en la sección <strong>Documentos e Info</strong>
+                Documentos legales completos disponibles en la sección <strong data-goto="documents-info" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">Documentos e Info</strong>
               </div>
             </div>
           </div>
@@ -970,7 +971,7 @@
           </div>
           <div class="ag-legal-pill" style="margin-top:16px;display:inline-flex">
             <svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Documentos legales completos disponibles en la sección <strong>Documentos e Info</strong>
+            Documentos legales completos disponibles en la sección <strong data-goto="documents-info" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">Documentos e Info</strong>
           </div>
 
         </div>
@@ -983,7 +984,7 @@
         <div class="dash-card__header"><span class="dash-card__title">Objetivos 2026</span><span class="status status--active">4 En Curso</span></div>
         <div class="dash-card__body">
           <div class="section-block">
-            <p>El Comité de Empleados ha definido los objetivos prioritarios para 2026 orientados a mejorar las condiciones laborales y el bienestar de toda la plantilla.</p>
+            <p>El Comité de Empresa ha definido los objetivos prioritarios para 2026 orientados a mejorar las condiciones laborales y el bienestar de toda la plantilla.</p>
           </div>
           <div class="objectives-grid">
             <div class="objective-card">
@@ -1059,35 +1060,35 @@
                 <div class="document-title">📄 Convenio Colectivo</div>
                 <div class="document-desc">Términos clave, derechos y condiciones laborales que aplican en nuestra empresa.</div>
               </div>
-              <a href="docs/convenio-colectivo.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+              <a href="docs/convenio-colectivo.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
             <div class="document-item">
               <div>
                 <div class="document-title">📜 Estatuto de los Trabajadores</div>
                 <div class="document-desc">Derechos laborales fundamentales y protecciones establecidas por la legislación española.</div>
               </div>
-              <a href="docs/estatuto-trabajadores.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+              <a href="docs/estatuto-trabajadores.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
             <div class="document-item">
               <div>
                 <div class="document-title">⚠️ Riesgos Laborales (PRL)</div>
                 <div class="document-desc">Obligaciones de salud y seguridad en el trabajo y prevención de riesgos laborales.</div>
               </div>
-              <a href="docs/prl.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+              <a href="docs/prl.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
             <div class="document-item">
               <div>
                 <div class="document-title">⚠️ Riesgos Laborales — PRL Reducida</div>
                 <div class="document-desc">Versión resumida de la PRL con los puntos esenciales de prevención de riesgos laborales.</div>
               </div>
-              <a href="docs/prl-reducida.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+              <a href="docs/prl-reducida.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
             <div class="document-item">
               <div>
                 <div class="document-title">🌍 Plan de Igualdad</div>
                 <div class="document-desc">Compromisos de la empresa con la igualdad de género y políticas de no discriminación.</div>
               </div>
-              <a href="docs/plan-igualdad.pdf" download class="dash-btn dash-btn--outline">Descargar</a>
+              <a href="docs/plan-igualdad.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
           </div>
         </div>
