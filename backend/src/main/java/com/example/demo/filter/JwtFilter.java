@@ -41,6 +41,12 @@ public class JwtFilter implements Filter {
         HttpServletRequest  req  = (HttpServletRequest)  request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
+        // Las solicitudes OPTIONS (preflight) siempre pasan sin JWT
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (isPublicRoute(req)) {
             chain.doFilter(request, response);
             return;

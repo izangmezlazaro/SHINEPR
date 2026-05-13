@@ -52,6 +52,9 @@ public class Main {
         addServlet(ctx, tomcat, "FrascoServlet",         FrascoServlet.class,        "/api/v1/frascos/*");
         addServlet(ctx, tomcat, "PerfumeCustomServlet",  PerfumeCustomServlet.class, "/api/v1/perfumes-custom/*");
         addServlet(ctx, tomcat, "NotaOlfativaServlet",   NotaOlfativaServlet.class,  "/api/v1/notas-olfativas/*");
+        addServlet(ctx, tomcat, "AnuncioServlet",        AnuncioServlet.class,       "/api/v1/anuncios/*");
+        addServlet(ctx, tomcat, "FichajeServlet",        FichajeServlet.class,       "/api/v1/fichajes/*");
+        addServlet(ctx, tomcat, "ReunionServlet",        ReunionServlet.class,       "/api/v1/reuniones/*");
 
         tomcat.start();
         System.out.println("╔════════════════════════════════════════════╗");

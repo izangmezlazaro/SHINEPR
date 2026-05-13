@@ -39,18 +39,24 @@ public class CorsFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         String origin = req.getHeader("Origin");
+        String method = req.getMethod();
+
+        // Log para diagnóstico (solo en desarrollo)
+        if (origin != null) {
+            System.out.println("[CorsFilter] " + method + " desde " + origin + " -> " + req.getRequestURI());
+        }
 
         if (isAllowedOrigin(origin)) {
-            resp.setHeader("Access-Control-Allow-Origin",      origin);
+            resp.setHeader("Access-Control-Allow-Origin",      origin != null ? origin : "*");
             resp.setHeader("Access-Control-Allow-Credentials", "true");
             resp.setHeader("Access-Control-Allow-Methods",     "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-            resp.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization");
+            resp.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization, X-Requested-With");
             resp.setHeader("Access-Control-Expose-Headers",    "Authorization");
             resp.setHeader("Vary",                             "Origin");
         }
 
-        // Preflight OPTIONS → responder 200 directamente sin pasar al Servlet
-        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+        // Preflight OPTIONS → responder 200 directamente sin pasar al resto de la cadena
+        if ("OPTIONS".equalsIgnoreCase(method)) {
             resp.setStatus(HttpServletResponse.SC_OK);
             return;
         }
@@ -62,7 +68,13 @@ public class CorsFilter implements Filter {
     public void destroy() {}
 
     private boolean isAllowedOrigin(String origin) {
-        if (origin == null) return false;
+        if (origin == null) return true; // Permitir peticiones directas (curl, postman)
+        
+        // Permitir cualquier origen local en desarrollo
+        if (origin.contains("localhost") || origin.contains("127.0.0.1")) {
+            return true;
+        }
+
         for (String allowed : ALLOWED_ORIGINS) {
             if (allowed.equals(origin)) return true;
         }

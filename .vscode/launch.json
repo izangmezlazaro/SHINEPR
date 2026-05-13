@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Shine Backend (Debug)",
+            "request": "launch",
+            "mainClass": "com.example.demo.Main",
+            "projectName": "demo",
+            "cwd": "${workspaceFolder}/backend",
+            "env": {
+                "JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
+            }
+        }
+    ]
+}

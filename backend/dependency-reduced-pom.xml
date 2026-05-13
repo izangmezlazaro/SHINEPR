@@ -15,17 +15,6 @@
         <configuration>
           <release>17</release>
           <encoding>UTF-8</encoding>
-          <excludes>
-            <exclude>com/example/demo/DemoApplication.java</exclude>
-            <exclude>com/example/demo/CorsConfig.java</exclude>
-            <exclude>com/example/demo/controller/**</exclude>
-            <exclude>com/example/demo/security/SecurityConfig.java</exclude>
-            <exclude>com/example/demo/security/JwtAuthFilter.java</exclude>
-            <exclude>com/example/demo/security/AuthenticatedUser.java</exclude>
-            <exclude>com/example/demo/repository/**</exclude>
-            <exclude>com/example/demo/exception/GlobalExceptionHandler.java</exclude>
-            <exclude>com/example/demo/entity/PerfumeCustomFraganciaId.java</exclude>
-          </excludes>
         </configuration>
       </plugin>
       <plugin>
@@ -57,6 +46,14 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <mainClass>com.example.demo.Main</mainClass>
+        </configuration>
       </plugin>
     </plugins>
   </build>
