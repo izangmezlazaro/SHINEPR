@@ -65,7 +65,16 @@ public class ProductoService {
         try {
             Producto producto = new Producto();
             aplicarDatos(producto, request);
-            return toResponse(productoDAO.save(producto));
+            Producto saved = productoDAO.save(producto);
+            // Save image if provided
+            if (request.getImagenUrl() != null && !request.getImagenUrl().isBlank()) {
+                ImagenProducto img = new ImagenProducto();
+                img.setProducto(saved);
+                img.setUrl(request.getImagenUrl());
+                img.setDescripcion(saved.getNombre());
+                imagenDAO.save(img);
+            }
+            return toResponse(saved);
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 

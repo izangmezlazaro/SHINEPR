@@ -109,11 +109,19 @@ public class CarritoService {
     CarritoItemResponseDTO toItemDto(CarritoItem item) {
         BigDecimal precio = obtenerPrecioUnitario(item);
         BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(item.getCantidad()));
+        String imagenUrl = null;
+        if (item.getProducto() != null) {
+            try {
+                var imgs = new com.example.demo.dao.ImagenProductoDAO()
+                        .findByProductoId(item.getProducto().getIdProducto());
+                if (!imgs.isEmpty()) imagenUrl = imgs.get(0).getUrl();
+            } catch (Exception ignored) {}
+        }
         return new CarritoItemResponseDTO(
             item.getId(),
             item.getProducto() != null ? item.getProducto().getIdProducto() : null,
             item.getPerfumeCustom() != null ? item.getPerfumeCustom().getIdPerfCust() : null,
-            obtenerNombreItem(item), item.getCantidad(), precio, subtotal);
+            obtenerNombreItem(item), imagenUrl, item.getCantidad(), precio, subtotal);
     }
 
     BigDecimal obtenerPrecioUnitario(CarritoItem item) {

@@ -29,7 +29,7 @@ public class FichajeDAO {
 
     public List<Fichaje> findByFecha(LocalDate fecha) throws SQLException {
         String sql = "SELECT id, empleado_email, empleado_nombre, tipo, fecha_hora " +
-                     "FROM fichaje WHERE fecha_hora::date = ? ORDER BY fecha_hora ASC";
+                     "FROM fichaje WHERE CAST(fecha_hora AS date) = ? ORDER BY fecha_hora ASC";
         List<Fichaje> list = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

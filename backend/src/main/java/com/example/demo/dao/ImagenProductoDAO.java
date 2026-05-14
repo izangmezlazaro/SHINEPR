@@ -51,4 +51,19 @@ public class ImagenProductoDAO {
         img.setDescripcion(rs.getString("descripcion"));
         return img;
     }
+
+    public ImagenProducto save(ImagenProducto img) throws SQLException {
+        String sql = "INSERT INTO imagen_producto (id_producto, url, descripcion) VALUES (?, ?, ?) RETURNING id_imagen";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, img.getProducto().getIdProducto());
+            ps.setString(2, img.getUrl());
+            ps.setString(3, img.getDescripcion());
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                img.setIdImagen(rs.getInt(1));
+            }
+        }
+        return img;
+    }
 }
