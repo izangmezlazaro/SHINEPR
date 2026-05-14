@@ -129,7 +129,8 @@
         successBox?.classList.add('show');
         const guestCart = JSON.parse(localStorage.getItem('shineGuestCart') || '[]');
         setTimeout(() => {
-          window.location.href = guestCart.length > 0 ? 'cart.html' : 'index.html';
+          // New users go through beauty quiz; users with cart items go to cart
+          window.location.href = guestCart.length > 0 ? 'cart.html' : 'beauty-quiz.html';
         }, 700);
       } catch (error) {
         showError(errorBox, errorText, error.message || 'Could not create the account.');

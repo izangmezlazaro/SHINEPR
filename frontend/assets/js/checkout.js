@@ -84,40 +84,45 @@
 
   function showBizumModal({ pedido, pago, puntosGanados, puntosTotal }) {
     document.getElementById('bizumPaymentModal')?.remove();
+    document.body.style.overflow = 'hidden';
 
     const pointsBadge = puntosGanados > 0
-      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:var(--petal);border-radius:var(--r-md);padding:var(--sp-sm) var(--sp-md);margin-bottom:var(--sp-lg);font-size:var(--fs-sm)">
-           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-           <span style="color:var(--rose);font-weight:700">+${puntosGanados} points earned</span>
+      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:var(--petal);border-radius:999px;padding:6px 14px;margin-bottom:var(--sp-lg);font-size:var(--fs-sm);border:1px solid rgba(212,145,154,.25)">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--rose)" stroke="var(--rose)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+           <span style="color:var(--rose);font-weight:700">+${puntosGanados} puntos ganados</span>
            ${puntosTotal != null ? `<span style="color:var(--text-muted)">· ${puntosTotal} total</span>` : ''}
          </div>`
       : '';
 
     const modal = document.createElement('div');
     modal.id = 'bizumPaymentModal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(18,18,18,.45);display:flex;align-items:center;justify-content:center;padding:24px';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(12,12,12,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
     modal.innerHTML = `
-      <div style="max-width:420px;width:100%;background:var(--surface);border-radius:var(--r-lg);box-shadow:0 24px 70px rgba(0,0,0,.22);padding:var(--sp-2xl);text-align:center">
-        <div style="width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--petal);color:var(--rose);margin:0 auto var(--sp-lg)">
-          ${CHECK_SVG}
+      <div style="max-width:400px;width:100%;background:#fff;border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.28);padding:40px 32px 32px;text-align:center;position:relative">
+        <div style="width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:var(--petal);margin:0 auto 20px;box-shadow:0 0 0 12px rgba(212,145,154,.12)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3 style="margin-bottom:var(--sp-sm)">Order confirmed!</h3>
-        <p class="text-sm text-muted" style="margin:0 0 var(--sp-md)">
-          Order #${escapeHtml(pedido.idPedido)} confirmed. Payment processed via Bizum. Your order is being prepared.
+        <h3 style="margin:0 0 8px;font-size:1.5rem;color:#1a1a1a">¡Pedido confirmado!</h3>
+        <p style="margin:0 0 16px;font-size:.9rem;color:#888;line-height:1.5">
+          Pedido <strong style="color:#444">#${escapeHtml(pedido.idPedido)}</strong> procesado mediante Bizum.<br>Tu pedido está siendo preparado.
         </p>
         ${pointsBadge}
-        <div style="display:flex;gap:var(--sp-sm);justify-content:center">
-          <button class="btn btn--primary" id="bizumOrdersBtn" type="button" style="flex:1">View my orders</button>
-          <button class="btn btn--outline" id="bizumDoneBtn" type="button" style="flex:1">Home</button>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <button class="btn btn--primary" id="bizumOrdersBtn" type="button" style="width:100%;padding:14px">Ver mis pedidos</button>
+          <button class="btn btn--outline" id="bizumDoneBtn" type="button" style="width:100%;padding:14px">Volver al inicio</button>
         </div>
       </div>
     `;
     document.body.appendChild(modal);
 
+    const cleanup = () => { document.body.style.overflow = ''; };
+
     document.getElementById('bizumOrdersBtn')?.addEventListener('click', () => {
+      cleanup();
       window.location.href = 'orders.html';
     });
     document.getElementById('bizumDoneBtn')?.addEventListener('click', () => {
+      cleanup();
       window.location.href = 'index.html';
     });
   }
