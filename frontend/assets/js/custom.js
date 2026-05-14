@@ -277,7 +277,7 @@
     lines.forEach((line, index) => line.classList.toggle('filled', index < currentStep));
 
     if (prevBtn) prevBtn.disabled = currentStep === 0;
-    if (nextBtn) nextBtn.textContent = currentStep === panels.length - 1 ? 'Crear y añadir al carrito' : 'Next Step';
+    if (nextBtn) nextBtn.textContent = currentStep === panels.length - 1 ? 'Create & Add to Cart' : 'Next Step';
   }
 
   function updateReview() {
@@ -473,9 +473,17 @@
       }
     }, true);
 
+    let typingTimer;
     nameInput?.addEventListener('input', () => {
       const previewLabel = document.getElementById('previewLabel');
       if (previewLabel) previewLabel.textContent = nameInput.value || 'Your Fragrance';
+      
+      clearTimeout(typingTimer);
+      if (nameInput.value.trim().length > 0) {
+        typingTimer = setTimeout(() => {
+          document.getElementById('btnGenerarAI')?.click();
+        }, 1500);
+      }
     });
 
     updateStepper();
@@ -536,6 +544,113 @@
     }
   }
 
+  function setupGeneradorIA() {
+    const btnGenerar = document.getElementById('btnGenerarAI');
+    const previewImagen = document.getElementById('previewImagen');
+
+    if (!btnGenerar || !previewImagen) return;
+
+    btnGenerar.addEventListener('click', async () => {
+      // 1. Capturar los valores actuales del estado 'selections'
+      const tipo = selections.intensidad || '';
+      const base = selections.base ? getFraganciaLabel(selections.base) : '';
+      const notas = selections.notes.map(getFraganciaLabel).join(', ');
+      const frascoObj = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
+      const frasco = frascoObj ? `${frascoObj.forma} (${frascoObj.capacidadMl}ml)` : '';
+      const formaElegida = frascoObj ? frascoObj.forma : 'elegant';
+      const nombreUsuario = document.getElementById('perfumeName')?.value.trim() || 'Shine Custom';
+
+      if (!tipo && !base && !notas && !frasco) {
+        showToast('Please select some options first.');
+        return;
+      }
+
+      const textoOriginalBoton = btnGenerar.innerText;
+
+      // 2. Estado de "Cargando"
+      btnGenerar.disabled = true;
+      btnGenerar.innerText = "✨ Designing luxury set...";
+      previewImagen.style.transition = "all 0.5s ease";
+      previewImagen.style.animation = "pulseAnimation 1.5s infinite ease-in-out";
+      previewImagen.style.filter = "drop-shadow(0 0 10px rgba(212, 175, 55, 0.5))";
+      
+      if (!document.getElementById('pulseKeyframes')) {
+        const style = document.createElement('style');
+        style.id = 'pulseKeyframes';
+        style.innerHTML = `
+          @keyframes pulseAnimation {
+            0% { opacity: 0.6; transform: scale(0.98); filter: blur(2px); }
+            50% { opacity: 1; transform: scale(1.02); filter: blur(0px); }
+            100% { opacity: 0.6; transform: scale(0.98); filter: blur(2px); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      try {
+        // 3. Preparar los datos usando URLSearchParams
+        const params = new URLSearchParams();
+        params.append('tipo', labelIntensidad(tipo));
+        params.append('base', base);
+        params.append('notas', notas);
+        params.append('frasco', frasco);
+        params.append('formaElegida', formaElegida);
+        params.append('nombreUsuario', nombreUsuario);
+
+        // 4. Petición POST a la ruta /api/generar-custom
+        // Usamos la API del backend asumiendo que ShineAPI.post acepta FormData/URLSearchParams 
+        // o hacemos fetch directamente para tener control total de los headers
+        const response = await fetch('http://localhost:8080/api/generar-custom', {
+          method: 'POST',
+          body: params,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 5. Extraer la imagen (ya sea URL o base64)
+        if (data && data.data && data.data.length > 0) {
+          const item = data.data[0];
+          const nuevaUrlImagen = item.url ? item.url : (item.b64_json ? "data:image/png;base64," + item.b64_json : null);
+
+          if (!nuevaUrlImagen) {
+            throw new Error('AI did not return any valid image');
+          }
+
+          // 6. Restaurar inmediatamente sin esperar al onload por si hay bloqueadores
+          previewImagen.style.animation = "none";
+          previewImagen.style.filter = "none";
+          previewImagen.style.transform = "scale(1)";
+          previewImagen.src = nuevaUrlImagen;
+          previewImagen.style.opacity = "1";
+          btnGenerar.disabled = false;
+          btnGenerar.innerText = textoOriginalBoton;
+          showToast('Design generated successfully!');
+        } else {
+            throw new Error('Invalid AI response format');
+        }
+
+      } catch (error) {
+        console.error("Error generating image:", error);
+        alert("✨ We're sorry, there was a problem generating your exclusive design. Please try again in a few moments.");
+        
+        // Restaurar estado
+        previewImagen.style.animation = "none";
+        previewImagen.style.filter = "none";
+        previewImagen.style.transform = "scale(1)";
+        previewImagen.style.opacity = "1";
+        btnGenerar.disabled = false;
+        btnGenerar.innerText = textoOriginalBoton;
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('stepperPanels')) return;
 
@@ -543,6 +658,7 @@
     setupSelections();
     setupStepper();
     setupCarousel();
+    setupGeneradorIA();
     cargarOpcionesBackend();
     updateTypePriceReveals();
   });

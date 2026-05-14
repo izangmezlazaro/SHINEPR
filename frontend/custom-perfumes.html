@@ -288,7 +288,10 @@
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp-2xl);background:var(--petal);border-radius:var(--r-lg);text-align:center">
                   <div style="font-family:var(--font-heading);font-size:var(--fs-xl);margin-bottom:var(--sp-sm)" id="previewLabel">Your Fragrance</div>
                   <div class="text-sm text-muted" id="previewComposition">—</div>
-                  <img src="assets/img/product-perfume.png" alt="Perfume preview" style="max-height:200px;margin-top:var(--sp-lg);border-radius:var(--r-md)">
+                  <img src="assets/img/product-perfume.png" id="previewImagen" alt="Perfume preview" style="max-height:200px;margin-top:var(--sp-lg);border-radius:var(--r-md); transition: opacity 0.3s ease;">
+                  <button class="btn btn--outline" id="btnGenerarAI" type="button" style="margin-top: var(--sp-lg); width: 100%;">
+                    ✨ Generate AI Design
+                  </button>
                 </div>
               </div>
             </div>

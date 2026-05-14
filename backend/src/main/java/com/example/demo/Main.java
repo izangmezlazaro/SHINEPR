@@ -63,6 +63,7 @@ public class Main {
         addServlet(ctx, tomcat, "ReunionServlet",        ReunionServlet.class,          "/api/v1/reuniones/*");
         addServlet(ctx, tomcat, "UsuarioServlet",        UsuarioServlet.class,          "/api/v1/usuarios/*");
         addServlet(ctx, tomcat, "IntranetPedidoServlet", IntranetPedidoServlet.class,   "/api/v1/intranet/pedidos/*");
+        addServlet(ctx, tomcat, "GenerarCustomServlet",  GenerarCustomServlet.class, "/api/generar-custom/*");
 
         runMigrations();
 
