@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="light" data-role="empleado">
 <head>
   <meta charset="UTF-8">
@@ -482,10 +482,10 @@
     <div class="dash-section" id="sec-dashboard">
 
       <div class="quick-actions">
-        <button class="quick-action" data-goto="orders" id="qNewOrder">
+        <button class="quick-action admin-only" data-goto="orders" id="qNewOrder">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo Pedido
         </button>
-        <button class="quick-action" data-goto="catalogue">
+        <button class="quick-action admin-only" data-goto="catalogue">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Producto
         </button>
         <button class="quick-action" data-goto="agreements">
@@ -627,7 +627,7 @@
       <div class="dash-card">
         <div class="dash-card__header">
           <span class="dash-card__title">Todos los Pedidos</span>
-          <button class="dash-btn dash-btn--rose" id="openNewOrderModal">
+          <button class="dash-btn dash-btn--rose admin-only" id="openNewOrderModal">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nuevo Pedido
           </button>
         </div>
@@ -657,7 +657,7 @@
       <div class="dash-card">
         <div class="dash-card__header">
           <span class="dash-card__title">Catálogo de Productos</span>
-          <button class="dash-btn dash-btn--rose" id="openAddProductModal">
+          <button class="dash-btn dash-btn--rose admin-only" id="openAddProductModal">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Producto
           </button>
         </div>
