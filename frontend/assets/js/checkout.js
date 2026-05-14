@@ -199,7 +199,11 @@
       const name = item.nombre || item.name || 'Producto Shine';
       const qty = getItemQty(item);
       const subtotal = getItemSubtotal(item);
-      const img = item.imagen || item.imagenUrl || item.image || 'assets/img/product-bodyoil.png';
+      let img = item.imagen || item.imagenUrl || item.image || 'assets/img/product-bodyoil.png';
+      if (item.idPerfCust) {
+        const cached = sessionStorage.getItem('custom_img_' + item.idPerfCust);
+        if (cached) img = cached;
+      }
 
       return `
         <div class="co-summary-item">

@@ -62,7 +62,7 @@ function goToTab(tab) {
   if (tab === 'objectives-2026') animateProgressBars();
   if (tab === 'admin-fichajes' && typeof window.loadFichajesAdmin === 'function') window.loadFichajesAdmin();
   if (tab === 'catalogue' && typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
-  if (tab === 'orders') window.loadIntranetOrders();
+  if (tab === 'orders' && typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
 }
 
 links.forEach(l => l.addEventListener('click', () => goToTab(l.dataset.tab)));
@@ -1544,6 +1544,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (dateFilter) dateFilter.addEventListener('change', loadFichajesAdmin);
     loadFichajesAdmin();
+
+    // ── Auto-refresh: Fichajes y Pedidos cada 30s ──
+    setInterval(() => {
+      if (typeof window.loadFichajesAdmin === 'function') window.loadFichajesAdmin();
+      if (typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
+    }, 30000);
+
+    // Preload orders data at startup
+    if (typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
 
     // Export fichajes CSV
     const exportFichajes = document.getElementById('exportFichajesCSV');

@@ -251,18 +251,18 @@
 .qz-opts {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .qz-opt {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 18px;
+  padding: 20px 24px;
   background: rgba(255,255,255,.55);
   backdrop-filter: blur(12px);
   border: 1.5px solid rgba(212,145,154,.06);
-  border-radius: 14px;
+  border-radius: 16px;
   cursor: pointer;
   text-align: left;
   transition: all .35s cubic-bezier(.22,1,.36,1);
@@ -305,8 +305,8 @@
 }
 
 .qz-opt-svg {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   stroke: var(--rose);
   fill: none;
@@ -319,8 +319,8 @@
 .qz-opt.selected .qz-opt-svg { stroke: var(--rose); transform: scale(1.1); }
 
 .qz-opt div { flex: 1; }
-.qz-opt strong { display: block; font-size: .92rem; color: var(--noir); margin-bottom: 1px; }
-.qz-opt span { font-size: .76rem; color: var(--text-muted); }
+.qz-opt strong { display: block; font-size: 1rem; color: var(--noir); margin-bottom: 2px; }
+.qz-opt span { font-size: .82rem; color: var(--text-muted); }
 
 /* ── KIT PHASE ───────────────────────── */
 .kit {

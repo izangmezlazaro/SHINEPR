@@ -10,10 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
 
-/**
- * Utilidad JWT sin Spring. Singleton inicializado en la primera carga de clase.
- * Lee la configuración desde AppConfig (db.properties / variables de entorno).
- */
+
 public final class JwtUtil {
 
     private static final JwtUtil INSTANCE = new JwtUtil();
