@@ -453,8 +453,11 @@
 
     configurarFiltros();
 
-    // Read ?category= from URL
-    const urlCategory = new URLSearchParams(window.location.search).get('category');
+    const params       = new URLSearchParams(window.location.search);
+    const urlCategory  = params.get('category');
+    const urlSubcat    = params.get('subcategory'); // e.g. "luxury"
+
+    // Apply ?category= — highlight the sidebar item
     if (urlCategory) {
       filtroCategoria = urlCategory;
       const categoryGroup = document.querySelector('#shopFilters .filter-group');
@@ -466,9 +469,32 @@
       }
     }
 
-    // Load subcategories and products in parallel
-    cargarSubcategorias();
-    cargarProductos();
+    // Load subcategories and products; then auto-select ?subcategory= if present
+    Promise.all([cargarSubcategorias(), cargarProductos()]).then(() => {
+      if (!urlSubcat) return;
+
+      // Find and click the matching subcategory filter chip in the sidebar
+      const normalizado = urlSubcat.trim().toLowerCase();
+      const categoryList = document.querySelector('#shopFilters .filter-group__list');
+      if (!categoryList) return;
+
+      // First, open subcategories for the active category by clicking its parent item
+      const activeCatItem = categoryList.querySelector(`.filter-item[data-filter="${urlCategory}"]`);
+      if (activeCatItem) {
+        // Open the subcategory drawer if not already open
+        if (!categoryList.querySelector('.filter-subcategory')) {
+          activeCatItem.click();
+        }
+      }
+
+      // Now find the subcategory chip whose text matches the URL param
+      const subItems = categoryList.querySelectorAll('.filter-item--sub');
+      subItems.forEach(sub => {
+        if (sub.textContent.trim().toLowerCase() === normalizado) {
+          sub.click();
+        }
+      });
+    });
   });
 
   window.ShineProductCache = {
