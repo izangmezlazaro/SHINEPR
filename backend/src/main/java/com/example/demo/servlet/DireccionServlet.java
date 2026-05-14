@@ -68,9 +68,13 @@ public class DireccionServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            Integer userId = HttpUtil.getAuthUserId(req);
+            if (userId == null) { HttpUtil.writeError(resp, 401, "No autenticado"); return; }
             int id = HttpUtil.extractId(req.getPathInfo());
-            direccionService.eliminar(id);
+            direccionService.eliminar(id, userId);
             resp.setStatus(204);
+        } catch (BadRequestException e) {
+            HttpUtil.writeError(resp, 403, e.getMessage());
         } catch (EntityNotFoundException e) {
             HttpUtil.writeError(resp, 404, e.getMessage());
         } catch (Exception e) {

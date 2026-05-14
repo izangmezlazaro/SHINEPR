@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class DireccionService {
 
+    private static final int MAX_ADDRESSES = 3;
+
     private final DireccionDAO direccionDAO;
     private final UsuarioDAO   usuarioDAO;
 
@@ -32,6 +34,13 @@ public class DireccionService {
         try {
             Usuario usuario = usuarioDAO.findById(request.getIdUsuario())
                     .orElseThrow(() -> new EntityNotFoundException("Usuario", request.getIdUsuario()));
+
+            // Enforce maximum of 3 addresses per user
+            int count = direccionDAO.findByUsuarioId(request.getIdUsuario()).size();
+            if (count >= MAX_ADDRESSES) {
+                throw new BadRequestException("Has alcanzado el máximo de " + MAX_ADDRESSES + " direcciones. Elimina una antes de añadir otra.");
+            }
+
             Direccion d = new Direccion();
             d.setUsuario(usuario);
             d.setCalle(request.getCalle());
@@ -59,6 +68,18 @@ public class DireccionService {
         try {
             direccionDAO.findById(idDireccion)
                     .orElseThrow(() -> new EntityNotFoundException("Direccion", idDireccion));
+            direccionDAO.delete(idDireccion);
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    /** Delete with ownership verification — user can only delete their own addresses */
+    public void eliminar(Integer idDireccion, Integer idUsuario) {
+        try {
+            Direccion d = direccionDAO.findById(idDireccion)
+                    .orElseThrow(() -> new EntityNotFoundException("Direccion", idDireccion));
+            if (!d.getUsuario().getId().equals(idUsuario)) {
+                throw new BadRequestException("La direccion no pertenece al usuario indicado");
+            }
             direccionDAO.delete(idDireccion);
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
