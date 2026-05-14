@@ -973,6 +973,30 @@ main { padding-top: var(--header-h); }
   color: var(--noir);
 }
 
+.filter-item--has-sub { position: relative; padding-right: calc(var(--sp-md) + 14px); }
+.filter-item--has-sub::after {
+  content: '›';
+  position: absolute;
+  right: var(--sp-md);
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform var(--t-fast);
+  font-size: 1rem;
+  line-height: 1;
+}
+.filter-item--has-sub.expanded::after { transform: translateY(-50%) rotate(90deg); }
+
+.filter-subcategory { overflow: hidden; }
+.filter-item--sub {
+  padding-left: calc(var(--sp-md) + var(--sp-sm));
+  font-size: calc(var(--fs-sm) * 0.92);
+  opacity: 0.75;
+}
+.filter-item--sub:hover, .filter-item--sub.active {
+  opacity: 1;
+  background: color-mix(in srgb, var(--blush) 60%, transparent);
+}
+
 .shop-toolbar {
   display: flex;
   justify-content: space-between;
