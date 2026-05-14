@@ -3,7 +3,7 @@
 // ============================================
 
 (function () {
-  const FALLBACK_IMAGE = 'assets/img/product-perfume.png';
+  const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const PRODUCT_CACHE_KEY = 'shine:productos:v2'; // must match productos.js
   const PRODUCT_CACHE_TTL = 10 * 60 * 1000;
 
@@ -58,6 +58,13 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  function isPerfume(producto) {
+    const catName = String(producto.categoria?.nombre || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const prodName = String(producto.nombre || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return catName.includes('frag') || catName.includes('perfume') || catName.includes('fragancia')
+        || prodName.includes('perfume') || prodName.includes('fragancia');
   }
 
   function formatCurrency(value) {
@@ -213,6 +220,11 @@
       addButton.disabled = Number(producto.stock) <= 0;
       addButton.textContent = Number(producto.stock) <= 0 ? 'Out of Stock' : 'Add to Cart';
     }
+
+    // For perfume products: also show "Create a Custom Fragrance" link
+    const esPerfume = isPerfume(producto);
+    const customLink = document.getElementById('customFragranceLink');
+    if (customLink) customLink.style.display = esPerfume ? 'inline-flex' : 'none';
 
     renderGallery(producto);
     renderAccordion(producto);

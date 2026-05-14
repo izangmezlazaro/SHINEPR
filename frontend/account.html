@@ -189,12 +189,23 @@
       }
 
       function statusLabel(s) {
-        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'In Preparation', procesando: 'Processing', cancelled: 'Cancelled' };
+        const map = {
+          transit: 'In Transit', en_transito: 'In Transit', 'en transito': 'In Transit', transito: 'In Transit',
+          delivered: 'Delivered', entregado: 'Delivered',
+          pending: 'In Preparation', pendiente: 'In Preparation',
+          procesando: 'Processing',
+          cancelled: 'Cancelled', cancelado: 'Cancelled'
+        };
         return map[String(s).toLowerCase()] || s;
       }
 
       function statusClass(s) {
-        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', procesando: 'pending', cancelled: 'cancelled' };
+        const map = {
+          transit: 'transit', en_transito: 'transit', 'en transito': 'transit', transito: 'transit',
+          delivered: 'delivered', entregado: 'delivered',
+          pending: 'pending', pendiente: 'pending', procesando: 'pending',
+          cancelled: 'cancelled', cancelado: 'cancelled'
+        };
         return map[String(s).toLowerCase()] || 'pending';
       }
 
@@ -211,7 +222,7 @@
         }
         const cls = statusClass(order.estado);
         const thumbs = (order.items || order.detalles || []).slice(0, 2).map(i =>
-          `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-perfume.png'}" alt="${i.nombre || ''}" onerror="this.src='assets/img/product-perfume.png'">`
+          `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-bodyoil.png'}" alt="${i.nombre || ''}" onerror="this.onerror=null;this.src='assets/img/product-bodyoil.png'">`
         ).join('');
         const names = (order.items || order.detalles || []).map(i => i.nombre).filter(Boolean).join(' &amp; ');
         card.innerHTML = `

@@ -1590,7 +1590,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const res = await fetch(`${INTRANET_API}/productos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre: name, sku, idCategoria: parseInt(catVal), precio: price, stock, descripcion: desc, ingredientes: ingredients })
+            body: JSON.stringify({ nombre: name, sku, idCategoria: parseInt(catVal), precio: price, stock, descripcion: desc, ingredientes: ingredients, imagenUrl: document.getElementById('cp-image')?.value.trim() || null })
           });
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));

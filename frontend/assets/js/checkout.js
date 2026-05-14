@@ -6,6 +6,7 @@
   const TAX_RATE = 0.06;
   const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+  const MAX_ADDRESSES = 3;
   let currentStep = 0;
   let carrito = null;
   let direcciones = [];
@@ -151,6 +152,10 @@
     const list = document.getElementById('coAddressList');
     if (!list) return;
 
+    // Hide/show add address button based on limit
+    const addBtn = document.getElementById('coAddAddrBtn');
+    if (addBtn) addBtn.style.display = direcciones.length >= MAX_ADDRESSES ? 'none' : '';
+
     if (!direcciones.length) {
       list.innerHTML = '<p class="text-sm text-muted">Add an address to continue.</p>';
       return;
@@ -189,10 +194,11 @@
       const name = item.nombre || item.name || 'Producto Shine';
       const qty = getItemQty(item);
       const subtotal = getItemSubtotal(item);
+      const img = item.imagen || item.imagenUrl || item.image || 'assets/img/product-bodyoil.png';
 
       return `
         <div class="co-summary-item">
-          <img src="assets/img/product-perfume.png" alt="${escapeHtml(name)}">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='assets/img/product-bodyoil.png'">
           <div>
             <div class="co-summary-item__name">${escapeHtml(name)}</div>
             <div class="co-summary-item__price">${escapeHtml(formatCurrency(getItemUnitPrice(item)))} × ${escapeHtml(qty)}</div>
@@ -282,6 +288,11 @@
   }
 
   async function guardarDireccion() {
+    if (direcciones.length >= MAX_ADDRESSES) {
+      showToast(`Maximum of ${MAX_ADDRESSES} addresses reached. Delete one first.`);
+      return;
+    }
+
     const calle = document.getElementById('coAddrLine')?.value.trim();
     const ciudad = document.getElementById('coAddrCity')?.value.trim();
     const codigoPostal = document.getElementById('coAddrZip')?.value.trim();
@@ -448,6 +459,29 @@
     }, true);
   }
 
+  function addBusinessDays(date, days) {
+    const result = new Date(date);
+    let added = 0;
+    while (added < days) {
+      result.setDate(result.getDate() + 1);
+      const dow = result.getDay();
+      if (dow !== 0 && dow !== 6) added++;
+    }
+    return result;
+  }
+
+  function formatShippingDate(date) {
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function initShippingDates() {
+    const today = new Date();
+    const freeEl = document.getElementById('coDateFree');
+    const expressEl = document.getElementById('coDateExpress');
+    if (freeEl) freeEl.textContent = formatShippingDate(addBusinessDays(today, 6));
+    if (expressEl) expressEl.textContent = formatShippingDate(addBusinessDays(today, 3));
+  }
+
   function setupCartCheckoutButton() {
     document.getElementById('checkoutBtn')?.addEventListener('click', event => {
       event.preventDefault();
@@ -460,6 +494,7 @@
 
     if (!document.getElementById('coPanels')) return;
 
+    initShippingDates();
     setupCheckoutStepper();
     setupCheckoutInteractions();
     cargarCheckout();

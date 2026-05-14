@@ -3,7 +3,7 @@
 // ============================================
 
 (function () {
-  const FALLBACK_IMAGE = 'assets/img/product-perfume.png';
+  const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const DELAY_CLASSES = ['', ' reveal--delay-1', ' reveal--delay-2'];
   const PRODUCT_CACHE_KEY = 'shine:productos:v2';
   const PRODUCT_CACHE_TTL = 10 * 60 * 1000; // 10 min — matches backend Cache-Control
@@ -317,6 +317,21 @@
     if (!document.getElementById('productGrid')) return;
 
     configurarFiltros();
+
+    // Read ?category= from URL (e.g. from index.html category cards)
+    const urlCategory = new URLSearchParams(window.location.search).get('category');
+    if (urlCategory) {
+      filtroCategoria = urlCategory;
+      // Update sidebar active state to match
+      const categoryGroup = document.querySelector('#shopFilters .filter-group');
+      if (categoryGroup) {
+        categoryGroup.querySelectorAll('.filter-item').forEach(item => {
+          item.classList.remove('active');
+          if (item.dataset.filter === urlCategory) item.classList.add('active');
+        });
+      }
+    }
+
     cargarProductos();
   });
 

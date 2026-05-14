@@ -113,7 +113,7 @@ public class CarritoService {
             item.getId(),
             item.getProducto() != null ? item.getProducto().getIdProducto() : null,
             item.getPerfumeCustom() != null ? item.getPerfumeCustom().getIdPerfCust() : null,
-            obtenerNombreItem(item), item.getCantidad(), precio, subtotal);
+            obtenerNombreItem(item), item.getCantidad(), precio, subtotal, item.getImagenUrl());
     }
 
     BigDecimal obtenerPrecioUnitario(CarritoItem item) {

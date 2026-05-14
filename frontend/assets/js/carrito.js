@@ -4,7 +4,7 @@
 
 (function () {
   const TAX_RATE = 0.10;
-  const FALLBACK_IMAGE = 'assets/img/product-perfume.png';
+  const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const CART_CACHE_KEY = 'shine:carrito:v1';
   const CART_CACHE_TTL = 30 * 1000;
   let ultimoCarrito = null;
@@ -203,10 +203,11 @@
       const name = getItemName(item);
       const unitPrice = getItemUnitPrice(item);
       const qty = getItemQty(item);
+      const imgSrc = item.imagenUrl || FALLBACK_IMAGE;
 
       return `
         <div class="cart-item" data-cart-item="${escapeHtml(id)}">
-          <img class="cart-item__img" src="${FALLBACK_IMAGE}" alt="${escapeHtml(name)}">
+          <img class="cart-item__img" src="${imgSrc}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
           <div class="cart-item__info">
             <div class="cart-item__name">${escapeHtml(name)}</div>
             <div class="cart-item__price">

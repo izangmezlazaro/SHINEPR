@@ -168,6 +168,7 @@
   <script src="assets/js/api.js"></script>
   <script>
     (function () {
+      const MAX_ADDRESSES = 3;
       const user = JSON.parse(localStorage.getItem('shineUser') || 'null');
       if (!user) { window.location.href = 'login.html'; return; }
 
@@ -201,10 +202,19 @@
         const meta = loadMeta();
         const container = document.getElementById('addressList');
         const empty = document.getElementById('addressEmpty');
+        const addBtn = document.getElementById('addAddressBtn');
+
+        // Show/hide add button based on limit
+        if (addBtn) {
+          addBtn.style.display = addresses.length >= MAX_ADDRESSES ? 'none' : '';
+          addBtn.querySelector('.addr-count')?.remove();
+        }
 
         if (!addresses.length) {
           container.innerHTML = '';
           empty.style.display = '';
+          // Close the form if open (nothing to show)
+          document.getElementById('addressForm')?.classList.remove('open');
           return;
         }
         empty.style.display = 'none';
@@ -230,6 +240,10 @@
               </div>
             </div>`;
         }).join('');
+
+        // Add address count indicator
+        const countHtml = `<p class="text-sm text-muted" style="margin-top:var(--sp-md)">${addresses.length} / ${MAX_ADDRESSES} addresses used</p>`;
+        container.insertAdjacentHTML('beforeend', countHtml);
       }
 
       async function fetchAddresses() {
@@ -300,6 +314,10 @@
       });
 
       document.getElementById('addAddressBtn').addEventListener('click', () => {
+        if (addresses.length >= MAX_ADDRESSES) {
+          showToast(`Maximum of ${MAX_ADDRESSES} addresses reached. Delete one to add a new one.`);
+          return;
+        }
         editingId = null;
         document.getElementById('formTitle').textContent = 'Add New Address';
         ['addrLabel','addrPhone','addrLine','addrCity','addrZip'].forEach(id => {
@@ -322,6 +340,12 @@
         const ciudad = document.getElementById('addrCity').value.trim();
         const codigoPostal = document.getElementById('addrZip').value.trim();
         if (!calle || !ciudad) { alert('Please fill in at least street and city.'); return; }
+
+        // Enforce limit on new addresses (not edits)
+        if (!editingId && addresses.length >= MAX_ADDRESSES) {
+          showToast(`Maximum of ${MAX_ADDRESSES} addresses reached. Delete one to add a new one.`);
+          return;
+        }
 
         const isDefault = document.getElementById('setAsDefault').checked;
         const phone = document.getElementById('addrPhone').value.trim();

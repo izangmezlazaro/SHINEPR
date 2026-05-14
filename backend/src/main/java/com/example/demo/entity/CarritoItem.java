@@ -7,6 +7,7 @@ public class CarritoItem {
     private Producto     producto;
     private PerfumeCustom perfumeCustom;
     private Integer      cantidad = 1;
+    private String       imagenUrl;
 
     public CarritoItem() {}
 
@@ -35,4 +36,7 @@ public class CarritoItem {
     public void         setCantidad(Integer cantidad) {
         this.cantidad = (cantidad == null) ? 1 : cantidad;
     }
+
+    public String       getImagenUrl()    { return imagenUrl; }
+    public void         setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
 }

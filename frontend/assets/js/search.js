@@ -2,7 +2,7 @@
 // Shine - Header Search
 // ============================================
 (function () {
-  const FALLBACK_IMAGE = 'assets/img/product-perfume.png';
+  const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const API_BASE = 'http://localhost:8080/api/v1';
   const CACHE_KEY = 'shine:productos:v2';
 

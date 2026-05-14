@@ -61,48 +61,18 @@
     .login-visual__content {
       position: relative;
       z-index: 1;
-      text-align: center;
-      color: var(--ivory);
-      padding: var(--sp-2xl);
-      max-width: 480px;
-    }
-
-    .login-visual__brand {
-      font-family: var(--font-heading);
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: var(--ivory);
-      letter-spacing: 2px;
-      margin-bottom: var(--sp-lg);
-    }
-
-    .login-visual__tagline {
-      font-size: var(--fs-md);
-      color: rgba(255, 250, 245, 0.5);
-      font-weight: 300;
-      line-height: 1.7;
-    }
-
-    .login-visual__badge {
-      display: inline-flex;
+      width: 100%;
+      height: 100%;
+      display: flex;
       align-items: center;
-      gap: var(--sp-sm);
-      margin-top: var(--sp-2xl);
-      padding: var(--sp-sm) var(--sp-lg);
-      border: 1px solid rgba(255, 250, 245, 0.12);
-      border-radius: var(--r-full);
-      font-size: var(--fs-xs);
-      color: rgba(255, 250, 245, 0.45);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      justify-content: center;
     }
 
-    .login-visual__badge svg {
-      width: 14px;
-      height: 14px;
-      stroke: var(--rose);
-      fill: none;
-      stroke-width: 2;
+    .login-visual__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .login-card {
@@ -353,14 +323,7 @@
 
     <div class="login-visual">
       <div class="login-visual__content">
-        <div class="login-visual__brand">Shine.</div>
-        <p class="login-visual__tagline">
-          Welcome to the Shine Intranet — your hub for orders, clients, catalogue management, and internal processes.
-        </p>
-        <div class="login-visual__badge">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-          Secure &amp; Encrypted
-        </div>
+        <img src="assets/img/loginemple.png" alt="Shine Staff" class="login-visual__img">
       </div>
     </div>
   </main>

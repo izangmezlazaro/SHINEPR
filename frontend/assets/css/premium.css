@@ -564,7 +564,7 @@
   cursor: grab;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
 }
 
 .hscroll-track::-webkit-scrollbar {
@@ -577,8 +577,20 @@
 
 .hscroll-track .product-card {
   flex-shrink: 0;
-  width: 280px;
+  width: calc((100% - 5 * var(--sp-lg)) / 6);
   scroll-snap-align: start;
+}
+
+.hscroll-track .product-card__body {
+  padding: var(--sp-sm) var(--sp-sm) var(--sp-md);
+}
+
+.hscroll-track .product-card__name {
+  font-size: var(--fs-sm);
+}
+
+.hscroll-track .product-card__price {
+  font-size: var(--fs-sm);
 }
 
 /* ---------- Carousel Navigation Buttons ---------- */

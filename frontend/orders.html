@@ -184,12 +184,23 @@
       }
 
       function statusLabel(s) {
-        const map = { transit: 'In Transit', delivered: 'Delivered', pending: 'In Preparation', procesando: 'Processing', cancelled: 'Cancelled' };
+        const map = {
+          transit: 'In Transit', en_transito: 'In Transit', 'en transito': 'In Transit', transito: 'In Transit',
+          delivered: 'Delivered', entregado: 'Delivered',
+          pending: 'In Preparation', pendiente: 'In Preparation',
+          procesando: 'Processing',
+          cancelled: 'Cancelled', cancelado: 'Cancelled'
+        };
         return map[String(s).toLowerCase()] || s;
       }
 
       function statusClass(s) {
-        const map = { transit: 'transit', delivered: 'delivered', pending: 'pending', procesando: 'pending', cancelled: 'cancelled' };
+        const map = {
+          transit: 'transit', en_transito: 'transit', 'en transito': 'transit', transito: 'transit',
+          delivered: 'delivered', entregado: 'delivered',
+          pending: 'pending', pendiente: 'pending', procesando: 'pending',
+          cancelled: 'cancelled', cancelado: 'cancelled'
+        };
         return map[String(s).toLowerCase()] || 'pending';
       }
 
@@ -199,7 +210,7 @@
         const fecha = order.fecha ? new Date(order.fecha).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
         const items = order.items || order.lineas || order.detalles || [];
         const thumbs = items.slice(0, 2).map(i =>
-          `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-perfume.png'}" alt="${i.nombre || ''}" onerror="this.src='assets/img/product-perfume.png'">`
+          `<img class="order-card__thumb" src="${i.imagen || i.imagenUrl || 'assets/img/product-bodyoil.png'}" alt="${i.nombre || ''}" onerror="this.onerror=null;this.src='assets/img/product-bodyoil.png'">`
         ).join('');
         const itemLines = items.map(i =>
           `<div style="font-size:var(--fs-sm);font-weight:600">${i.nombre || ''}</div>
@@ -207,7 +218,7 @@
         ).join('');
         const detailItems = items.map(i =>
           `<div style="display:flex;gap:var(--sp-md);margin-bottom:var(--sp-md);align-items:center">
-            <img style="width:48px;height:48px;border-radius:var(--r-md);object-fit:cover;background:var(--petal)" src="${i.imagen || i.imagenUrl || 'assets/img/product-perfume.png'}" alt="" onerror="this.src='assets/img/product-perfume.png'">
+            <img style="width:48px;height:48px;border-radius:var(--r-md);object-fit:cover;background:var(--petal)" src="${i.imagen || i.imagenUrl || 'assets/img/product-bodyoil.png'}" alt="" onerror="this.onerror=null;this.src='assets/img/product-bodyoil.png'">
             <div>
               <div style="font-size:var(--fs-sm);font-weight:600">${i.nombre || ''}</div>
               <div style="font-size:var(--fs-xs);color:var(--text-muted)">× ${i.cantidad || 1} — ${fmt(i.precioUnitario || i.precio || 0)}</div>

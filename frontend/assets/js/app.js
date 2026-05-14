@@ -217,23 +217,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carousel navigation buttons
     const prevBtn = document.getElementById('hscrollPrev');
     const nextBtn = document.getElementById('hscrollNext');
-    const scrollAmount = 320; // Width of product card + gap
+
+    function getCarouselStep() {
+      const card = hscroll.querySelector('.product-card');
+      return card ? card.offsetWidth + 24 : 260; // card width + --sp-lg (24px)
+    }
 
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        hscroll.scrollBy({
-          left: -scrollAmount,
-          behavior: 'smooth'
-        });
+        hscroll.scrollBy({ left: -getCarouselStep(), behavior: 'smooth' });
       });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        hscroll.scrollBy({
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
+        hscroll.scrollBy({ left: getCarouselStep(), behavior: 'smooth' });
       });
     }
   }
