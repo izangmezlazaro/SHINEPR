@@ -13,7 +13,7 @@
   };
 
   // ── Canvas preview constants ─────────────────────────────────────────
-  const CANVAS_BASE_SRC = 'assets/img/luxury-base-atmosphere.png';
+  const CANVAS_BASE_SRC = 'assets/img/custom-perfume-bg.png';
   const BOTTLE_IMG_MAP = {
     '4':  'assets/img/types/IMPACT_FRASCO.png',
     '5':  'assets/img/types/GRANADE_FRASCO.jpg',

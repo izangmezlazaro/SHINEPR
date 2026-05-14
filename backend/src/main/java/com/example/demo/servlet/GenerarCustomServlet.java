@@ -86,16 +86,21 @@ public class GenerarCustomServlet extends HttpServlet {
 
             // Compact prompt + strict label copy (user casing / punctuation preserved
             // in-image)
-            String notasClause = notas.isEmpty() ? "" : ", " + notas + " notes";
-            String baseClause = base.isEmpty() ? "" : ", base " + base;
-            String prompt = "Luxury " + formaElegida + " perfume bottle, " + tipo + " editorial still"
-                    + baseClause
-                    + notasClause
-                    + ", dark premium studio, soft spotlight, gold foil label on glass front; "
-                    + "label text must match EXACTLY between markers (same capitals, spaces, accents, punctuation; "
-                    + "no translation, no autocorrect, no Title Case): <<<"
-                    + nombreEtiqueta
-                    + ">>>";
+            String notasClause = notas.isEmpty() ? "" : ", infused with " + notas + " notes";
+            String baseClause  = base.isEmpty()  ? "" : ", base " + base;
+            String prompt =
+                "Ultra-premium luxury perfume editorial photograph. "
+                + "Subject: a " + formaElegida + " " + tipo + " perfume bottle standing upright "
+                + baseClause
+                + notasClause
+                + ". "
+                + "Beside the bottle, its matching luxury gift box (rectangular matte black with gold foil embossing, slightly open, lid resting at an angle). "
+                + "Both bottle and box display the label: <<<" + nombreEtiqueta + ">>> "
+                + "(reproduce label text EXACTLY — same capitals, spaces, accents, punctuation; no translation, no autocorrect). "
+                + "Scene: dark cinematic studio, black marble surface, single overhead spotlight casting soft shadows, "
+                + "scattered dried rose petals and botanicals at the base, delicate smoke wisps rising. "
+                + "Gold foil accents on label. Photorealistic, 8K render, depth of field, ultra-sharp glass reflections. "
+                + "Professional luxury fragrance brand campaign style. No people, no text except the label.";
 
             JsonObject openAiRequest = new JsonObject();
             openAiRequest.addProperty("model", MODEL);

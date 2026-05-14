@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shine â€” Create Your Custom Fragrance</title>
-  <meta name="description" content="Design your own bespoke perfume with Shine. Choose your fragrance type, base, notes, and packaging â€” a scent as unique as you.">
+  <title>Shine — Create Your Custom Fragrance</title>
+  <meta name="description" content="Design your own bespoke perfume with Shine. Choose your fragrance type, base, notes, and packaging — a scent as unique as you.">
 <link rel="icon" type="image/x-icon" href="assets/img/Shine.ico">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -41,9 +41,11 @@
     <!-- Hero -->
     <section class="section section--petal" style="padding-bottom:var(--sp-xl)">
       <div class="container text-center">
-        <p class="hero__tagline reveal">Bespoke Experience</p>
+        <a href="index.html" class="reveal" style="display:inline-block;margin-bottom:var(--sp-lg)">
+          <img src="assets/img/ShineN.png" alt="Shine" style="height:52px;width:auto;object-fit:contain">
+        </a>
         <h1 class="reveal">Create Your Fragrance</h1>
-        <p class="reveal" style="margin:0 auto var(--sp-xl);max-width:560px;text-align:center">Design a scent that's uniquely yours. Choose your fragrance type, select your notes, pick your bottle â€” and we'll craft it by hand.</p>
+        <p class="reveal" style="margin:0 auto var(--sp-xl);max-width:560px;text-align:center">Design a scent that's uniquely yours. Choose your fragrance type, select your notes, pick your bottle &mdash; and we'll craft it by hand.</p>
       </div>
     </section>
 
@@ -199,7 +201,7 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                 </button>
                 <div class="options-carousel" id="notesCarousel" data-group="notes" data-mode="multi" data-max="5">
-                  <p class="text-sm text-muted" style="padding:var(--sp-xl)">Loading olfactory notesâ€¦</p>
+                  <p class="text-sm text-muted" style="padding:var(--sp-xl)">Loading olfactory notes…</p>
                 </div>
                 <button class="carousel-btn carousel-btn--next" id="notesNext" aria-label="Next">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -279,11 +281,11 @@
                   </div>
                   <div style="padding:var(--sp-xl);background:var(--petal);border-radius:var(--r-lg);margin-top:var(--sp-lg)">
                     <h4 style="margin-bottom:var(--sp-md)">Your Selections</h4>
-                    <div id="reviewType" style="margin-bottom:var(--sp-sm)"><strong>Type:</strong> â€”</div>
-                    <div id="reviewQuantity" style="margin-bottom:var(--sp-sm)"><strong>Quantity:</strong> â€”</div>
-                    <div id="reviewBase" style="margin-bottom:var(--sp-sm)"><strong>Base:</strong> â€”</div>
-                    <div id="reviewNotes" style="margin-bottom:var(--sp-sm)"><strong>Notes:</strong> â€”</div>
-                    <div id="reviewBottle"><strong>Bottle:</strong> â€”</div>
+                    <div id="reviewType" style="margin-bottom:var(--sp-sm)"><strong>Type:</strong> —</div>
+                    <div id="reviewQuantity" style="margin-bottom:var(--sp-sm)"><strong>Quantity:</strong> —</div>
+                    <div id="reviewBase" style="margin-bottom:var(--sp-sm)"><strong>Base:</strong> —</div>
+                    <div id="reviewNotes" style="margin-bottom:var(--sp-sm)"><strong>Notes:</strong> —</div>
+                    <div id="reviewBottle"><strong>Bottle:</strong> —</div>
                   </div>
                 </div>
                 <div class="canvas-preview-panel">
@@ -295,17 +297,17 @@
                     <!-- Layer 3: text overlay -->
                     <div class="canvas-text-overlay">
                       <div id="previewLabel" class="canvas-preview-name">Your Fragrance</div>
-                      <div id="previewComposition" class="canvas-preview-comp">â€”</div>
+                      <div id="previewComposition" class="canvas-preview-comp">—</div>
                     </div>
                     <!-- Badge -->
                     <div class="canvas-preview-badge">Live Preview</div>
                   </div>
                   <button class="btn-generate-ai" id="btnGenerarAI" type="button">
                     <span class="btn-generate-ai__shine"></span>
-                    <span class="btn-generate-ai__icon">âœ¦</span>
+                    <span class="btn-generate-ai__icon">✦</span>
                     <span class="btn-generate-ai__body">
                       <span class="btn-generate-ai__title">Generate Final Design</span>
-                      <span class="btn-generate-ai__sub">AI render Â· usually a few seconds</span>
+                      <span class="btn-generate-ai__sub">AI render &middot; usually a few seconds</span>
                     </span>
                   </button>
                 </div>
@@ -317,7 +319,7 @@
         <!-- Price Bar -->
         <div id="priceBar" style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp-md) var(--sp-xl);background:var(--petal);border-radius:var(--r-md);margin-top:var(--sp-xl);border:1px solid var(--border)">
           <span style="font-size:0.875rem;color:var(--muted)">Estimated total so far</span>
-          <span id="priceBarTotal" style="font-family:var(--font-heading);font-size:1.15rem;font-weight:700;color:var(--accent)">â€”</span>
+          <span id="priceBarTotal" style="font-family:var(--font-heading);font-size:1.15rem;font-weight:700;color:var(--accent)">—</span>
         </div>
 
         <!-- Navigation Buttons -->
@@ -343,21 +345,21 @@
     </div>
   </footer>
 
-  <!-- â”€â”€ AI Generation Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── AI Generation Overlay ─────────────────────────────────────────── -->
   <div id="aiGeneratingOverlay" class="ai-overlay" aria-modal="true" role="dialog" aria-label="AI Design Generator" aria-hidden="true">
     <div class="ai-overlay__card">
       <div class="ai-overlay__ambient" aria-hidden="true"></div>
 
       <!-- Loading state -->
       <div class="ai-overlay__state" id="aiStateLoading">
-        <div class="ai-orbital" aria-label="Generatingâ€¦">
+        <div class="ai-orbital" aria-label="Generating…">
           <div class="ai-orbital__ring ai-orbital__ring--1"></div>
           <div class="ai-orbital__ring ai-orbital__ring--2"></div>
           <div class="ai-orbital__ring ai-orbital__ring--3"></div>
-          <div class="ai-orbital__core">âœ¦</div>
+          <div class="ai-orbital__core">✦</div>
         </div>
         <div class="ai-overlay__title">Crafting Your Design</div>
-        <p class="ai-overlay__subtitle" id="aiLoadingMessage">Blending your chosen notesâ€¦</p>
+        <p class="ai-overlay__subtitle" id="aiLoadingMessage">Blending your chosen notes…</p>
         <div class="ai-segs" id="aiProgressSegments">
           <div class="ai-seg"><div class="ai-seg__bar"></div><span>Notes</span></div>
           <div class="ai-seg"><div class="ai-seg__bar"></div><span>Lighting</span></div>
@@ -368,7 +370,7 @@
 
       <!-- Result state -->
       <div class="ai-overlay__state" id="aiStateResult" style="display:none">
-        <div class="ai-result-badge">âœ¦ Your Exclusive Design is Ready</div>
+        <div class="ai-result-badge">✦ Your Exclusive Design is Ready</div>
         <div class="ai-result-frame">
           <img id="aiResultImage" src="" alt="" class="ai-result-image" decoding="async" fetchpriority="high" aria-describedby="aiResultName">
           <div class="ai-frame-corner ai-frame-corner--tl"></div>
@@ -385,7 +387,7 @@
   </div>
 
   <style>
-    /* â”€â”€ Canvas Preview Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Canvas Preview Panel ─────────────────────────────────────────── */
     .canvas-preview-panel {
       display: flex;
       flex-direction: column;
@@ -469,7 +471,7 @@
       backdrop-filter: blur(4px);
     }
 
-    /* â”€â”€ Generate AI Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Generate AI Button ───────────────────────────────────────────── */
     .btn-generate-ai {
       position: relative;
       display: flex;
@@ -538,7 +540,7 @@
       transform: none;
     }
 
-    /* â”€â”€ AI Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── AI Overlay ───────────────────────────────────────────────────── */
     .ai-overlay {
       position: fixed;
       inset: 0;
@@ -792,7 +794,7 @@
         nextBtn.textContent = current === panels.length - 1 ? 'Request Quote' : 'Next Step';
       }
 
-      // Option selection â€” works for both .options-grid and .options-carousel
+      // Option selection — works for both .options-grid and .options-carousel
       document.querySelectorAll('.options-grid, .options-carousel').forEach(grid => {
         grid.querySelectorAll('.option-card').forEach(card => {
           card.addEventListener('click', () => {
@@ -828,12 +830,12 @@
       });
 
       function updateReview() {
-        document.getElementById('reviewType').innerHTML = '<strong>Type:</strong> ' + (selections.type || 'â€”');
-        document.getElementById('reviewBase').innerHTML = '<strong>Base:</strong> ' + (selections.base || 'â€”');
-        document.getElementById('reviewNotes').innerHTML = '<strong>Notes:</strong> ' + (selections.notes.length ? selections.notes.join(', ') : 'â€”');
-        document.getElementById('reviewBottle').innerHTML = '<strong>Bottle:</strong> ' + (selections.bottle || 'â€”');
-        const comp = [selections.type, selections.base, ...selections.notes].filter(Boolean).join(' Â· ');
-        document.getElementById('previewComposition').textContent = comp || 'â€”';
+        document.getElementById('reviewType').innerHTML = '<strong>Type:</strong> ' + (selections.type || '—');
+        document.getElementById('reviewBase').innerHTML = '<strong>Base:</strong> ' + (selections.base || '—');
+        document.getElementById('reviewNotes').innerHTML = '<strong>Notes:</strong> ' + (selections.notes.length ? selections.notes.join(', ') : '—');
+        document.getElementById('reviewBottle').innerHTML = '<strong>Bottle:</strong> ' + (selections.bottle || '—');
+        const comp = [selections.type, selections.base, ...selections.notes].filter(Boolean).join(' &middot; ');
+        document.getElementById('previewComposition').textContent = comp || '—';
       }
 
       if (nameInput) {
