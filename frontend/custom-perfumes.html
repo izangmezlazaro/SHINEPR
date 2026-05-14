@@ -269,7 +269,7 @@
           <div class="step-panel" data-panel="5">
             <div class="step-panel__inner">
               <h2>Review Your Creation</h2>
-              <p>Name your fragrance and review your selections before we begin crafting.</p>
+              <p>Name your fragrance and review your selections before we begin crafting. The name you type is what we send to the label in the AI render (same spelling and capitals).</p>
               <div class="grid grid-2 mt-xl" style="gap:var(--sp-2xl)">
                 <div>
                   <div class="form-group">
@@ -285,12 +285,27 @@
                     <div id="reviewBottle"><strong>Bottle:</strong> —</div>
                   </div>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp-2xl);background:var(--petal);border-radius:var(--r-lg);text-align:center">
-                  <div style="font-family:var(--font-heading);font-size:var(--fs-xl);margin-bottom:var(--sp-sm)" id="previewLabel">Your Fragrance</div>
-                  <div class="text-sm text-muted" id="previewComposition">—</div>
-                  <img src="assets/img/product-bodyoil.png" id="previewImagen" alt="Perfume preview" style="max-height:200px;margin-top:var(--sp-lg);border-radius:var(--r-md); transition: opacity 0.3s ease;">
-                  <button class="btn btn--outline" id="btnGenerarAI" type="button" style="margin-top: var(--sp-lg); width: 100%;">
-                    ✨ Generate AI Design
+                <div class="canvas-preview-panel">
+                  <div class="canvas-preview-wrap">
+                    <!-- Layer 1: atmosphere canvas (background only) -->
+                    <canvas id="previewCanvas" width="480" height="480" aria-label="Live fragrance preview"></canvas>
+                    <!-- Layer 2: selected bottle image (CSS blend) -->
+                    <img id="previewBottleImg" class="canvas-bottle-overlay" src="" alt="Selected bottle">
+                    <!-- Layer 3: text overlay -->
+                    <div class="canvas-text-overlay">
+                      <div id="previewLabel" class="canvas-preview-name">Your Fragrance</div>
+                      <div id="previewComposition" class="canvas-preview-comp">—</div>
+                    </div>
+                    <!-- Badge -->
+                    <div class="canvas-preview-badge">Live Preview</div>
+                  </div>
+                  <button class="btn-generate-ai" id="btnGenerarAI" type="button">
+                    <span class="btn-generate-ai__shine"></span>
+                    <span class="btn-generate-ai__icon">✦</span>
+                    <span class="btn-generate-ai__body">
+                      <span class="btn-generate-ai__title">Generate Final Design</span>
+                      <span class="btn-generate-ai__sub">AI render · usually a few seconds</span>
+                    </span>
                   </button>
                 </div>
               </div>
@@ -330,35 +345,198 @@
   <!-- ── AI Generation Overlay ─────────────────────────────────────────── -->
   <div id="aiGeneratingOverlay" class="ai-overlay" aria-modal="true" role="dialog" aria-label="AI Design Generator" aria-hidden="true">
     <div class="ai-overlay__card">
-
-      <!-- Sparkle particles (filled by JS) -->
-      <div class="ai-overlay__sparkles" id="aiSparkles" aria-hidden="true"></div>
+      <div class="ai-overlay__ambient" aria-hidden="true"></div>
 
       <!-- Loading state -->
-      <div class="ai-overlay__state ai-overlay__state--loading" id="aiStateLoading">
-        <div class="ai-loader" aria-label="Generating…">
-          <span></span><span></span><span></span>
+      <div class="ai-overlay__state" id="aiStateLoading">
+        <div class="ai-orbital" aria-label="Generating…">
+          <div class="ai-orbital__ring ai-orbital__ring--1"></div>
+          <div class="ai-orbital__ring ai-orbital__ring--2"></div>
+          <div class="ai-orbital__ring ai-orbital__ring--3"></div>
+          <div class="ai-orbital__core">✦</div>
         </div>
-        <div class="ai-overlay__title">Creating Your Exclusive Design</div>
-        <p class="ai-overlay__subtitle" id="aiLoadingMessage">Crafting your exclusive bottle…</p>
-        <div class="ai-progress-bar"><div class="ai-progress-bar__fill"></div></div>
+        <div class="ai-overlay__title">Crafting Your Design</div>
+        <p class="ai-overlay__subtitle" id="aiLoadingMessage">Blending your chosen notes…</p>
+        <div class="ai-segs" id="aiProgressSegments">
+          <div class="ai-seg"><div class="ai-seg__bar"></div><span>Notes</span></div>
+          <div class="ai-seg"><div class="ai-seg__bar"></div><span>Lighting</span></div>
+          <div class="ai-seg"><div class="ai-seg__bar"></div><span>Glass</span></div>
+          <div class="ai-seg"><div class="ai-seg__bar"></div><span>Render</span></div>
+        </div>
       </div>
 
       <!-- Result state -->
-      <div class="ai-overlay__state ai-overlay__state--result" id="aiStateResult" style="display:none">
-        <div class="ai-result-badge">✨ Your Exclusive Design is Ready</div>
-        <img id="aiResultImage" src="" alt="Your AI-generated custom perfume" class="ai-result-image" loading="lazy">
+      <div class="ai-overlay__state" id="aiStateResult" style="display:none">
+        <div class="ai-result-badge">✦ Your Exclusive Design is Ready</div>
+        <div class="ai-result-frame">
+          <img id="aiResultImage" src="" alt="" class="ai-result-image" decoding="async" fetchpriority="high" aria-describedby="aiResultName">
+          <div class="ai-frame-corner ai-frame-corner--tl"></div>
+          <div class="ai-frame-corner ai-frame-corner--tr"></div>
+          <div class="ai-frame-corner ai-frame-corner--bl"></div>
+          <div class="ai-frame-corner ai-frame-corner--br"></div>
+        </div>
         <div class="ai-result-name" id="aiResultName"></div>
         <div class="ai-overlay__actions">
-          <button class="btn btn--primary" id="aiCloseBtn">Apply Design</button>
-          <a id="aiDownloadBtn" class="btn btn--outline" href="#" download="shine-custom-perfume.png">⬇ Download</a>
+          <button class="btn-ai-apply" id="aiCloseBtn">Apply to Preview</button>
         </div>
       </div>
-
     </div>
   </div>
 
   <style>
+    /* ── Canvas Preview Panel ─────────────────────────────────────────── */
+    .canvas-preview-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(160deg, #16110a 0%, #0c0906 100%);
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: 20px;
+      padding: 1.5rem 1.25rem;
+    }
+    .canvas-preview-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+    }
+    #previewCanvas {
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      display: block;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.12);
+    }
+    /* Bottle image layered over canvas via CSS */
+    .canvas-bottle-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      max-height: 62%;
+      max-width: 48%;
+      object-fit: contain;
+      mix-blend-mode: luminosity;
+      filter: brightness(1.15) contrast(1.05) saturate(0.8);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .canvas-bottle-overlay[src=""] { opacity: 0; }
+    .canvas-bottle-overlay.canvas-bottle-overlay--hidden {
+      opacity: 0 !important;
+      pointer-events: none;
+    }
+    /* Text overlay at bottom of canvas */
+    .canvas-text-overlay {
+      position: absolute;
+      bottom: 10%;
+      left: 0; right: 0;
+      text-align: center;
+      padding: 0 0.75rem;
+      pointer-events: none;
+    }
+    .canvas-preview-name {
+      font-family: var(--font-heading, 'Playfair Display', serif);
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      font-style: italic;
+      font-weight: 700;
+      color: #d4af37;
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 12px rgba(212,175,55,0.5);
+    }
+    .canvas-preview-comp {
+      font-size: 0.62rem;
+      color: rgba(212,175,55,0.55);
+      letter-spacing: 0.08em;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .canvas-preview-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(212,175,55,0.7);
+      background: rgba(10,8,4,0.7);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 99px;
+      padding: 3px 9px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ── Generate AI Button ───────────────────────────────────────────── */
+    .btn-generate-ai {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, #1e1608 0%, #2a1e0a 50%, #1e1608 100%);
+      border: 1px solid rgba(212,175,55,0.35);
+      border-radius: 14px;
+      color: #f0e8d8;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+      text-align: left;
+    }
+    .btn-generate-ai:hover {
+      border-color: rgba(212,175,55,0.65);
+      box-shadow: 0 8px 32px rgba(212,175,55,0.18), 0 0 0 1px rgba(212,175,55,0.1) inset;
+      transform: translateY(-1px);
+    }
+    .btn-generate-ai:active { transform: translateY(0); }
+    .btn-generate-ai__shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(212,175,55,0.08) 50%, transparent 60%);
+      background-size: 200% 100%;
+      animation: btnShimmer 3s ease-in-out infinite;
+    }
+    @keyframes btnShimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .btn-generate-ai__icon {
+      font-size: 1.3rem;
+      color: #d4af37;
+      flex-shrink: 0;
+      text-shadow: 0 0 10px rgba(212,175,55,0.6);
+      animation: iconPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%,100% { opacity: 0.8; transform: scale(1); }
+      50%     { opacity: 1;   transform: scale(1.15); }
+    }
+    .btn-generate-ai__body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: relative;
+    }
+    .btn-generate-ai__title {
+      font-family: var(--font-heading, 'Playfair Display', serif);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f0e8d8;
+    }
+    .btn-generate-ai__sub {
+      font-size: 0.68rem;
+      color: rgba(212,175,55,0.6);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .btn-generate-ai:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     /* ── AI Overlay ───────────────────────────────────────────────────── */
     .ai-overlay {
       position: fixed;
@@ -367,153 +545,222 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(8, 6, 4, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(4,3,2,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.4s ease;
     }
-    .ai-overlay--visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-
+    .ai-overlay--visible { opacity: 1; pointer-events: all; }
     .ai-overlay__card {
       position: relative;
       width: min(520px, 92vw);
-      background: linear-gradient(145deg, #1a1410 0%, #120e08 100%);
-      border: 1px solid rgba(212,175,55,0.25);
-      border-radius: 24px;
+      background: linear-gradient(145deg, #1c1610, #0f0b06);
+      border: 1px solid rgba(212,175,55,0.22);
+      border-radius: 28px;
       padding: 2.5rem 2rem;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.1) inset;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(212,175,55,0.07) inset;
       overflow: hidden;
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
+      transform: translateY(28px) scale(0.95);
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .ai-overlay--visible .ai-overlay__card {
-      transform: translateY(0) scale(1);
-    }
-
-    /* Sparkles */
-    .ai-overlay__sparkles { position: absolute; inset: 0; pointer-events: none; }
-    .ai-sparkle {
+    .ai-overlay--visible .ai-overlay__card { transform: translateY(0) scale(1); }
+    .ai-overlay__ambient {
       position: absolute;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #d4af37, rgba(212,175,55,0));
-      animation: sparklePop 2s ease-in-out infinite;
+      inset: -60%;
+      background: radial-gradient(circle at 50% 30%, rgba(212,175,55,0.07) 0%, transparent 55%);
+      pointer-events: none;
+      animation: ambientPulse 4s ease-in-out infinite;
     }
-    @keyframes sparklePop {
-      0%   { opacity: 0; transform: scale(0) translateY(0); }
-      40%  { opacity: 1; transform: scale(1.8) translateY(-6px); }
-      100% { opacity: 0; transform: scale(0.5) translateY(-16px); }
+    @keyframes ambientPulse {
+      0%,100% { opacity: 0.6; transform: scale(1); }
+      50%     { opacity: 1;   transform: scale(1.12); }
     }
-
-    /* Loading state */
     .ai-overlay__state {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 1rem;
+      gap: 1.25rem;
+      position: relative;
+    }
+
+    /* Orbital rings */
+    .ai-orbital {
+      position: relative;
+      width: 88px;
+      height: 88px;
+      margin: 0.25rem 0;
+    }
+    .ai-orbital__ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1.5px solid transparent;
+    }
+    .ai-orbital__ring--1 {
+      border-top-color: #d4af37;
+      border-right-color: rgba(212,175,55,0.18);
+      animation: orbitSpin 1.8s linear infinite;
+    }
+    .ai-orbital__ring--2 {
+      inset: 12px;
+      border-top-color: transparent;
+      border-left-color: rgba(212,175,55,0.55);
+      border-bottom-color: rgba(212,175,55,0.12);
+      animation: orbitSpin 2.6s linear infinite reverse;
+    }
+    .ai-orbital__ring--3 {
+      inset: 24px;
+      border-top-color: rgba(212,175,55,0.28);
+      animation: orbitSpin 3.4s linear infinite;
+    }
+    @keyframes orbitSpin { to { transform: rotate(360deg); } }
+    .ai-orbital__core {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #d4af37;
+      text-shadow: 0 0 14px rgba(212,175,55,0.85);
+      animation: corePulse 2.2s ease-in-out infinite;
+    }
+    @keyframes corePulse {
+      0%,100% { opacity: 0.7; transform: scale(0.9); }
+      50%     { opacity: 1;   transform: scale(1.12); }
     }
     .ai-overlay__title {
       font-family: var(--font-heading, 'Playfair Display', serif);
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: #f5f0e8;
       letter-spacing: 0.02em;
     }
     .ai-overlay__subtitle {
-      font-size: 0.875rem;
-      color: rgba(212,175,55,0.75);
+      font-size: 0.75rem;
+      color: rgba(212,175,55,0.7);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       min-height: 1.4em;
       transition: opacity 0.4s;
-      letter-spacing: 0.03em;
     }
 
-    /* Three-dot loader */
-    .ai-loader {
+    /* Segmented progress */
+    .ai-segs {
       display: flex;
-      gap: 10px;
-      margin: 0.5rem 0;
+      gap: 8px;
+      width: 85%;
     }
-    .ai-loader span {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #d4af37;
-      animation: dotBounce 1.4s infinite ease-in-out both;
+    .ai-seg {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(212,175,55,0.4);
     }
-    .ai-loader span:nth-child(1) { animation-delay: 0s; }
-    .ai-loader span:nth-child(2) { animation-delay: 0.2s; }
-    .ai-loader span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes dotBounce {
-      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-      40%            { transform: scale(1.2); opacity: 1; }
-    }
-
-    /* Progress bar */
-    .ai-progress-bar {
-      width: 80%;
+    .ai-seg__bar {
+      width: 100%;
       height: 2px;
-      background: rgba(212,175,55,0.15);
+      background: rgba(212,175,55,0.12);
       border-radius: 99px;
       overflow: hidden;
-      margin-top: 0.5rem;
+      position: relative;
     }
-    .ai-progress-bar__fill {
-      height: 100%;
-      width: 0%;
+    .ai-seg__bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
       background: linear-gradient(90deg, #b8860b, #d4af37, #ffe066);
       border-radius: 99px;
-      animation: progressSlide 90s linear forwards; /* matches backend timeout */
+      width: 0%;
+      transition: width 0.5s ease;
     }
-    @keyframes progressSlide {
-      0%   { width: 0%; }
-      70%  { width: 88%; }
-      100% { width: 95%; }
+    .ai-seg.done .ai-seg__bar::after { width: 100%; }
+    .ai-seg.done { color: rgba(212,175,55,0.8); }
+    .ai-seg.active .ai-seg__bar::after {
+      width: 50%;
+      animation: segPulse 1.2s ease-in-out infinite alternate;
     }
+    @keyframes segPulse { to { opacity: 0.5; } }
 
     /* Result state */
     .ai-result-badge {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.16em;
       color: #d4af37;
       background: rgba(212,175,55,0.1);
       border: 1px solid rgba(212,175,55,0.25);
       border-radius: 99px;
-      padding: 0.3rem 1rem;
-      margin-bottom: 0.25rem;
+      padding: 0.3rem 1.1rem;
+    }
+    .ai-result-frame {
+      position: relative;
+      width: 100%;
     }
     .ai-result-image {
       width: 100%;
-      max-height: 340px;
+      max-height: 320px;
       object-fit: contain;
       border-radius: 16px;
-      box-shadow: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.15);
-      animation: revealImage 0.6s cubic-bezier(0.22,1,0.36,1) both;
+      box-shadow: 0 16px 56px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.12);
+      animation: revealImg 0.7s cubic-bezier(0.22,1,0.36,1) both;
     }
-    @keyframes revealImage {
-      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    @keyframes revealImg {
+      from { opacity: 0; transform: scale(0.9) translateY(16px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
+    .ai-frame-corner {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: #d4af37;
+      border-style: solid;
+      opacity: 0.6;
+    }
+    .ai-frame-corner--tl { top: 8px;  left: 8px;  border-width: 1.5px 0 0 1.5px; border-radius: 4px 0 0 0; }
+    .ai-frame-corner--tr { top: 8px;  right: 8px; border-width: 1.5px 1.5px 0 0; border-radius: 0 4px 0 0; }
+    .ai-frame-corner--bl { bottom: 8px; left: 8px;  border-width: 0 0 1.5px 1.5px; border-radius: 0 0 0 4px; }
+    .ai-frame-corner--br { bottom: 8px; right: 8px; border-width: 0 1.5px 1.5px 0; border-radius: 0 0 4px 0; }
     .ai-result-name {
-      font-family: var(--font-heading, 'Playfair Display', serif);
-      font-size: 1.15rem;
-      color: #f5f0e8;
-      letter-spacing: 0.04em;
+      font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+      font-size: clamp(1.15rem, 4vw, 1.45rem);
+      font-style: italic;
+      font-weight: 700;
+      color: #d4af37;
+      letter-spacing: 0.06em;
+      text-transform: none;
+      font-variant: normal;
+      text-shadow: 0 0 18px rgba(212, 175, 55, 0.45), 0 2px 12px rgba(0, 0, 0, 0.75);
+      margin-top: 0.35rem;
+      line-height: 1.25;
     }
     .ai-overlay__actions {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 0.25rem;
     }
+    .btn-ai-apply {
+      padding: 0.65rem 1.6rem;
+      background: linear-gradient(135deg, #c8960c, #d4af37, #e8c84a);
+      border: none;
+      border-radius: 10px;
+      color: #0a0804;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.03em;
+    }
+    .btn-ai-apply:hover { opacity: 0.9; transform: translateY(-1px); }
   </style>
 
   <script src="assets/js/api.js" defer></script>

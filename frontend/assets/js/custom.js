@@ -11,6 +11,39 @@
     corazon:  'assets/img/product-serum.png',
     fondo:    'assets/img/product-bodyoil.png'
   };
+
+  // ── Canvas preview constants ─────────────────────────────────────────
+  const CANVAS_BASE_SRC = 'assets/img/luxury-base-atmosphere.png';
+  const BOTTLE_IMG_MAP = {
+    '4':  'assets/img/types/IMPACT_FRASCO.png',
+    '5':  'assets/img/types/GRANADE_FRASCO.jpg',
+    '6':  'assets/img/types/DIAMOND_FRASCO.JPG',
+    '7':  'assets/img/types/PEARL_FRASCO.JPG',
+    '8':  'assets/img/types/GENTLEMEN_FRASCO.JPG',
+    '9':  'assets/img/types/CHAMPIONS_FRASCO.png',
+    '10': 'assets/img/types/HEEL_FRASCO.JPG',
+    '11': 'assets/img/types/PANTHER_FRASCO.png'
+  };
+  /** Matches static bottle cards when API /frascos IDs differ or fail to load. */
+  const BOTTLE_SHAPE_BY_ID = {
+    '4': 'Impact silhouette bottle',
+    '5': 'Grenade-shaped luxury bottle',
+    '6': 'Diamond-cut faceted crystal bottle',
+    '7': 'Pearl-inspired rounded elegant bottle',
+    '8': 'Classic gentlemen rectangular bottle',
+    '9': 'Trophy champions sculptural bottle',
+    '10': 'High heel sculptural stiletto bottle',
+    '11': 'Panther sleek feline sculptural bottle'
+  };
+  const INTENSITY_PARTICLE_COLOR = {
+    elixir:          '#d4af37',
+    eau_de_parfum:   '#c8a060',
+    eau_de_toilette: '#8ab4cc',
+    eau_de_cologne:  '#90b888',
+    body_mist:       '#d4b8a8'
+  };
+  const _imgCache = {};
+  let _canvasTimer = null;
   const NOTE_DESCRIPTIONS = {
     'Tobacco':    'Warm and enveloping',
     'Sandalwood': 'Fresh wood',
@@ -94,19 +127,26 @@
   }
 
   function labelIntensidad(intensidad) {
-    if (intensidad === 'eau_de_parfum') return 'Eau de Parfum';
-    if (intensidad === 'eau_de_toilette') return 'Eau de Toilette';
-    if (intensidad === 'body_mist') return 'Body Mist';
-    return '—';
+    const labels = {
+      elixir: 'Elixir',
+      eau_de_parfum: 'Eau de Parfum',
+      eau_de_toilette: 'Eau de Toilette',
+      eau_de_cologne: 'Eau de Cologne',
+      body_mist: 'Eau Solide'
+    };
+    return labels[intensidad] || '—';
   }
 
   function intensidadDesdeCard(card) {
     const value = normalizarTexto(card.dataset.value);
-    const text  = normalizarTexto(card.textContent);
+    const text = normalizarTexto(card.textContent);
 
+    if (value === 'elixir' || text.includes('elixir')) return 'elixir';
     if (value === 'body_mist' || text.includes('solide') || text.includes('mist')) return 'body_mist';
-    if (value === 'eau_de_toilette' || value === 'eau_de_cologne' || text.includes('toilette') || text.includes('cologne')) return 'eau_de_toilette';
-    return 'eau_de_parfum';
+    if (value === 'eau_de_cologne' || text.includes('cologne')) return 'eau_de_cologne';
+    if (value === 'eau_de_toilette' || text.includes('toilette')) return 'eau_de_toilette';
+    if (value === 'eau_de_parfum' || text.includes('parfum')) return 'eau_de_parfum';
+    return value || 'eau_de_parfum';
   }
 
   function getFrasco(idFrasco) {
@@ -125,6 +165,18 @@
     const frasco = getFrasco(idFrasco);
     if (frasco) return `${frasco.forma} (${frasco.capacidadMl}ml)`;
     return selections.bottleLabel || '—';
+  }
+
+  /** Shape description for AI when DB row is missing (static carousel). */
+  function getFrascoFormaParaPrompt() {
+    const id = String(selections.idFrasco ?? '');
+    if (BOTTLE_SHAPE_BY_ID[id]) return BOTTLE_SHAPE_BY_ID[id];
+    
+    const frasco = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
+    if (frasco?.forma) return String(frasco.forma).trim();
+    
+    const lbl = selections.bottleLabel;
+    return (lbl && String(lbl).trim()) || 'sleek cylindrical glass perfume bottle';
   }
 
   function calcularPrecio() {
@@ -313,8 +365,17 @@
       previewComposition.textContent = composition || '—';
     }
 
+    const nameInput = document.getElementById('perfumeName');
+    const previewLabel = document.getElementById('previewLabel');
+    if (nameInput && previewLabel) {
+      const raw = nameInput.value || '';
+      previewLabel.textContent = raw.trim() || 'Your Fragrance';
+    }
+
     updateTypePriceReveals();
     updatePriceBar();
+    renderCanvasPreview();
+    updateBottleOverlay();
   }
 
   function selectSingleCard(card, group) {
@@ -406,6 +467,9 @@
       return;
     }
 
+    const aiImg = document.getElementById('aiResultImage')?.src;
+    const imagenFinal = (aiImg && aiImg.startsWith('data:')) ? aiImg : BOTTLE_IMAGE;
+
     if (!getUsuarioId()) {
       // Guest: save to guest cart and go to cart
       const payload = crearPayload();
@@ -418,7 +482,7 @@
         nombre: payload.nombrePersonalizado || 'Custom Fragrance',
         perfumeName: payload.nombrePersonalizado,
         precioCalculado: payload.precioCalculado,
-        imagenUrl: BOTTLE_IMAGE,
+        imagenUrl: imagenFinal,
         cantidad: 1
       });
       localStorage.setItem('shineGuestCart', JSON.stringify(guestItems));
@@ -436,6 +500,10 @@
     try {
       const perfume = await window.ShineAPI.post('/perfumes-custom', crearPayload());
       const idPerfCust = perfume.idPerfCust ?? perfume.id ?? perfume.idPerfumeCustom;
+
+      if (imagenFinal.startsWith('data:')) {
+        try { sessionStorage.setItem('custom_img_' + idPerfCust, imagenFinal); } catch(e) {}
+      }
 
       if (typeof window.añadirPerfumeCustomAlCarrito === 'function') {
         await window.añadirPerfumeCustomAlCarrito(idPerfCust, 1);
@@ -494,17 +562,13 @@
       }
     }, true);
 
-    let typingTimer;
     nameInput?.addEventListener('input', () => {
       const previewLabel = document.getElementById('previewLabel');
-      if (previewLabel) previewLabel.textContent = nameInput.value || 'Your Fragrance';
-      
-      clearTimeout(typingTimer);
-      if (nameInput.value.trim().length > 0) {
-        typingTimer = setTimeout(() => {
-          document.getElementById('btnGenerarAI')?.click();
-        }, 1500);
+      if (previewLabel) {
+        const raw = nameInput.value || '';
+        previewLabel.textContent = raw.trim() || 'Your Fragrance';
       }
+      renderCanvasPreview();
     });
 
     updateStepper();
@@ -539,6 +603,119 @@
     bindCarousel('bottleCarousel',   'bottlePrev',   'bottleNext');
   }
 
+  // ── Canvas Preview System ────────────────────────────────────────────────
+  function _loadImg(src) {
+    if (_imgCache[src]) return Promise.resolve(_imgCache[src]);
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload  = () => { _imgCache[src] = img; resolve(img); };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
+  function renderCanvasPreview() {
+    clearTimeout(_canvasTimer);
+    _canvasTimer = setTimeout(_doRenderCanvas, 30);
+  }
+
+  async function _doRenderCanvas() {
+    const canvas = document.getElementById('previewCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // 1. Dark premium gradient background
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0,   '#1c1208');
+    grad.addColorStop(0.5, '#0d0904');
+    grad.addColorStop(1,   '#080604');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Atmosphere base image
+    const baseImg = await _loadImg(CANVAS_BASE_SRC);
+    if (baseImg) {
+      ctx.globalAlpha = 0.55;
+      ctx.drawImage(baseImg, 0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
+
+    // 3. Deterministic sparkle particles (by intensity type)
+    const pColor = INTENSITY_PARTICLE_COLOR[selections.intensidad] || '#d4af37';
+    _drawParticles(ctx, W, H, pColor);
+
+    // 4. Subtle glow in centre (where bottle sits)
+    const glow = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, W*0.38);
+    glow.addColorStop(0, pColor + '1a');
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // 5. Type + ml label (very top, subtle)
+    const tipoLabel = labelIntensidad(selections.intensidad);
+    const mlLabel   = selections.cantidad ? `${selections.cantidad} ml` : '';
+    const topLine   = [tipoLabel !== '\u2014' ? tipoLabel : null, mlLabel].filter(Boolean).join(' \u00B7 ');
+    if (topLine) {
+      ctx.save();
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font         = '10px Inter, sans-serif';
+      ctx.fillStyle    = 'rgba(255,248,235,0.30)';
+      ctx.fillText(topLine, W / 2, H * 0.05);
+      ctx.restore();
+    }
+
+    // 6. Vignette
+    const vign = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.72);
+    vign.addColorStop(0, 'transparent');
+    vign.addColorStop(1, 'rgba(0,0,0,0.65)');
+    ctx.fillStyle = vign;
+    ctx.fillRect(0, 0, W, H);
+
+    // NOTE: Bottle, name and note chips are rendered as CSS layers over the canvas
+    // See: .canvas-bottle-overlay, .canvas-text-overlay in the HTML
+  }
+
+  function _drawParticles(ctx, W, H, color) {
+    const N = 22;
+    const seed = (selections.intensidad || 'edp').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    ctx.save();
+    for (let i = 0; i < N; i++) {
+      const sx    = ((seed * (i + 1) * 7919) % 97) / 97;
+      const sy    = ((seed * (i + 3) * 6271) % 97) / 97;
+      const size  = 0.8 + ((seed * (i + 5) * 3571) % 100) / 60;
+      const alpha = 0.10 + ((seed * (i + 7) * 4513) % 60) / 220;
+      ctx.beginPath();
+      ctx.arc(sx * W, sy * H, size, 0, Math.PI * 2);
+      ctx.fillStyle = color + Math.round(alpha * 255).toString(16).padStart(2, '0');
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function initCanvasPreview() {
+    const canvas = document.getElementById('previewCanvas');
+    if (!canvas) return;
+    canvas.width  = 480;
+    canvas.height = 480;
+    _loadImg(CANVAS_BASE_SRC);
+    updateBottleOverlay();
+    renderCanvasPreview();
+  }
+
+  function updateBottleOverlay() {
+    const img = document.getElementById('previewBottleImg');
+    if (!img) return;
+    const rel = BOTTLE_IMG_MAP[String(selections.idFrasco)] || '';
+    if (img.dataset.overlayBottle !== rel) {
+      img.dataset.overlayBottle = rel;
+      img.src = rel;
+    }
+    img.classList.remove('canvas-bottle-overlay--hidden');
+  }
+
   async function cargarOpcionesBackend() {
     if (!window.ShineAPI) {
       showToast('Could not initialize the connection with the API.');
@@ -567,94 +744,136 @@
 
   // ── AI Generation overlay helpers ───────────────────────────────────────
   const AI_MESSAGES = [
-    'Crafting your exclusive bottle…',
     'Blending your chosen notes…',
-    'Applying studio lighting…',
+    'Composing light and shadow…',
     'Rendering glass reflections…',
+    'Applying premium studio lighting…',
     'Adding gold typography…',
-    'Almost ready — final touches…'
+    'Final render in progress…'
   ];
 
-  function aiOverlayShow(name) {
+  /** OpenAI /v1/images/generations: prefer inline base64 (reliable in img); URLs often break in the browser. */
+  function imageUrlFromOpenAiImagesResponse(data) {
+    const item = data?.data?.[0];
+    if (!item) return null;
+    const raw = item.b64_json ?? item.base64 ?? item.image_base64;
+    if (typeof raw === 'string' && raw.trim().length > 0) {
+      const b64 = raw.replace(/\s/g, '');
+      let mime = 'image/png';
+      if (b64.startsWith('/9j') || b64.startsWith('/9J')) mime = 'image/jpeg';
+      else if (b64.startsWith('UklGR')) mime = 'image/webp';
+      else if (b64.startsWith('iVBOR')) mime = 'image/png';
+      return `data:${mime};base64,${b64}`;
+    }
+    const url = typeof item.url === 'string' ? item.url.trim() : '';
+    if (url && /^https?:\/\//i.test(url)) return url;
+    return null;
+  }
+
+  function aiOverlayShow() {
     const overlay = document.getElementById('aiGeneratingOverlay');
-    const stateLoading = document.getElementById('aiStateLoading');
-    const stateResult  = document.getElementById('aiStateResult');
-    const msgEl        = document.getElementById('aiLoadingMessage');
+    const stateLoad = document.getElementById('aiStateLoading');
+    const stateResult = document.getElementById('aiStateResult');
+    const msgEl = document.getElementById('aiLoadingMessage');
     if (!overlay) return;
 
-    stateLoading.style.display = 'flex';
-    stateResult.style.display  = 'none';
+    if (overlay._msgTimer) clearInterval(overlay._msgTimer);
+    if (overlay._segTick) clearInterval(overlay._segTick);
+    overlay._segTimers?.forEach(t => clearTimeout(t));
+
+    stateLoad.style.display = 'flex';
+    stateResult.style.display = 'none';
     overlay.classList.add('ai-overlay--visible');
     document.body.style.overflow = 'hidden';
 
-    // Rotate status messages
+    document.querySelectorAll('.ai-seg').forEach(s => s.classList.remove('done', 'active'));
+
     let msgIdx = 0;
     if (msgEl) msgEl.textContent = AI_MESSAGES[0];
     overlay._msgTimer = setInterval(() => {
       msgIdx = (msgIdx + 1) % AI_MESSAGES.length;
       if (msgEl) msgEl.textContent = AI_MESSAGES[msgIdx];
-    }, 3500);
+    }, 2200);
 
-    // Animate sparkles
-    const sparkleContainer = document.getElementById('aiSparkles');
-    if (sparkleContainer) {
-      sparkleContainer.innerHTML = '';
-      for (let i = 0; i < 18; i++) {
-        const sp = document.createElement('div');
-        sp.className = 'ai-sparkle';
-        sp.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*2).toFixed(2)}s;animation-duration:${(1.5+Math.random()*2).toFixed(2)}s`;
-        sparkleContainer.appendChild(sp);
-      }
-    }
+    const segs = Array.from(document.querySelectorAll('.ai-seg'));
+    const t0 = Date.now();
+    const tick = () => {
+      if (!segs.length) return;
+      const elapsed = Date.now() - t0;
+      const phase = Math.min(segs.length - 1, Math.floor(elapsed / 700));
+      segs.forEach((s, j) => {
+        s.classList.toggle('done', j < phase);
+        s.classList.toggle('active', j === phase);
+      });
+    };
+    tick();
+    overlay._segTick = setInterval(tick, 400);
   }
 
   function aiOverlayShowResult(imageUrl, name) {
-    const stateLoading = document.getElementById('aiStateLoading');
-    const stateResult  = document.getElementById('aiStateResult');
-    const resultImg    = document.getElementById('aiResultImage');
-    const resultName   = document.getElementById('aiResultName');
-    const downloadBtn  = document.getElementById('aiDownloadBtn');
-    const overlay      = document.getElementById('aiGeneratingOverlay');
+    const overlay = document.getElementById('aiGeneratingOverlay');
+    const stateLoad = document.getElementById('aiStateLoading');
+    const stateResult = document.getElementById('aiStateResult');
+    const resultImg = document.getElementById('aiResultImage');
+    const resultName = document.getElementById('aiResultName');
 
     if (overlay?._msgTimer) clearInterval(overlay._msgTimer);
+    if (overlay?._segTick) clearInterval(overlay._segTick);
+    overlay?._segTimers?.forEach(t => clearTimeout(t));
 
-    if (resultImg)  resultImg.src = imageUrl;
-    if (resultName) resultName.textContent = name || 'Your Exclusive Fragrance';
-    if (downloadBtn) {
-      downloadBtn.href = imageUrl;
-      downloadBtn.download = (name || 'shine-custom-perfume').replace(/\s+/g, '-').toLowerCase() + '.png';
+    document.querySelectorAll('.ai-seg').forEach(s => {
+      s.classList.remove('active');
+      s.classList.add('done');
+    });
+
+    if (resultImg) {
+      resultImg.loading = 'eager';
+      resultImg.src = '';
+      requestAnimationFrame(() => {
+        resultImg.src = imageUrl;
+      });
     }
+    if (resultName) resultName.textContent = name || 'Your Exclusive Fragrance';
 
-    stateLoading.style.display = 'none';
-    stateResult.style.display  = 'flex';
+    stateLoad.style.display = 'none';
+    stateResult.style.display = 'flex';
   }
 
   function aiOverlayHide() {
     const overlay = document.getElementById('aiGeneratingOverlay');
     if (!overlay) return;
     if (overlay._msgTimer) clearInterval(overlay._msgTimer);
+    if (overlay._segTick) clearInterval(overlay._segTick);
+    overlay._segTimers?.forEach(t => clearTimeout(t));
     overlay.classList.remove('ai-overlay--visible');
     document.body.style.overflow = '';
   }
 
   function setupGeneradorIA() {
-    const btnGenerar    = document.getElementById('btnGenerarAI');
-    const previewImagen = document.getElementById('previewImagen');
-    const closeBtn      = document.getElementById('aiCloseBtn');
+    const btnGenerar = document.getElementById('btnGenerarAI');
+    const closeBtn   = document.getElementById('aiCloseBtn');
 
     if (!btnGenerar) return;
 
-    // Close overlay → apply image to preview
+    // Close overlay → draw AI image onto canvas
     closeBtn?.addEventListener('click', () => {
       const resultImg = document.getElementById('aiResultImage');
-      if (resultImg?.src && previewImagen) {
-        previewImagen.src = resultImg.src;
-        previewImagen.style.maxHeight = '280px';
-        previewImagen.style.borderRadius = '12px';
-        previewImagen.style.boxShadow = '0 8px 32px rgba(212,175,55,0.25)';
+      if (resultImg?.src) {
+        const canvas = document.getElementById('previewCanvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const aiImg = new Image();
+          aiImg.crossOrigin = 'anonymous';
+          aiImg.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(aiImg, 0, 0, canvas.width, canvas.height);
+            document.getElementById('previewBottleImg')?.classList.add('canvas-bottle-overlay--hidden');
+          };
+          aiImg.src = resultImg.src;
+        }
       }
       aiOverlayHide();
-      showToast('✨ Design applied to your preview!');
+      showToast('✦ AI design applied to your preview!');
     });
 
     // Close on backdrop click
@@ -666,33 +885,42 @@
     });
 
     btnGenerar.addEventListener('click', async () => {
-      const tipo         = selections.intensidad || '';
-      const base         = selections.base ? getFraganciaLabel(selections.base) : '';
-      const notas        = selections.notes.map(getFraganciaLabel).filter(Boolean).join(', ');
-      const frascoObj    = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
-      const frasco       = frascoObj ? `${frascoObj.forma} (${frascoObj.capacidadMl}ml)` : '';
-      const formaElegida = frascoObj ? frascoObj.forma : 'elegant';
-      const nombreUsuario = document.getElementById('perfumeName')?.value.trim() || 'Shine Custom';
+      const tipo = selections.intensidad || '';
+      const base = selections.base ? getFraganciaLabel(selections.base) : '';
+      const notas = selections.notes.map(id => notasOlfativas.find(n => Number(n.idNota) === Number(id))?.nombre || getFraganciaLabel(id)).filter(Boolean).join(', ');
+      const frascoObj = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
+      const frasco = frascoObj ? `${frascoObj.forma} (${frascoObj.capacidadMl}ml)` : '';
+      const formaElegida = getFrascoFormaParaPrompt();
+      const nameInput = document.getElementById('perfumeName');
+      const rawName = nameInput?.value ?? '';
+      const nombreParaMostrar = rawName.trim() || 'Shine Custom';
+      const nombreParaEnvio = rawName.replace(/\r?\n/g, ' ').trim() || 'Shine Custom';
 
-      if (!tipo && !base && !notas && !frasco) {
+      if (!tipo && !base && !notas && !selections.idFrasco) {
         showToast('Please select some options before generating your design.');
         return;
       }
 
-      // Show overlay
-      aiOverlayShow(nombreUsuario);
+      let genUrl = '/api/generar-custom';
+      try {
+        if (window.ShineAPI?.baseUrl) {
+          genUrl = new URL('/api/generar-custom', window.ShineAPI.baseUrl).href;
+        }
+      } catch (_) { /* keep relative */ }
+
+      aiOverlayShow();
       btnGenerar.disabled = true;
 
       try {
         const params = new URLSearchParams();
-        params.append('tipo',          labelIntensidad(tipo));
-        params.append('base',          base);
-        params.append('notas',         notas);
-        params.append('frasco',        frasco);
-        params.append('formaElegida',  formaElegida);
-        params.append('nombreUsuario', nombreUsuario);
+        params.append('tipo', labelIntensidad(tipo));
+        params.append('base', base);
+        params.append('notas', notas);
+        params.append('frasco', frasco);
+        params.append('formaElegida', formaElegida);
+        params.append('nombreUsuario', nombreParaEnvio);
 
-        const response = await fetch('http://localhost:8080/api/generar-custom', {
+        const response = await fetch(genUrl, {
           method: 'POST',
           body: params,
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -702,22 +930,17 @@
         try { data = await response.json(); } catch (_) { data = null; }
 
         if (!response.ok) {
-          const detail = data?.error || data?.detail || `HTTP ${response.status}`;
-          throw new Error(detail);
+          const msg = [data?.error, data?.detail].filter(Boolean).join(' — ') || `HTTP ${response.status}`;
+          throw new Error(msg.length > 400 ? msg.slice(0, 400) + '…' : msg);
         }
 
-        // Extract image — supports both URL and base64 (b64_json)
-        const item = data?.data?.[0];
-        const imageUrl = item?.url
-          ? item.url
-          : item?.b64_json
-            ? 'data:image/png;base64,' + item.b64_json
-            : null;
+        const imageUrl = imageUrlFromOpenAiImagesResponse(data);
 
         if (!imageUrl) throw new Error('The AI did not return a valid image. Please try again.');
 
-        aiOverlayShowResult(imageUrl, nombreUsuario);
-
+        aiOverlayShowResult(imageUrl, nombreParaMostrar);
+        const previewLabel = document.getElementById('previewLabel');
+        if (previewLabel) previewLabel.textContent = nombreParaMostrar;
       } catch (error) {
         console.error('[Shine AI]', error);
         aiOverlayHide();
@@ -736,6 +959,7 @@
     setupStepper();
     setupCarousel();
     setupGeneradorIA();
+    initCanvasPreview();
     cargarOpcionesBackend();
     updateTypePriceReveals();
   });

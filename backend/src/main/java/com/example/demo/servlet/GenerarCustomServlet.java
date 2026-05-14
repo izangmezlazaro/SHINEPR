@@ -7,11 +7,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Base64;
 import java.util.Scanner;
 
 /**
@@ -21,7 +27,14 @@ import java.util.Scanner;
 @WebServlet(urlPatterns = "/api/generar-custom", name = "GenerarCustomServlet")
 public class GenerarCustomServlet extends HttpServlet {
 
-    private static final String OPENAI_API_KEY = "";
+    private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
+            ? System.getenv("OPENAI_API_KEY")
+            : "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"; // <--
+                                                                                                                                                                                      // PEGA
+                                                                                                                                                                                      // TU
+                                                                                                                                                                                      // API
+                                                                                                                                                                                      // KEY
+                                                                                                                                                                                      // AQUÍ
 
     private static final String MODEL = "gpt-image-1-mini";
     private static final int CONNECT_MS = 15_000; // 15 s
@@ -29,6 +42,13 @@ public class GenerarCustomServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (OPENAI_API_KEY == null || OPENAI_API_KEY.trim().isEmpty()) {
+            System.err.println(">> OPENAI_API_KEY IS MISSING!");
+            HttpUtil.writeError(resp, HttpServletResponse.SC_UNAUTHORIZED,
+                    "The OpenAI API key is not configured in the backend.");
+            return;
+        }
+
         try {
             // ── Read parameters (application/x-www-form-urlencoded) ──────────
             String tipo = nvl(req.getParameter("tipo"), "Eau de Parfum");
@@ -36,6 +56,10 @@ public class GenerarCustomServlet extends HttpServlet {
             String notas = nvl(req.getParameter("notas"), "floral and woody");
             String formaElegida = nvl(req.getParameter("formaElegida"), "sleek glass");
             String nombreUsuario = nvl(req.getParameter("nombreUsuario"), "Shine");
+            String nombreEtiqueta = stripLabelMarkers(nombreUsuario);
+            if (nombreEtiqueta.isEmpty()) {
+                nombreEtiqueta = "Shine";
+            }
 
             System.out.println("=== SHINE AI GENERATOR ===");
             System.out.println("Model     : " + MODEL);
@@ -45,24 +69,25 @@ public class GenerarCustomServlet extends HttpServlet {
             System.out.println("Shape     : " + formaElegida);
             System.out.println("Name      : " + nombreUsuario);
 
-            // ── Build the prompt ─────────────────────────────────────────────
-            String prompt = "Luxury perfume product photography on a dark, moody background. "
-                    + "Center: a " + formaElegida + " glass perfume bottle with a translucent liquid. "
-                    + "Beside it, a matching matte-finish premium box. "
-                    + "Both display the name '" + nombreUsuario + "' in minimalist gold serif typography. "
-                    + "Fragrance style: " + tipo + ". "
-                    + (!notas.isEmpty() ? "Scent notes: " + notas + ". " : "")
-                    + "Cinematic studio lighting, realistic glass reflections and soft shadows. "
-                    + "8K photorealistic render, no watermarks, no extra text.";
+            // Compact prompt + strict label copy (user casing / punctuation preserved
+            // in-image)
+            String notasClause = notas.isEmpty() ? "" : ", " + notas + " notes";
+            String baseClause = base.isEmpty() ? "" : ", base " + base;
+            String prompt = "Luxury " + formaElegida + " perfume bottle, " + tipo + " editorial still"
+                    + baseClause
+                    + notasClause
+                    + ", dark premium studio, soft spotlight, gold foil label on glass front; "
+                    + "label text must match EXACTLY between markers (same capitals, spaces, accents, punctuation; "
+                    + "no translation, no autocorrect, no Title Case): <<<"
+                    + nombreEtiqueta
+                    + ">>>";
 
-            String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"");
-
-            String body = "{"
-                    + "\"model\":\"" + MODEL + "\","
-                    + "\"prompt\":\"" + safePrompt + "\","
-                    + "\"n\":1,"
-                    + "\"size\":\"1024x1024\""
-                    + "}";
+            JsonObject openAiRequest = new JsonObject();
+            openAiRequest.addProperty("model", MODEL);
+            openAiRequest.addProperty("prompt", prompt);
+            openAiRequest.addProperty("n", 1);
+            openAiRequest.addProperty("size", "1024x1024");
+            String body = new Gson().toJson(openAiRequest);
 
             System.out.println("Prompt    : " + prompt);
 
@@ -101,11 +126,17 @@ public class GenerarCustomServlet extends HttpServlet {
 
             if (status == 200) {
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write(responseStr);
+                resp.getWriter().write(ensureInlineBase64Image(responseStr));
             } else {
-                // Return error as JSON so the frontend can display a proper message
-                String safeDetail = responseStr.replace("\\", "\\\\").replace("\"", "\\\"");
-                resp.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+                String safeDetail = responseStr;
+                if (safeDetail.length() > 1800) {
+                    safeDetail = safeDetail.substring(0, 1800) + "…";
+                }
+                safeDetail = safeDetail.replace("\\", "\\\\").replace("\"", "\\\"");
+                int proxyStatus = (status == 401 || status == 403) ? HttpServletResponse.SC_UNAUTHORIZED
+                        : (status == 400 || status == 422) ? HttpServletResponse.SC_BAD_REQUEST
+                                : HttpServletResponse.SC_BAD_GATEWAY;
+                resp.setStatus(proxyStatus);
                 resp.getWriter().write(
                         "{\"error\":\"OpenAI returned " + status + "\",\"detail\":\"" + safeDetail + "\"}");
             }
@@ -122,5 +153,88 @@ public class GenerarCustomServlet extends HttpServlet {
      */
     private static String nvl(String value, String fallback) {
         return (value != null && !value.trim().isEmpty()) ? value.trim() : fallback;
+    }
+
+    /**
+     * Prevent user text from breaking the <<< >>> label delimiters in the prompt.
+     */
+    private static String stripLabelMarkers(String name) {
+        if (name == null) {
+            return "";
+        }
+        return name.replace("<<<", "").replace(">>>", "").trim();
+    }
+
+    /**
+     * If OpenAI returns only a temporary {@code url}, the browser often cannot show
+     * it in {@code <img>}
+     * (CORS / referrer / expiry). Fetch the bytes here and return JSON with
+     * {@code b64_json} populated.
+     */
+    private static String ensureInlineBase64Image(String openAiJson) {
+        try {
+            JsonObject root = JsonParser.parseString(openAiJson).getAsJsonObject();
+            JsonArray data = root.getAsJsonArray("data");
+            if (data == null || data.isEmpty()) {
+                return openAiJson;
+            }
+            if (!data.get(0).isJsonObject()) {
+                return openAiJson;
+            }
+            JsonObject first = data.get(0).getAsJsonObject();
+            if (hasNonBlank(first, "b64_json")) {
+                return openAiJson;
+            }
+            if (!hasNonBlank(first, "url")) {
+                return openAiJson;
+            }
+            String imageUrl = first.get("url").getAsString().trim();
+            if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                return openAiJson;
+            }
+            byte[] bytes = fetchUrlBytes(imageUrl);
+            if (bytes.length == 0) {
+                return openAiJson;
+            }
+            first.remove("url");
+            first.addProperty("b64_json", Base64.getEncoder().encodeToString(bytes));
+            return new Gson().toJson(root);
+        } catch (Exception e) {
+            System.err.println("ensureInlineBase64Image: " + e.getMessage());
+            return openAiJson;
+        }
+    }
+
+    private static boolean hasNonBlank(JsonObject o, String field) {
+        if (o == null || !o.has(field) || o.get(field).isJsonNull()) {
+            return false;
+        }
+        String s = o.get(field).getAsString();
+        return s != null && !s.trim().isEmpty();
+    }
+
+    private static byte[] fetchUrlBytes(String imageUrl) throws IOException {
+        URL u = new URL(imageUrl);
+        HttpURLConnection c = (HttpURLConnection) u.openConnection();
+        c.setRequestMethod("GET");
+        c.setConnectTimeout(CONNECT_MS);
+        c.setReadTimeout(READ_MS);
+        c.setInstanceFollowRedirects(true);
+        c.setRequestProperty("User-Agent", "ShinePerfume/1.0 (+https://shine.local)");
+        int code = c.getResponseCode();
+        if (code < 200 || code >= 300) {
+            InputStream err = c.getErrorStream();
+            if (err != null) {
+                try (InputStream es = err) {
+                    es.readAllBytes();
+                }
+            }
+            return new byte[0];
+        }
+        try (InputStream in = c.getInputStream()) {
+            return in.readAllBytes();
+        } finally {
+            c.disconnect();
+        }
     }
 }

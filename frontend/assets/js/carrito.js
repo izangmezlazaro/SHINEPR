@@ -239,7 +239,12 @@
       const name = isGuest ? item.nombre : getItemName(item);
       const unitPrice = isGuest ? item.precioUnitario : getItemUnitPrice(item);
       const qty = isGuest ? item.cantidad : getItemQty(item);
-      const imgSrc = item.imagenUrl || FALLBACK_IMAGE;
+      let imgSrc = item.imagenUrl || FALLBACK_IMAGE;
+      
+      if (!isGuest && item.idPerfCust) {
+        const cachedImg = sessionStorage.getItem('custom_img_' + item.idPerfCust);
+        if (cachedImg) imgSrc = cachedImg;
+      }
 
       return `
         <div class="cart-item" data-cart-item="${escapeHtml(String(id))}">
