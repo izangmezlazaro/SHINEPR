@@ -102,10 +102,20 @@ public class Main {
                 try (InputStream in = Main.class.getClassLoader().getResourceAsStream(script)) {
                     if (in == null) { System.err.println("Migration not found: " + script); continue; }
                     String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-                    try (Statement stmt = conn.createStatement()) {
-                        stmt.execute(sql);
-                        System.out.println("Migration OK: " + script);
+                    // Split by semicolons and execute each statement individually
+                    String[] statements = sql.split(";");
+                    boolean allOk = true;
+                    for (String rawStmt : statements) {
+                        String trimmed = rawStmt.trim();
+                        if (trimmed.isEmpty() || trimmed.startsWith("--")) continue;
+                        try (Statement stmt = conn.createStatement()) {
+                            stmt.execute(trimmed);
+                        } catch (Exception e) {
+                            System.err.println("Migration warning (" + script + "): " + e.getMessage());
+                            allOk = false;
+                        }
                     }
+                    if (allOk) System.out.println("Migration OK: " + script);
                 } catch (Exception e) {
                     System.err.println("Migration warning (" + script + "): " + e.getMessage());
                 }

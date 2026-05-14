@@ -12,9 +12,9 @@ echo 🛠️  Compilando y empaquetando proyecto...
 call mvn clean package
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo ❌ ERROR: La compilacion ha fallado. Revisa el codigo arriba.
+    echo ERROR: La compilacion ha fallado. El log completo esta en build.log
     pause
-    exit /b %ERRORLEVEL%
+    exit /b %BUILD_ERROR%
 )
 
 echo.
