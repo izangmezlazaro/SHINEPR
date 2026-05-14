@@ -5,7 +5,7 @@
 (function () {
   const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const DELAY_CLASSES = ['', ' reveal--delay-1', ' reveal--delay-2'];
-  const PRODUCT_CACHE_KEY = 'shine:productos:v2';
+  const PRODUCT_CACHE_KEY = 'shine:productos:v3';
   const PRODUCT_CACHE_TTL = 10 * 60 * 1000; // 10 min — matches backend Cache-Control
 
   // Maps frontend filter key → id_categoria in DB
@@ -31,7 +31,8 @@
       { idSubcategoria: null, nombre: 'Classic',               keywords: ['clasico', 'clasica', 'classic', 'classical', 'original', 'traditional', 'heritage', 'timeless', 'vintage', 'elegance', 'elegancia'] },
       { idSubcategoria: null, nombre: 'New Generation',        keywords: ['new generation', 'nueva generacion', 'modern', 'fresco', 'fresh', 'contemporary', 'neo', 'next', 'nuevo', 'generation'] },
       { idSubcategoria: null, nombre: 'Limited Edition',       keywords: ['edicion limitada', 'edicion lim', 'limited', 'limitado', 'limitada', 'edition', 'collector', 'coleccion'] },
-      { idSubcategoria: null, nombre: 'Special Edition',       keywords: ['especial', 'special', 'exclusive', 'exclusivo', 'exclusiva', 'premium', 'vip', 'luxury', 'lujo'] },
+      { idSubcategoria: null, nombre: 'Special Edition',       keywords: ['especial', 'special', 'exclusive', 'exclusivo', 'exclusiva', 'premium', 'vip'] },
+      { idSubcategoria: null, nombre: 'Luxury',                keywords: ['luxury', 'lujo', 'lujoso', 'lujosa', 'prestige', 'prestigio', 'haute', 'opulence', 'opulencia', 'grand', 'elite', 'niche'] },
     ],
     3: [  // Supplements
       { idSubcategoria: null, nombre: 'Vitamins & Health',     keywords: ['vitamin', 'vitamina', 'health', 'mineral', 'zinc', 'iron', 'hierro', 'omega', 'probiotic', 'probiotico', 'magnesio', 'magnesium', 'calcium', 'calcio'] },
@@ -232,7 +233,11 @@
   }
 
   function filtrarPorSubcategoria(producto) {
-    if (filtroSubcatId !== null) return producto.idSubcategoria === filtroSubcatId;
+    if (filtroSubcatId !== null) {
+      // Use Number() coercion so the comparison works whether the value
+      // comes from the API (integer) or from a cached JSON string.
+      return Number(producto.idSubcategoria) === Number(filtroSubcatId);
+    }
     if (filtroSubcatKeywords !== null) {
       const texto = normalizarTexto(
         (producto.nombre        || '') + ' ' +
@@ -287,7 +292,9 @@
     const catId = CATEGORIA_IDS[catKey];
     if (!catId) return;
 
-    // Use API subcategories if available, otherwise fall back to static definitions
+    // Use API subcategories if available, otherwise fall back to static definitions.
+    // When the API returns real DB subcategories we ALWAYS use them so the
+    // idSubcategoria-based filter (exact DB match) is used instead of keywords.
     const apiSubs = subcategoriasData[catId] || [];
     const subs = apiSubs.length ? apiSubs : (SUBCATEGORIAS_ESTATICAS[catId] || []);
     if (!subs.length) return;
@@ -305,8 +312,8 @@
         container.querySelectorAll('.filter-item--sub').forEach(s => s.classList.remove('active'));
         subItem.classList.add('active');
         if (sub.idSubcategoria !== null) {
-          // API subcategory: filter by exact DB id
-          filtroSubcatId = sub.idSubcategoria;
+          // API subcategory: filter by exact DB id (force Number to avoid type mismatches)
+          filtroSubcatId = Number(sub.idSubcategoria);
           filtroSubcatKeywords = null;
         } else {
           // Static fallback: filter by keyword matching against product names

@@ -40,7 +40,7 @@ public class GenerarCustomServlet extends HttpServlet {
     private static final String MODEL = "gpt-image-1-mini";
     private static final int CONNECT_MS = 15_000; // 15 s
     private static final int READ_MS = 120_000; // 2 min – generation can be slow
-    
+
     // Rate Limiting: IP -> Timestamp of last request
     private static final ConcurrentHashMap<String, Long> rateLimiter = new ConcurrentHashMap<>();
     private static final long RATE_LIMIT_MS = 20_000; // 20 seconds per IP
@@ -50,9 +50,10 @@ public class GenerarCustomServlet extends HttpServlet {
         String clientIp = req.getRemoteAddr();
         long now = System.currentTimeMillis();
         long lastRequest = rateLimiter.getOrDefault(clientIp, 0L);
-        
+
         if (now - lastRequest < RATE_LIMIT_MS) {
-            HttpUtil.writeError(resp, 429, "Please wait " + ((RATE_LIMIT_MS - (now - lastRequest)) / 1000) + " seconds before generating another design.");
+            HttpUtil.writeError(resp, 429, "Please wait " + ((RATE_LIMIT_MS - (now - lastRequest)) / 1000)
+                    + " seconds before generating another design.");
             return;
         }
         rateLimiter.put(clientIp, now);
