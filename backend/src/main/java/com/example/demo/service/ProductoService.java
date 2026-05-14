@@ -108,6 +108,7 @@ public class ProductoService {
         p.setModoUso(req.getModoUso()); p.setPrecio(req.getPrecio());
         p.setStock(req.getStock()); p.setGenero(req.getGenero());
         p.setTipoFragancia(req.getTipoFragancia()); p.setCategoria(cat);
+        p.setIdSubcategoria(req.getIdSubcategoria());
     }
 
     ProductoResponseDTO toResponse(Producto p) throws SQLException {

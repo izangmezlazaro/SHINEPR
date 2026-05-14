@@ -1565,6 +1565,31 @@ document.addEventListener('DOMContentLoaded', () => {
     //   ADMIN PANEL: PRODUCT CREATION
     // ══════════════════════════════════════════════
 
+    const cpCategoryEl = document.getElementById('cp-category');
+    const cpSubcategoryEl = document.getElementById('cp-subcategory');
+    if (cpCategoryEl && cpSubcategoryEl) {
+      cpCategoryEl.addEventListener('change', async () => {
+        const catId = cpCategoryEl.value;
+        cpSubcategoryEl.innerHTML = '<option value="">Sin subcategoría</option>';
+        cpSubcategoryEl.disabled = true;
+        if (!catId) return;
+        try {
+          const res = await fetch(`${INTRANET_API}/subcategorias?categoriaId=${catId}`);
+          if (!res.ok) return;
+          const subs = await res.json();
+          if (Array.isArray(subs) && subs.length) {
+            subs.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s.idSubcategoria;
+              opt.textContent = s.nombre;
+              cpSubcategoryEl.appendChild(opt);
+            });
+            cpSubcategoryEl.disabled = false;
+          }
+        } catch (_) {}
+      });
+    }
+
     const createProductForm = document.getElementById('createProductForm');
     if (createProductForm) {
       createProductForm.addEventListener('submit', async (e) => {
@@ -1573,6 +1598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('cp-name')?.value.trim();
         const sku = document.getElementById('cp-sku')?.value.trim();
         const catVal = document.getElementById('cp-category')?.value;
+        const subcatVal = document.getElementById('cp-subcategory')?.value;
         const price = parseFloat(document.getElementById('cp-price')?.value || 0);
         const stock = parseInt(document.getElementById('cp-stock')?.value || 0);
         const desc = document.getElementById('cp-desc')?.value.trim() || '';
@@ -1587,10 +1613,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creando...'; }
 
         try {
+          const payload = { nombre: name, sku, idCategoria: parseInt(catVal), precio: price, stock, descripcion: desc, ingredientes: ingredients, imagenUrl: document.getElementById('cp-image')?.value.trim() || null };
+          if (subcatVal) payload.idSubcategoria = parseInt(subcatVal);
           const res = await fetch(`${INTRANET_API}/productos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre: name, sku, idCategoria: parseInt(catVal), precio: price, stock, descripcion: desc, ingredientes: ingredients, imagenUrl: document.getElementById('cp-image')?.value.trim() || null })
+            body: JSON.stringify(payload)
           });
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));
@@ -2030,6 +2058,29 @@ function setupCatalogueRowActions() {
   }
 }
 
+async function loadEpSubcategories(catId, selectedSubcatId) {
+  const subSelect = document.getElementById('ep-subcategory');
+  if (!subSelect) return;
+  subSelect.innerHTML = '<option value="">Sin subcategoría</option>';
+  subSelect.disabled = true;
+  if (!catId) return;
+  try {
+    const res = await fetch(`${INTRANET_API}/subcategorias?categoriaId=${catId}`);
+    if (!res.ok) return;
+    const subs = await res.json();
+    if (Array.isArray(subs) && subs.length) {
+      subs.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.idSubcategoria;
+        opt.textContent = s.nombre;
+        if (selectedSubcatId && s.idSubcategoria === selectedSubcatId) opt.selected = true;
+        subSelect.appendChild(opt);
+      });
+      subSelect.disabled = false;
+    }
+  } catch (_) {}
+}
+
 async function openCatalogueEditModal(productId) {
   try {
     const res = await fetch(`${INTRANET_API}/productos/${productId}`);
@@ -2045,8 +2096,11 @@ async function openCatalogueEditModal(productId) {
     document.getElementById('ep-ingredients').value = p.ingredientes || '';
     document.getElementById('ep-fragancia').value = p.tipoFragancia || '';
 
+    const catId = p.categoria?.idCategoria;
     const catSelect = document.getElementById('ep-category');
-    if (catSelect && p.categoria?.idCategoria) catSelect.value = p.categoria.idCategoria;
+    if (catSelect && catId) catSelect.value = catId;
+
+    await loadEpSubcategories(catId, p.idSubcategoria ?? null);
 
     if (window.openModal) window.openModal('editProductModal');
   } catch (e) {
@@ -2121,12 +2175,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ── Wiring: Category change in Edit modal → reload subcategories ──────────
+  document.getElementById('ep-category')?.addEventListener('change', function () {
+    loadEpSubcategories(this.value || null, null);
+  });
+
   // ── Wiring: Submit Edit Product ───────────────────────────
   document.getElementById('submitEditProduct')?.addEventListener('click', async () => {
     const id = document.getElementById('ep-id')?.value;
     const name = document.getElementById('ep-name')?.value.trim();
     const sku = document.getElementById('ep-sku')?.value.trim();
     const catId = parseInt(document.getElementById('ep-category')?.value || '0');
+    const subcatVal = document.getElementById('ep-subcategory')?.value;
     const price = parseFloat(document.getElementById('ep-price')?.value || '0');
     const stock = parseInt(document.getElementById('ep-stock')?.value || '0');
     const desc = document.getElementById('ep-desc')?.value.trim() || '';
@@ -2138,11 +2198,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const payload = { nombre: name, sku, idCategoria: catId, precio: price, stock, descripcion: desc, ingredientes: ingredients, tipoFragancia: fragancia || null };
+    if (subcatVal) payload.idSubcategoria = parseInt(subcatVal);
+
     try {
       const res = await fetch(`${INTRANET_API}/productos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: name, sku, idCategoria: catId, precio: price, stock, descripcion: desc, ingredientes: ingredients, tipoFragancia: fragancia || null })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

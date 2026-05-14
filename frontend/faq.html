@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,50 +7,210 @@
   <meta name="description" content="Frequently asked questions about Shine products, orders, shipping, and custom fragrances.">
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
-    .faq-item { border-bottom: 1px solid var(--border); }
-    .faq-question {
-      width: 100%;
-      background: none;
-      border: none;
-      text-align: left;
-      padding: var(--sp-lg) 0;
-      cursor: pointer;
+    /* ── HERO ─────────────────────────────────── */
+    .faq-hero {
+      min-height: 50vh;
+      background: linear-gradient(160deg, var(--petal) 0%, var(--blush) 50%, var(--sand) 100%);
+      position: relative;
+      overflow: hidden;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
     }
-    .faq-question svg { flex-shrink: 0; transition: transform .25s; }
-    .faq-question[aria-expanded="true"] svg { transform: rotate(180deg); }
-    .faq-answer { overflow: hidden; max-height: 0; transition: max-height .3s ease; }
-    .faq-answer p { padding-bottom: var(--sp-lg); }
+    .faq-hero::before, .faq-hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .faq-hero::before {
+      width: 500px; height: 500px;
+      top: -30%; right: -10%;
+      background: radial-gradient(circle, rgba(212,145,154,0.12) 0%, transparent 70%);
+      animation: heroOrb 10s ease-in-out infinite;
+    }
+    .faq-hero::after {
+      width: 350px; height: 350px;
+      bottom: -25%; left: -5%;
+      background: radial-gradient(circle, rgba(196,168,130,0.1) 0%, transparent 70%);
+      animation: heroOrb 12s ease-in-out infinite reverse;
+    }
+    @keyframes heroOrb {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(25px,-20px) scale(1.06); }
+    }
+    .faq-hero .container { position: relative; z-index: 2; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212,145,154,0.18);
+      border-radius: 9999px;
+      font-size: 0.8rem; font-weight: 600; color: var(--rose);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      animation: fadeUp .7s ease-out both;
+    }
+    .hero-badge svg { width: 16px; height: 16px; stroke: var(--rose); fill: none; stroke-width: 2; }
+    .faq-hero h1 {
+      background: linear-gradient(135deg, var(--noir), var(--rose));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      animation: fadeUp .7s ease-out .1s both;
+    }
+    .faq-hero .hero__sub { animation: fadeUp .7s ease-out .2s both; }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(18px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    /* ── CATEGORY TABS ───────────────────────── */
+    .faq-section { padding: 70px 0 100px; }
+    .faq-wrap { max-width: 820px; margin: 0 auto; }
+    .faq-tabs {
+      display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap;
+      animation: fadeUp .7s ease-out .3s both;
+    }
+    .faq-tab {
+      padding: 10px 22px;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(26,26,26,0.1);
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(8px);
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer;
+      transition: all .35s cubic-bezier(.22,1,.36,1);
+      color: var(--text-secondary);
+    }
+    .faq-tab:hover { border-color: var(--rose); color: var(--rose); transform: translateY(-2px); }
+    .faq-tab.active {
+      background: linear-gradient(135deg, var(--rose), var(--camel));
+      color: #fff; border-color: transparent;
+      box-shadow: 0 4px 18px rgba(212,145,154,0.3);
+    }
+
+    /* ── CATEGORY GROUP ──────────────────────── */
+    .faq-group { margin-bottom: 48px; }
+    .faq-group-title {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px; padding-bottom: 14px;
+      border-bottom: 2px solid transparent;
+      border-image: linear-gradient(90deg, var(--rose), var(--camel), transparent) 1;
+    }
+    .faq-group-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blush), var(--petal));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .faq-group-icon svg { width: 20px; height: 20px; stroke: var(--rose); fill: none; stroke-width: 2; }
+    .faq-group-title h3 { margin: 0; font-size: 1.3rem; color: var(--noir); }
+
+    /* ── ACCORDION ITEMS ─────────────────────── */
+    .faq-item {
+      margin-bottom: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(212,145,154,0.08);
+      overflow: hidden;
+      transition: all .4s cubic-bezier(.22,1,.36,1);
+      opacity: 0; transform: translateY(20px);
+    }
+    .faq-item.revealed { opacity: 1; transform: translateY(0); }
+    .faq-item:hover {
+      background: rgba(255,255,255,0.8);
+      border-color: rgba(212,145,154,0.2);
+      box-shadow: 0 8px 30px rgba(26,26,26,0.04);
+    }
+    .faq-item.open {
+      background: rgba(255,255,255,0.88);
+      border-color: rgba(212,145,154,0.22);
+      box-shadow: 0 10px 35px rgba(26,26,26,0.05);
+    }
+
+    .faq-question {
+      width: 100%; background: none; border: none; text-align: left;
+      padding: 20px 24px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+      color: var(--text-primary);
+      transition: color .3s;
+    }
+    .faq-item.open .faq-question { color: var(--rose); }
+    .faq-chevron {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--petal);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .4s cubic-bezier(.22,1,.36,1);
+    }
+    .faq-chevron svg { width: 16px; height: 16px; stroke: var(--rose); fill: none; stroke-width: 2.5; transition: transform .4s cubic-bezier(.22,1,.36,1); }
+    .faq-item.open .faq-chevron {
+      background: linear-gradient(135deg, var(--rose), var(--camel));
+      transform: rotate(180deg);
+    }
+    .faq-item.open .faq-chevron svg { stroke: #fff; }
+
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height .45s cubic-bezier(.22,1,.36,1), padding .35s ease;
+    }
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      font-size: 0.875rem; color: var(--text-secondary); line-height: 1.75;
+    }
+    .faq-answer-inner a { color: var(--camel); text-decoration: underline; text-underline-offset: 3px; }
+    .faq-answer-inner a:hover { color: var(--rose); }
+
+    /* ── CTA CARD ─────────────────────────────── */
+    .faq-cta {
+      margin-top: 56px; padding: 36px 40px;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(212,145,154,0.15);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap;
+      position: relative; overflow: hidden;
+    }
+    .faq-cta::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--rose), var(--camel), var(--blush));
+    }
+    .faq-cta h4 { margin: 0 0 6px; font-size: 1.3rem; }
+    .faq-cta p { margin: 0; font-size: 0.9rem; color: var(--text-secondary); }
+
+    /* ── SCROLL PROGRESS ─────────────────────── */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--rose), var(--camel));
+      z-index: 9999; border-radius: 0 2px 2px 0;
+    }
+
+    @media (max-width: 768px) {
+      .faq-hero { min-height: 40vh; }
+      .faq-question { padding: 16px 18px; font-size: .93rem; }
+      .faq-answer-inner { padding: 0 18px 16px; }
+      .faq-cta { padding: 28px 24px; flex-direction: column; text-align: center; }
+    }
   </style>
 </head>
-
 <body>
+
+  <div class="scroll-progress" id="scrollProgress" style="width:0%"></div>
 
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
       <nav class="nav" id="mainNav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="custom-perfumes.html">Custom Perfume</a>
-        <a href="about.html">Our Brand</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
+        <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a>
         <a href="cart.html" class="nav-cta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6" />
-          </svg>
-          Cart
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>Cart
         </a>
       </nav>
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
@@ -63,88 +222,120 @@
   </div>
 
   <main>
-    <!-- Hero -->
-    <section class="hero" style="min-height:40vh;background:var(--petal)">
+    <section class="faq-hero">
       <div class="container">
-        <div class="reveal" style="max-width:640px">
-          <p class="hero__tagline">Answers</p>
+        <div style="max-width:640px">
+          <div class="hero-badge">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Answers
+          </div>
           <h1>Frequently Asked Questions</h1>
           <p class="hero__sub">Can't find your answer here? Our team is always happy to help.</p>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="faq-section">
       <div class="container">
-        <div style="max-width:720px;margin:0 auto" class="reveal">
+        <div class="faq-wrap">
 
-          <h3 style="margin-bottom:var(--sp-lg);color:var(--camel)">Orders & Shipping</h3>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              How long does delivery take?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Standard delivery takes 3–5 business days within Spain. Express delivery (1–2 days) and international shipping are also available. See our <a href="shipping.html" style="color:var(--camel)">Shipping & Returns</a> page for full details.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              Can I track my order?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Yes. Once your order ships you'll receive an email with a tracking link. You can also view the status of all your orders in <a href="orders.html" style="color:var(--camel)">My Orders</a>.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              Do you ship internationally?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Yes, we ship to over 50 countries. International orders typically arrive in 5–10 business days. Additional customs duties may apply depending on your destination country.</p></div>
+          <!-- TABS -->
+          <div class="faq-tabs">
+            <button class="faq-tab active" data-cat="all">All</button>
+            <button class="faq-tab" data-cat="shipping">Orders & Shipping</button>
+            <button class="faq-tab" data-cat="products">Products</button>
+            <button class="faq-tab" data-cat="returns">Returns & Refunds</button>
           </div>
 
-          <h3 style="margin:var(--sp-2xl) 0 var(--sp-lg);color:var(--camel)">Products</h3>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              Are your products cruelty-free?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Absolutely. All Shine products are 100% cruelty-free. We never test on animals and are certified by Leaping Bunny. Many of our formulations are also vegan.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              What is a custom fragrance?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Our bespoke fragrance service lets you choose your preferred olfactory notes, bottle, and intensity to create a perfume that's uniquely yours. Visit <a href="custom-perfumes.html" style="color:var(--camel)">Custom Perfume</a> to get started.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              How do I find my skin type?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Each product page includes a skin-type guide. If you're unsure, our <a href="contact.html" style="color:var(--camel)">support team</a> can recommend the right products for your skin type and concerns.</p></div>
-          </div>
-
-          <h3 style="margin:var(--sp-2xl) 0 var(--sp-lg);color:var(--camel)">Returns & Refunds</h3>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              What is your return policy?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">We accept returns within 30 days of delivery on all unopened standard products. Custom fragrances cannot be returned. Full details on our <a href="shipping.html" style="color:var(--camel)">Shipping & Returns</a> page.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              How long does a refund take?
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="faq-answer"><p class="text-sm">Refunds are processed within 5 business days of us receiving the returned item. The time it takes to appear in your account depends on your bank (usually 3–5 additional days).</p></div>
+          <!-- ORDERS & SHIPPING -->
+          <div class="faq-group" data-group="shipping">
+            <div class="faq-group-title">
+              <div class="faq-group-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+              <h3>Orders & Shipping</h3>
+            </div>
+            <div class="faq-item" data-cat="shipping">
+              <button class="faq-question" aria-expanded="false">
+                How long does delivery take?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Standard delivery takes 3–5 business days within Spain. Express delivery (1–2 days) and international shipping are also available. See our <a href="shipping.html">Shipping & Returns</a> page for full details.</div></div>
+            </div>
+            <div class="faq-item" data-cat="shipping">
+              <button class="faq-question" aria-expanded="false">
+                Can I track my order?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Yes. Once your order ships you'll receive an email with a tracking link. You can also view the status of all your orders in <a href="orders.html">My Orders</a>.</div></div>
+            </div>
+            <div class="faq-item" data-cat="shipping">
+              <button class="faq-question" aria-expanded="false">
+                Do you ship internationally?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Yes, we ship to over 50 countries. International orders typically arrive in 5–10 business days. Additional customs duties may apply depending on your destination country.</div></div>
+            </div>
           </div>
 
-          <div style="margin-top:var(--sp-2xl);padding:var(--sp-xl);background:var(--petal);border-radius:var(--radius-lg)">
-            <h4 style="margin-bottom:var(--sp-sm)">Still have questions?</h4>
-            <p class="text-sm" style="margin-bottom:var(--sp-md)">Our team is here to help Monday–Friday, 9 am–6 pm CET.</p>
+          <!-- PRODUCTS -->
+          <div class="faq-group" data-group="products">
+            <div class="faq-group-title">
+              <div class="faq-group-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+              <h3>Products</h3>
+            </div>
+            <div class="faq-item" data-cat="products">
+              <button class="faq-question" aria-expanded="false">
+                Are your products cruelty-free?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Absolutely. All Shine products are 100% cruelty-free. We never test on animals and are certified by Leaping Bunny. Many of our formulations are also vegan.</div></div>
+            </div>
+            <div class="faq-item" data-cat="products">
+              <button class="faq-question" aria-expanded="false">
+                What is a custom fragrance?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Our bespoke fragrance service lets you choose your preferred olfactory notes, bottle, and intensity to create a perfume that's uniquely yours. Visit <a href="custom-perfumes.html">Custom Perfume</a> to get started.</div></div>
+            </div>
+            <div class="faq-item" data-cat="products">
+              <button class="faq-question" aria-expanded="false">
+                How do I find my skin type?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Each product page includes a skin-type guide. If you're unsure, our <a href="contact.html">support team</a> can recommend the right products for your skin type and concerns.</div></div>
+            </div>
+          </div>
+
+          <!-- RETURNS -->
+          <div class="faq-group" data-group="returns">
+            <div class="faq-group-title">
+              <div class="faq-group-icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></div>
+              <h3>Returns & Refunds</h3>
+            </div>
+            <div class="faq-item" data-cat="returns">
+              <button class="faq-question" aria-expanded="false">
+                What is your return policy?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">We accept returns within 30 days of delivery on all unopened standard products. Custom fragrances cannot be returned. Full details on our <a href="shipping.html">Shipping & Returns</a> page.</div></div>
+            </div>
+            <div class="faq-item" data-cat="returns">
+              <button class="faq-question" aria-expanded="false">
+                How long does a refund take?
+                <span class="faq-chevron"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <div class="faq-answer"><div class="faq-answer-inner">Refunds are processed within 5 business days of us receiving the returned item. The time it takes to appear in your account depends on your bank (usually 3–5 additional days).</div></div>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="faq-cta">
+            <div>
+              <h4>Still have questions?</h4>
+              <p>Our team is here to help Monday–Friday, 9 am–6 pm CET.</p>
+            </div>
             <a href="contact.html" class="btn btn--primary">Contact Us</a>
           </div>
+
         </div>
       </div>
     </section>
@@ -163,33 +354,9 @@
             <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
           </div>
         </div>
-        <div>
-          <div class="footer-heading">Shop</div>
-          <div class="footer-links">
-            <a href="shop.html">All Products</a>
-            <a href="shop.html?category=skincare">Skincare</a>
-            <a href="shop.html?category=fragrance">Fragrances</a>
-            <a href="shop.html?category=4">Gift Sets</a>
-          </div>
-        </div>
-        <div>
-          <div class="footer-heading">Company</div>
-          <div class="footer-links">
-            <a href="about.html">Our Brand</a>
-            <a href="contact.html">Contact Us</a>
-            <a href="careers.html">Careers</a>
-            <a href="press.html">Press</a>
-          </div>
-        </div>
-        <div>
-          <div class="footer-heading">Support</div>
-          <div class="footer-links">
-            <a href="shipping.html">Shipping & Returns</a>
-            <a href="faq.html">FAQ</a>
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-          </div>
-        </div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html?category=skincare">Skincare</a><a href="shop.html?category=fragrance">Fragrances</a><a href="shop.html?category=4">Gift Sets</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact Us</a><a href="careers.html">Careers</a><a href="press.html">Press</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="shipping.html">Shipping & Returns</a><a href="faq.html">FAQ</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div></div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2025 Shine. All rights reserved. Made with love in Spain.</p>
@@ -201,13 +368,53 @@
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/search.js" defer></script>
   <script>
+    // Scroll progress
+    const prog = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', () => {
+      prog.style.width = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
+    });
+
+    // Accordion
     document.querySelectorAll('.faq-question').forEach(btn => {
       btn.addEventListener('click', () => {
-        const expanded = btn.getAttribute('aria-expanded') === 'true';
-        btn.setAttribute('aria-expanded', !expanded);
-        const answer = btn.nextElementSibling;
-        answer.style.maxHeight = expanded ? '0' : answer.scrollHeight + 'px';
+        const item = btn.closest('.faq-item');
+        const answer = item.querySelector('.faq-answer');
+        const isOpen = item.classList.contains('open');
+
+        // Close all others
+        document.querySelectorAll('.faq-item.open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('open');
+            openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+            openItem.querySelector('.faq-answer').style.maxHeight = '0';
+          }
+        });
+
+        item.classList.toggle('open', !isOpen);
+        btn.setAttribute('aria-expanded', !isOpen);
+        answer.style.maxHeight = isOpen ? '0' : answer.scrollHeight + 'px';
       });
+    });
+
+    // Category filtering
+    document.querySelectorAll('.faq-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.faq-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const cat = tab.dataset.cat;
+        document.querySelectorAll('.faq-group').forEach(g => {
+          g.style.display = (cat === 'all' || g.dataset.group === cat) ? '' : 'none';
+        });
+      });
+    });
+
+    // Scroll reveal
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.faq-item').forEach((item, i) => {
+      item.style.transitionDelay = (i * 0.06) + 's';
+      obs.observe(item);
     });
   </script>
 </body>

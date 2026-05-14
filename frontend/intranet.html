@@ -1425,24 +1425,33 @@
                   <option value="">Seleccionar...</option>
                   <option value="1">Skincare</option>
                   <option value="2">Fragrance</option>
-                  <option value="3">Body Care</option>
+                  <option value="3">Supplements</option>
                   <option value="4">Gift Sets</option>
+                  <option value="5">Makeup</option>
+                  <option value="6">Accessories</option>
+                  <option value="7">Hair Care</option>
                 </select>
               </div>
               <div class="dash-form-group">
-                <label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label>
-                <input class="dash-input" id="cp-price" type="number" step="0.01" min="0" placeholder="0.00" required>
+                <label class="dash-label">Subcategoría</label>
+                <select class="dash-input" id="cp-subcategory" disabled>
+                  <option value="">Selecciona primero una categoría</option>
+                </select>
               </div>
             </div>
             <div class="dash-grid-2">
               <div class="dash-form-group">
+                <label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="cp-price" type="number" step="0.01" min="0" placeholder="0.00" required>
+              </div>
+              <div class="dash-form-group">
                 <label class="dash-label">Stock Inicial <span style="color:var(--dash-danger)">*</span></label>
                 <input class="dash-input" id="cp-stock" type="number" min="0" placeholder="0" required>
               </div>
-              <div class="dash-form-group">
-                <label class="dash-label">Peso (g)</label>
-                <input class="dash-input" id="cp-weight" type="number" min="0" placeholder="0">
-              </div>
+            </div>
+            <div class="dash-form-group">
+              <label class="dash-label">Peso (g)</label>
+              <input class="dash-input" id="cp-weight" type="number" min="0" placeholder="0">
             </div>
             <div class="dash-form-group">
               <label class="dash-label">Descripción <span style="color:var(--dash-danger)">*</span></label>
@@ -1589,16 +1598,25 @@
             <option value="">Seleccionar...</option>
             <option value="1">Skincare</option>
             <option value="2">Fragrance</option>
-            <option value="3">Body Care</option>
+            <option value="3">Supplements</option>
             <option value="4">Gift Sets</option>
+            <option value="5">Makeup</option>
+            <option value="6">Accessories</option>
+            <option value="7">Hair Care</option>
           </select>
         </div>
-        <div class="dash-form-group"><label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ep-price" type="number" step="0.01" min="0" placeholder="0.00"></div>
+        <div class="dash-form-group">
+          <label class="dash-label">Subcategoría</label>
+          <select class="dash-input" id="ep-subcategory" disabled>
+            <option value="">Sin subcategoría</option>
+          </select>
+        </div>
       </div>
       <div class="dash-grid-2">
+        <div class="dash-form-group"><label class="dash-label">Precio (€) <span style="color:var(--dash-danger)">*</span></label><input class="dash-input" id="ep-price" type="number" step="0.01" min="0" placeholder="0.00"></div>
         <div class="dash-form-group"><label class="dash-label">Stock</label><input class="dash-input" id="ep-stock" type="number" min="0" placeholder="0"></div>
-        <div class="dash-form-group"><label class="dash-label">Tipo Fragancia</label><input class="dash-input" id="ep-fragancia" placeholder="EDP, EDT…"></div>
       </div>
+      <div class="dash-form-group"><label class="dash-label">Tipo Fragancia</label><input class="dash-input" id="ep-fragancia" placeholder="EDP, EDT…"></div>
       <div class="dash-form-group"><label class="dash-label">Descripción</label><textarea class="dash-input" id="ep-desc" rows="3" placeholder="Descripción del producto…" style="resize:vertical"></textarea></div>
       <div class="dash-form-group"><label class="dash-label">Ingredientes</label><textarea class="dash-input" id="ep-ingredients" rows="2" placeholder="Lista de ingredientes…" style="resize:vertical"></textarea></div>
     </div>

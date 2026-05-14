@@ -19,14 +19,38 @@
     haircare:    7,
   };
 
-  // Fallback labels shown when the API hasn't returned data yet (backend not restarted)
-  const FALLBACK_SUBS = {
-    1: ['Face Care', 'Body Care', 'Essential Oils', 'Aloe Vera Line', 'Home Fragrances'],
-    2: ['Classic', 'New Generation', 'Limited Edition', 'Special Edition'],
-    3: ['Vitamins & Health', 'Colostrum Health', 'Dental Care'],
-    5: ['Face & Foundation', 'Lips'],
-    6: ['Bags & Boxes', 'Beauty Tools'],
-    7: ['Shampoo & Conditioner', 'Styling'],
+  // Fallback subcategories used when the API returns none (table empty or backend offline)
+  const SUBCATEGORIAS_ESTATICAS = {
+    1: [  // Skincare
+      { idSubcategoria: null, nombre: 'Essential Oils',        keywords: ['oil', 'aceite', 'essential', 'esencial', 'argan', 'rosehip', 'jojoba', 'coconut', 'coco'] },
+      { idSubcategoria: null, nombre: 'Face Care',             keywords: ['face', 'facial', 'cleanser', 'serum', 'suero', 'moisturizer', 'toner', 'mask', 'mascarilla', 'retinol', 'hyaluronic', 'brightening', 'anti-aging', 'antiage', 'contorno', 'exfolian'] },
+      { idSubcategoria: null, nombre: 'Body Care',             keywords: ['body', 'corporal', 'lotion', 'butter', 'manteca', 'scrub', 'exfoliant', 'cuerpo', 'cream', 'crema', 'hidratante', 'moisturizing'] },
+      { idSubcategoria: null, nombre: 'Aloe Vera Line',        keywords: ['aloe', 'vera'] },
+    ],
+    2: [  // Fragrances
+      { idSubcategoria: null, nombre: 'Classic',               keywords: ['clasico', 'clasica', 'classic', 'classical', 'original', 'traditional', 'heritage', 'timeless', 'vintage', 'elegance', 'elegancia'] },
+      { idSubcategoria: null, nombre: 'New Generation',        keywords: ['new generation', 'nueva generacion', 'modern', 'fresco', 'fresh', 'contemporary', 'neo', 'next', 'nuevo', 'generation'] },
+      { idSubcategoria: null, nombre: 'Limited Edition',       keywords: ['edicion limitada', 'edicion lim', 'limited', 'limitado', 'limitada', 'edition', 'collector', 'coleccion'] },
+      { idSubcategoria: null, nombre: 'Special Edition',       keywords: ['especial', 'special', 'exclusive', 'exclusivo', 'exclusiva', 'premium', 'vip', 'luxury', 'lujo'] },
+    ],
+    3: [  // Supplements
+      { idSubcategoria: null, nombre: 'Vitamins & Health',     keywords: ['vitamin', 'vitamina', 'health', 'mineral', 'zinc', 'iron', 'hierro', 'omega', 'probiotic', 'probiotico', 'magnesio', 'magnesium', 'calcium', 'calcio'] },
+      { idSubcategoria: null, nombre: 'Colostrum Health',      keywords: ['colostrum', 'calostro', 'colostro', 'inmun', 'inmune', 'immune'] },
+      { idSubcategoria: null, nombre: 'Dental Care',           keywords: ['dental', 'teeth', 'dientes', 'oral', 'mouth', 'boca', 'white', 'blanqueo', 'blanqueador', 'enamel', 'esmalte', 'encías', 'gum'] },
+    ],
+    5: [  // Makeup
+      { idSubcategoria: null, nombre: 'Face & Foundation',     keywords: ['foundation', 'base', 'concealer', 'corrector', 'blush', 'colorete', 'powder', 'polvo', 'contour', 'bronzer', 'bronceador', 'highlighter', 'iluminador', 'primer', 'setting'] },
+      { idSubcategoria: null, nombre: 'Lips',                  keywords: ['lip', 'labial', 'lipstick', 'gloss', 'balm', 'balsamo', 'liner', 'labios', 'labio'] },
+      { idSubcategoria: null, nombre: 'Eyes',                  keywords: ['eye', 'ojo', 'mascara', 'rimel', 'eyeliner', 'delineador', 'shadow', 'sombra', 'brow', 'cejas', 'lashes', 'pestanas'] },
+    ],
+    6: [  // Accessories
+      { idSubcategoria: null, nombre: 'Bags & Boxes',          keywords: ['bag', 'bolsa', 'box', 'caja', 'case', 'estuche', 'neceser', 'pouch', 'packaging', 'kit', 'set'] },
+      { idSubcategoria: null, nombre: 'Beauty Tools',          keywords: ['brush', 'brocha', 'pincel', 'tool', 'herramienta', 'roller', 'gua sha', 'applicator', 'aplicador', 'mirror', 'espejo', 'towel', 'toalla', 'headband', 'cinta', 'spatula', 'espatula', 'tweezer', 'pinza'] },
+    ],
+    7: [  // Hair Care
+      { idSubcategoria: null, nombre: 'Shampoo & Conditioner', keywords: ['shampoo', 'champu', 'conditioner', 'acondicionador', 'rinse'] },
+      { idSubcategoria: null, nombre: 'Styling',               keywords: ['mask', 'mascarilla', 'treatment', 'tratamiento', 'oil', 'aceite', 'serum', 'gel', 'spray', 'wax', 'cera', 'mousse', 'foam', 'style', 'styling', 'lacquer', 'laca'] },
+    ],
   };
 
   let productos = [];
@@ -34,7 +58,8 @@
   let filtroCategoria    = 'skincare';
   let filtroPrecio       = 'all';
   let filtroGenero       = 'all-genders';
-  let filtroSubcatId     = null;  // Integer — exact match against producto.idSubcategoria
+  let filtroSubcatId       = null;  // Integer — exact match against producto.idSubcategoria
+  let filtroSubcatKeywords = null;  // String[] — keyword match against product name (static subcategories)
 
   // ── Cache ──────────────────────────────────────────────────────────────────
 
@@ -207,8 +232,16 @@
   }
 
   function filtrarPorSubcategoria(producto) {
-    if (filtroSubcatId === null) return true;
-    return producto.idSubcategoria === filtroSubcatId;
+    if (filtroSubcatId !== null) return producto.idSubcategoria === filtroSubcatId;
+    if (filtroSubcatKeywords !== null) {
+      const texto = normalizarTexto(
+        (producto.nombre        || '') + ' ' +
+        (producto.descripcion   || '') + ' ' +
+        (producto.tipoFragancia || '')
+      );
+      return filtroSubcatKeywords.some(kw => texto.includes(normalizarTexto(kw)));
+    }
+    return true;
   }
 
   function ordenarProductos(items) {
@@ -254,47 +287,36 @@
     const catId = CATEGORIA_IDS[catKey];
     if (!catId) return;
 
-    const apiSubs     = subcategoriasData[catId] || [];
-    const useFallback = !apiSubs.length;
-    const fallback    = FALLBACK_SUBS[catId] || [];
-
-    if (!apiSubs.length && !fallback.length) return;
+    // Use API subcategories if available, otherwise fall back to static definitions
+    const apiSubs = subcategoriasData[catId] || [];
+    const subs = apiSubs.length ? apiSubs : (SUBCATEGORIAS_ESTATICAS[catId] || []);
+    if (!subs.length) return;
 
     item.classList.add('expanded');
     const container = document.createElement('div');
     container.className = 'filter-subcategory';
 
-    if (!useFallback) {
-      // Full API data: filter products by idSubcategoria
-      apiSubs.forEach(sub => {
-        const subItem = document.createElement('div');
-        subItem.className = 'filter-item filter-item--sub';
-        subItem.textContent = sub.nombre;
-        subItem.addEventListener('click', e => {
-          e.stopPropagation();
-          container.querySelectorAll('.filter-item--sub').forEach(s => s.classList.remove('active'));
-          subItem.classList.add('active');
+    subs.forEach(sub => {
+      const subItem = document.createElement('div');
+      subItem.className = 'filter-item filter-item--sub';
+      subItem.textContent = sub.nombre;
+      subItem.addEventListener('click', e => {
+        e.stopPropagation();
+        container.querySelectorAll('.filter-item--sub').forEach(s => s.classList.remove('active'));
+        subItem.classList.add('active');
+        if (sub.idSubcategoria !== null) {
+          // API subcategory: filter by exact DB id
           filtroSubcatId = sub.idSubcategoria;
-          renderizarCatalogo();
-        });
-        container.appendChild(subItem);
-      });
-    } else {
-      // Fallback: show labels only — clicking shows all products in the main category
-      fallback.forEach(label => {
-        const subItem = document.createElement('div');
-        subItem.className = 'filter-item filter-item--sub';
-        subItem.textContent = label;
-        subItem.addEventListener('click', e => {
-          e.stopPropagation();
-          container.querySelectorAll('.filter-item--sub').forEach(s => s.classList.remove('active'));
-          subItem.classList.add('active');
+          filtroSubcatKeywords = null;
+        } else {
+          // Static fallback: filter by keyword matching against product names
           filtroSubcatId = null;
-          renderizarCatalogo();
-        });
-        container.appendChild(subItem);
+          filtroSubcatKeywords = sub.keywords || [];
+        }
+        renderizarCatalogo();
       });
-    }
+      container.appendChild(subItem);
+    });
 
     item.insertAdjacentElement('afterend', container);
   }
@@ -320,8 +342,9 @@
             cerrarSubcategorias(list);
             list.querySelectorAll('.filter-item:not(.filter-item--sub)').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            filtroCategoria = item.dataset.filter || 'all';
-            filtroSubcatId  = null;
+            filtroCategoria      = item.dataset.filter || 'all';
+            filtroSubcatId       = null;
+            filtroSubcatKeywords = null;
 
             // Abrir subcategorías salvo que el usuario esté cerrando las ya abiertas (toggle off)
             if (!(mismaCategoria && subcatsYaAbiertas)) {

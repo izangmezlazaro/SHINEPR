@@ -7,114 +7,552 @@
   <title>Shine — Privacy Policy</title>
   <meta name="description" content="Shine Privacy Policy. How we collect, use, and protect your personal data.">
   <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* ── HERO ─────────────────────────────────── */
+    .priv-hero {
+      min-height: 48vh;
+      background: linear-gradient(145deg, var(--petal) 0%, var(--blush) 45%, var(--sand) 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .priv-hero::before {
+      content: '';
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      top: -35%;
+      right: -12%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212, 145, 154, 0.13) 0%, transparent 70%);
+      animation: orbDrift 9s ease-in-out infinite;
+    }
+
+    .priv-hero::after {
+      content: '';
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      bottom: -28%;
+      left: -8%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196, 168, 130, 0.1) 0%, transparent 70%);
+      animation: orbDrift 11s ease-in-out infinite reverse;
+    }
+
+    @keyframes orbDrift {
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(20px, -18px) scale(1.05);
+      }
+    }
+
+    .priv-hero .container {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 145, 154, 0.18);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--rose);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      animation: fadeUp .7s ease-out both;
+    }
+
+    .hero-badge svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--rose);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .priv-hero h1 {
+      background: linear-gradient(135deg, var(--noir), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeUp .7s ease-out .12s both;
+    }
+
+    .priv-hero .hero__sub {
+      animation: fadeUp .7s ease-out .24s both;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+      animation: fadeUp .7s ease-out .36s both;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .hero-meta-item svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--camel);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── TWO-COLUMN LAYOUT ───────────────────── */
+    .priv-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 48px;
+      max-width: 960px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .priv-section {
+      padding: 70px 0 100px;
+    }
+
+    /* ── STICKY SIDEBAR NAV ──────────────────── */
+    .priv-sidebar {
+      position: sticky;
+      top: 100px;
+      animation: fadeUp .7s ease-out .4s both;
+    }
+
+    .priv-sidebar-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--camel);
+      margin-bottom: 16px;
+    }
+
+    .priv-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .priv-nav a {
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      transition: all .3s cubic-bezier(.22, 1, .36, 1);
+      border-left: 3px solid transparent;
+      font-weight: 500;
+    }
+
+    .priv-nav a:hover {
+      color: var(--rose);
+      background: rgba(242, 215, 217, 0.2);
+    }
+
+    .priv-nav a.active {
+      color: var(--rose);
+      background: rgba(242, 215, 217, 0.25);
+      border-left-color: var(--rose);
+      font-weight: 600;
+    }
+
+    /* ── CONTENT CARDS ───────────────────────── */
+    .priv-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .priv-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(212, 145, 154, 0.1);
+      border-radius: 16px;
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: all .45s cubic-bezier(.22, 1, .36, 1);
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    .priv-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .priv-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 0;
+      background: linear-gradient(to bottom, var(--rose), var(--camel));
+      transition: height .5s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .priv-card:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(212, 145, 154, 0.22);
+      box-shadow: 0 10px 35px rgba(26, 26, 26, 0.05);
+      transform: translateX(4px);
+    }
+
+    .priv-card:hover::before {
+      height: 100%;
+    }
+
+    .priv-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .priv-card-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blush), var(--petal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--rose);
+      transition: all .4s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .priv-card:hover .priv-card-num {
+      background: linear-gradient(135deg, var(--rose), var(--camel));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(212, 145, 154, 0.3);
+    }
+
+    .priv-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      transition: color .3s;
+    }
+
+    .priv-card:hover h3 {
+      color: var(--rose);
+    }
+
+    .priv-card p,
+    .priv-card li {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 0;
+    }
+
+    .priv-card ul {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      list-style: none;
+    }
+
+    .priv-card ul li::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--rose);
+      margin-right: 10px;
+      vertical-align: middle;
+      opacity: .6;
+    }
+
+    .priv-card strong {
+      color: var(--noir);
+    }
+
+    .priv-card a {
+      color: var(--camel);
+    }
+
+    /* ── SCROLL PROGRESS ─────────────────────── */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--rose), var(--camel));
+      z-index: 9999;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width: 900px) {
+      .priv-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .priv-sidebar {
+        position: static;
+        margin-bottom: 32px;
+      }
+
+      .priv-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .priv-nav a {
+        border-left: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        padding: 6px 12px;
+      }
+
+      .priv-nav a.active {
+        border-bottom-color: var(--rose);
+        border-left: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .priv-card {
+        padding: 20px 20px;
+      }
+
+      .hero-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+
+  <div class="scroll-progress" id="scrollProgress" style="width:0%"></div>
 
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
       <nav class="nav" id="mainNav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="custom-perfumes.html">Custom Perfume</a>
-        <a href="about.html">Our Brand</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
-        <a href="cart.html" class="nav-cta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
+        <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="margin-right:4px">
             <circle cx="9" cy="21" r="1" />
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6" />
-          </svg>
-          Cart
-        </a>
+          </svg>Cart</a>
       </nav>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <button class="hamburger" id="hamburgerBtn"
+        aria-label="Toggle menu"><span></span><span></span><span></span></button>
     </div>
   </header>
   <div class="mobile-nav" id="mobileNav">
     <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
-    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a href="cart.html">Cart</a>
+    <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a><a
+      href="cart.html">Cart</a>
   </div>
 
   <main>
-    <section class="hero" style="min-height:35vh;background:var(--petal)">
+    <section class="priv-hero">
       <div class="container">
-        <div class="reveal" style="max-width:640px">
-          <p class="hero__tagline">Legal</p>
+        <div style="max-width:640px">
+          <div class="hero-badge">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            Legal
+          </div>
           <h1>Privacy Policy</h1>
-          <p class="hero__sub">Last updated: 1 January 2025</p>
+          <p class="hero__sub">How we collect, use, and protect your personal data — with full transparency.</p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Updated: 13 May 2026
+            </div>
+            <div class="hero-meta-item">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              ~4 min read
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="priv-section">
       <div class="container">
-        <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:var(--sp-2xl)" class="reveal">
+        <div class="priv-layout">
 
-          <div>
-            <h3>1. Who We Are</h3>
-            <p class="text-sm">Shine Luxury S.L. ("Shine", "we", "us") is the controller of your personal data. We are registered in Spain (CIF: B-00000000) and our registered address is Passeig de Gràcia 10, 08007 Barcelona, Spain. Contact us at <strong>privacy@shineluxury.com</strong>.</p>
-          </div>
+          <!-- SIDEBAR -->
+          <aside class="priv-sidebar">
+            <div class="priv-sidebar-title">Sections</div>
+            <nav class="priv-nav">
+              <a href="#who" class="active">Who We Are</a>
+              <a href="#data-collect">Data We Collect</a>
+              <a href="#data-use">How We Use It</a>
+              <a href="#sharing">Data Sharing</a>
+              <a href="#retention">Retention</a>
+              <a href="#rights">Your Rights</a>
+              <a href="#cookies">Cookies</a>
+              <a href="#changes">Changes</a>
+            </nav>
+          </aside>
 
-          <div>
-            <h3>2. Data We Collect</h3>
-            <p class="text-sm" style="margin-bottom:var(--sp-sm)">We collect the following categories of personal data:</p>
-            <ul style="padding-left:var(--sp-lg);display:flex;flex-direction:column;gap:var(--sp-xs)">
-              <li class="text-sm"><strong>Account data:</strong> name, email address, password (hashed).</li>
-              <li class="text-sm"><strong>Order data:</strong> delivery address, payment method (we do not store full card numbers), order history.</li>
-              <li class="text-sm"><strong>Usage data:</strong> pages visited, products viewed, browser type, IP address (anonymised after 90 days).</li>
-              <li class="text-sm"><strong>Custom fragrance preferences:</strong> olfactory note selections you make when building a bespoke perfume.</li>
-            </ul>
-          </div>
+          <!-- CONTENT -->
+          <div class="priv-cards">
+            <div class="priv-card" id="who">
+              <div class="priv-card-header">
+                <div class="priv-card-num">1</div>
+                <h3>Who We Are</h3>
+              </div>
+              <p>Shine Luxury S.L. ("Shine", "we", "us") is the controller of your personal data. We are registered in
+                Spain (CIF: B-00000000) and our registered address is Passeig de Gràcia 10, 08007 Barcelona, Spain.
+                Contact us at <strong>privacy@shineluxury.com</strong>.</p>
+            </div>
 
-          <div>
-            <h3>3. How We Use Your Data</h3>
-            <ul style="padding-left:var(--sp-lg);display:flex;flex-direction:column;gap:var(--sp-xs)">
-              <li class="text-sm">To process and fulfil your orders (contractual necessity).</li>
-              <li class="text-sm">To manage your account and provide customer support (contractual necessity).</li>
-              <li class="text-sm">To send transactional emails such as order confirmations and shipping updates (contractual necessity).</li>
-              <li class="text-sm">To send marketing emails, where you have given consent (you may unsubscribe at any time).</li>
-              <li class="text-sm">To improve our website and services through anonymised analytics (legitimate interest).</li>
-              <li class="text-sm">To comply with legal obligations (e.g., tax records).</li>
-            </ul>
-          </div>
+            <div class="priv-card" id="data-collect">
+              <div class="priv-card-header">
+                <div class="priv-card-num">2</div>
+                <h3>Data We Collect</h3>
+              </div>
+              <p>We collect the following categories of personal data:</p>
+              <ul>
+                <li><strong>Account data:</strong> name, email address, password (hashed).</li>
+                <li><strong>Order data:</strong> delivery address, payment method (we do not store full card numbers),
+                  order history.</li>
+                <li><strong>Usage data:</strong> pages visited, products viewed, browser type, IP address (anonymised
+                  after 90 days).</li>
+                <li><strong>Custom fragrance preferences:</strong> olfactory note selections you make when building a
+                  bespoke perfume.</li>
+              </ul>
+            </div>
 
-          <div>
-            <h3>4. Data Sharing</h3>
-            <p class="text-sm">We share data with trusted third-party processors only as necessary: courier partners (delivery address), payment processors (order total and billing details), and analytics providers (anonymised usage data). We do not sell your personal data.</p>
-          </div>
+            <div class="priv-card" id="data-use">
+              <div class="priv-card-header">
+                <div class="priv-card-num">3</div>
+                <h3>How We Use Your Data</h3>
+              </div>
+              <ul>
+                <li>To process and fulfil your orders (contractual necessity).</li>
+                <li>To manage your account and provide customer support (contractual necessity).</li>
+                <li>To send transactional emails such as order confirmations and shipping updates (contractual
+                  necessity).</li>
+                <li>To send marketing emails, where you have given consent (you may unsubscribe at any time).</li>
+                <li>To improve our website and services through anonymised analytics (legitimate interest).</li>
+                <li>To comply with legal obligations (e.g., tax records).</li>
+              </ul>
+            </div>
 
-          <div>
-            <h3>5. Data Retention</h3>
-            <p class="text-sm">We retain account data for as long as your account is active. Order data is kept for 7 years to comply with Spanish tax law. You may request deletion of your account at any time; we will anonymise your data within 30 days, subject to legal retention requirements.</p>
-          </div>
+            <div class="priv-card" id="sharing">
+              <div class="priv-card-header">
+                <div class="priv-card-num">4</div>
+                <h3>Data Sharing</h3>
+              </div>
+              <p>We share data with trusted third-party processors only as necessary: courier partners (delivery
+                address), payment processors (order total and billing details), and analytics providers (anonymised
+                usage data). We do not sell your personal data.</p>
+            </div>
 
-          <div>
-            <h3>6. Your Rights</h3>
-            <p class="text-sm" style="margin-bottom:var(--sp-sm)">Under the GDPR and Spanish data protection law you have the right to:</p>
-            <ul style="padding-left:var(--sp-lg);display:flex;flex-direction:column;gap:var(--sp-xs)">
-              <li class="text-sm">Access the personal data we hold about you.</li>
-              <li class="text-sm">Rectify inaccurate data.</li>
-              <li class="text-sm">Request erasure ("right to be forgotten").</li>
-              <li class="text-sm">Object to or restrict certain processing.</li>
-              <li class="text-sm">Data portability.</li>
-              <li class="text-sm">Lodge a complaint with the AEPD (Agencia Española de Protección de Datos).</li>
-            </ul>
-            <p class="text-sm" style="margin-top:var(--sp-sm)">To exercise any right, contact us at <strong>privacy@shineluxury.com</strong>.</p>
-          </div>
+            <div class="priv-card" id="retention">
+              <div class="priv-card-header">
+                <div class="priv-card-num">5</div>
+                <h3>Data Retention</h3>
+              </div>
+              <p>We retain account data for as long as your account is active. Order data is kept for 7 years to comply
+                with Spanish tax law. You may request deletion of your account at any time; we will anonymise your data
+                within 30 days, subject to legal retention requirements.</p>
+            </div>
 
-          <div>
-            <h3>7. Cookies</h3>
-            <p class="text-sm">We use essential cookies to keep you logged in and maintain your cart, and optional analytics cookies (only with your consent). You can manage cookie preferences in your browser settings.</p>
-          </div>
+            <div class="priv-card" id="rights">
+              <div class="priv-card-header">
+                <div class="priv-card-num">6</div>
+                <h3>Your Rights</h3>
+              </div>
+              <p>Under the GDPR and Spanish data protection law you have the right to:</p>
+              <ul>
+                <li>Access the personal data we hold about you.</li>
+                <li>Rectify inaccurate data.</li>
+                <li>Request erasure ("right to be forgotten").</li>
+                <li>Object to or restrict certain processing.</li>
+                <li>Data portability.</li>
+                <li>Lodge a complaint with the AEPD (Agencia Española de Protección de Datos).</li>
+              </ul>
+              <p style="margin-top:12px">To exercise any right, contact us at <strong>privacy@shineluxury.com</strong>.
+              </p>
+            </div>
 
-          <div>
-            <h3>8. Changes to This Policy</h3>
-            <p class="text-sm">We may update this policy from time to time. We will notify you of significant changes by email. Continued use of our services after an update constitutes acceptance.</p>
+            <div class="priv-card" id="cookies">
+              <div class="priv-card-header">
+                <div class="priv-card-num">7</div>
+                <h3>Cookies</h3>
+              </div>
+              <p>We use essential cookies to keep you logged in and maintain your cart, and optional analytics cookies
+                (only with your consent). You can manage cookie preferences in your browser settings.</p>
+            </div>
+
+            <div class="priv-card" id="changes">
+              <div class="priv-card-header">
+                <div class="priv-card-num">8</div>
+                <h3>Changes to This Policy</h3>
+              </div>
+              <p>We may update this policy from time to time. We will notify you of significant changes by email.
+                Continued use of our services after an update constitutes acceptance.</p>
+            </div>
           </div>
 
         </div>
@@ -128,39 +566,38 @@
       <div class="footer-grid">
         <div>
           <div class="footer-brand">Shine.</div>
-          <p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain for the world.</p>
+          <p class="footer-desc">Luxury cosmetics & bespoke fragrances. Handcrafted with love in Spain for the world.
+          </p>
           <div class="footer-socials mt-lg">
-            <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2zm-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg></a>
-            <a href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.18-.77 1.22-5.17 1.22-5.17s-.31-.62-.31-1.55c0-1.45.84-2.54 1.89-2.54.89 0 1.32.67 1.32 1.47 0 .9-.57 2.24-.87 3.49-.25 1.04.52 1.89 1.54 1.89 1.85 0 3.27-1.95 3.27-4.76 0-2.49-1.79-4.23-4.34-4.23-2.96 0-4.69 2.22-4.69 4.51 0 .89.34 1.85.77 2.37.08.1.09.19.07.29-.08.32-.25 1.04-.28 1.18-.04.19-.14.23-.32.14-1.25-.58-2.03-2.42-2.03-3.89 0-3.15 2.29-6.05 6.61-6.05 3.47 0 6.16 2.47 6.16 5.77 0 3.45-2.17 6.22-5.19 6.22-1.01 0-1.97-.53-2.3-1.15l-.62 2.33c-.23.87-.84 1.96-1.25 2.62.94.29 1.94.45 2.97.45 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></a>
-            <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24">
+                <path
+                  d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2zm-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z" />
+              </svg></a>
+            <a href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.18-.77 1.22-5.17 1.22-5.17s-.31-.62-.31-1.55c0-1.45.84-2.54 1.89-2.54.89 0 1.32.67 1.32 1.47 0 .9-.57 2.24-.87 3.49-.25 1.04.52 1.89 1.54 1.89 1.85 0 3.27-1.95 3.27-4.76 0-2.49-1.79-4.23-4.34-4.23-2.96 0-4.69 2.22-4.69 4.51 0 .89.34 1.85.77 2.37.08.1.09.19.07.29-.08.32-.25 1.04-.28 1.18-.04.19-.14.23-.32.14-1.25-.58-2.03-2.42-2.03-3.89 0-3.15 2.29-6.05 6.61-6.05 3.47 0 6.16 2.47 6.16 5.77 0 3.45-2.17 6.22-5.19 6.22-1.01 0-1.97-.53-2.3-1.15l-.62 2.33c-.23.87-.84 1.96-1.25 2.62.94.29 1.94.45 2.97.45 5.52 0 10-4.48 10-10S17.52 2 12 2z" />
+              </svg></a>
+            <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24">
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg></a>
           </div>
         </div>
         <div>
           <div class="footer-heading">Shop</div>
-          <div class="footer-links">
-            <a href="shop.html">All Products</a>
-            <a href="shop.html?category=skincare">Skincare</a>
-            <a href="shop.html?category=fragrance">Fragrances</a>
-            <a href="shop.html?category=4">Gift Sets</a>
-          </div>
+          <div class="footer-links"><a href="shop.html">All Products</a><a
+              href="shop.html?category=skincare">Skincare</a><a href="shop.html?category=fragrance">Fragrances</a><a
+              href="shop.html?category=4">Gift Sets</a></div>
         </div>
         <div>
           <div class="footer-heading">Company</div>
-          <div class="footer-links">
-            <a href="about.html">Our Brand</a>
-            <a href="contact.html">Contact Us</a>
-            <a href="careers.html">Careers</a>
-            <a href="press.html">Press</a>
-          </div>
+          <div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact Us</a><a
+              href="careers.html">Careers</a><a href="press.html">Press</a></div>
         </div>
         <div>
           <div class="footer-heading">Support</div>
-          <div class="footer-links">
-            <a href="shipping.html">Shipping & Returns</a>
-            <a href="faq.html">FAQ</a>
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-          </div>
+          <div class="footer-links"><a href="shipping.html">Shipping & Returns</a><a href="faq.html">FAQ</a><a
+              href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -172,5 +609,45 @@
 
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/search.js" defer></script>
+  <script>
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+      document.getElementById('scrollProgress').style.width =
+        (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
+    });
+
+    // Scroll reveal cards
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.priv-card').forEach((c, i) => {
+      c.style.transitionDelay = (i * 0.07) + 's';
+      obs.observe(c);
+    });
+
+    // Sidebar active tracking on scroll
+    const sections = document.querySelectorAll('.priv-card[id]');
+    const navLinks = document.querySelectorAll('.priv-nav a');
+    const secObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(l => l.classList.remove('active'));
+          const link = document.querySelector(`.priv-nav a[href="#${e.target.id}"]`);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '-100px 0px -50% 0px' });
+    sections.forEach(s => secObs.observe(s));
+
+    // Smooth scroll sidebar links
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
 </body>
+
 </html>

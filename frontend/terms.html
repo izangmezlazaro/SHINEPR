@@ -7,30 +7,77 @@
   <title>Shine — Terms of Service</title>
   <meta name="description" content="Shine Terms of Service. The rules that govern your use of our website and purchase of our products.">
   <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .t-hero{min-height:50vh;background:linear-gradient(135deg,var(--petal),var(--blush) 40%,var(--sand));position:relative;overflow:hidden;display:flex;align-items:center}
+    .t-hero::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(212,145,154,.15),transparent 70%);animation:hf 8s ease-in-out infinite}
+    .t-hero::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(196,168,130,.12),transparent 70%);animation:hf 10s ease-in-out infinite reverse}
+    @keyframes hf{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.05)}}
+    .t-hero .container{position:relative;z-index:2}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);border:1px solid rgba(212,145,154,.2);border-radius:9999px;font-size:.8rem;font-weight:600;color:var(--rose);text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;animation:fu .8s ease-out both}
+    .hero-badge svg{width:16px;height:16px}
+    .t-hero h1{background:linear-gradient(135deg,var(--noir),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fu .8s ease-out .15s both}
+    .t-hero .hero__sub{animation:fu .8s ease-out .3s both;color:var(--text-secondary)}
+    .hero-meta{display:flex;gap:24px;margin-top:20px;animation:fu .8s ease-out .45s both;flex-wrap:wrap}
+    .hero-meta-item{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-muted)}
+    .hero-meta-item svg{width:16px;height:16px;stroke:var(--camel);fill:none;stroke-width:2}
+    @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .scroll-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--rose),var(--camel));z-index:9999;border-radius:0 2px 2px 0}
+
+    /* ── TWO-COLUMN LAYOUT ───────── */
+    .t-section{padding:70px 0 100px}
+    .t-layout{display:grid;grid-template-columns:200px 1fr;gap:48px;max-width:960px;margin:0 auto;align-items:start}
+    .t-sidebar{position:sticky;top:100px;animation:fu .7s ease-out .5s both}
+    .t-sidebar-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--camel);margin-bottom:14px}
+    .t-nav{display:flex;flex-direction:column;gap:3px}
+    .t-nav a{padding:7px 12px;border-radius:8px;font-size:.78rem;color:var(--text-secondary);transition:all .3s cubic-bezier(.22,1,.36,1);border-left:3px solid transparent;font-weight:500;line-height:1.3}
+    .t-nav a:hover{color:var(--rose);background:rgba(242,215,217,.2)}
+    .t-nav a.active{color:var(--rose);background:rgba(242,215,217,.25);border-left-color:var(--rose);font-weight:600}
+
+    /* ── CARDS ────────────────────── */
+    .t-cards{display:flex;flex-direction:column;gap:20px}
+    .t-card{background:rgba(255,255,255,.6);backdrop-filter:blur(14px);border:1px solid rgba(212,145,154,.1);border-radius:16px;padding:26px 30px;position:relative;overflow:hidden;transition:all .45s cubic-bezier(.22,1,.36,1);opacity:0;transform:translateY(24px)}
+    .t-card.revealed{opacity:1;transform:translateY(0)}
+    .t-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:0;background:linear-gradient(to bottom,var(--rose),var(--camel));transition:height .5s cubic-bezier(.22,1,.36,1)}
+    .t-card:hover{background:rgba(255,255,255,.85);border-color:rgba(212,145,154,.22);box-shadow:0 10px 35px rgba(26,26,26,.05);transform:translateX(4px)}
+    .t-card:hover::before{height:100%}
+    .t-card-header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+    .t-card-icon{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--blush),var(--petal));display:flex;align-items:center;justify-content:center;transition:all .4s cubic-bezier(.22,1,.36,1)}
+    .t-card-icon svg{width:18px;height:18px;stroke:var(--rose);fill:none;stroke-width:2;transition:stroke .3s}
+    .t-card:hover .t-card-icon{background:linear-gradient(135deg,var(--rose),var(--camel));box-shadow:0 4px 14px rgba(212,145,154,.3)}
+    .t-card:hover .t-card-icon svg{stroke:#fff}
+    .t-card h3{margin:0;font-size:1.15rem;transition:color .3s}
+    .t-card:hover h3{color:var(--rose)}
+    .t-card p{font-size:.875rem;color:var(--text-secondary);line-height:1.75;margin-bottom:0}
+    .t-card a{color:var(--camel);text-decoration:underline;text-underline-offset:3px}
+    .t-card a:hover{color:var(--rose)}
+
+    .back-to-top{position:fixed;bottom:32px;right:32px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border:1px solid rgba(212,145,154,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .4s cubic-bezier(.22,1,.36,1);z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+    .back-to-top.visible{opacity:1;transform:translateY(0)}
+    .back-to-top:hover{background:var(--rose);border-color:var(--rose);transform:translateY(-4px);box-shadow:0 8px 30px rgba(212,145,154,.35)}
+    .back-to-top:hover svg{stroke:#fff}
+    .back-to-top svg{width:20px;height:20px;stroke:var(--noir);fill:none;stroke-width:2;transition:stroke .3s}
+
+    @media(max-width:900px){
+      .t-layout{grid-template-columns:1fr;gap:0}
+      .t-sidebar{position:static;margin-bottom:28px}
+      .t-nav{flex-direction:row;flex-wrap:wrap;gap:5px}
+      .t-nav a{border-left:none;border-bottom:2px solid transparent;border-radius:8px;font-size:.75rem;padding:5px 10px}
+      .t-nav a.active{border-bottom-color:var(--rose);border-left:none}
+    }
+    @media(max-width:480px){.t-card{padding:20px 20px}.hero-meta{flex-direction:column;gap:8px}}
+  </style>
 </head>
 
 <body>
+  <div class="scroll-progress" id="scrollProgress" style="width:0%"></div>
 
-  <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a class="brand" href="index.html"><img src="assets/img/ShineN.png" alt="Shine"></a>
       <nav class="nav" id="mainNav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="custom-perfumes.html">Custom Perfume</a>
-        <a href="about.html">Our Brand</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
-        <a href="cart.html" class="nav-cta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6" />
-          </svg>
-          Cart
-        </a>
+        <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="custom-perfumes.html">Custom Perfume</a>
+        <a href="about.html">Our Brand</a><a href="contact.html">Contact</a><a href="login.html">Login</a>
+        <a href="cart.html" class="nav-cta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>Cart</a>
       </nav>
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     </div>
@@ -41,81 +88,93 @@
   </div>
 
   <main>
-    <section class="hero" style="min-height:35vh;background:var(--petal)">
+    <section class="t-hero">
       <div class="container">
-        <div class="reveal" style="max-width:640px">
-          <p class="hero__tagline">Legal</p>
+        <div style="max-width:640px">
+          <div class="hero-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Legal</div>
           <h1>Terms of Service</h1>
-          <p class="hero__sub">Last updated: 1 January 2025</p>
+          <p class="hero__sub">The rules and guidelines that govern your use of Shine and our luxury products.</p>
+          <div class="hero-meta">
+            <div class="hero-meta-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Updated: 1 Jan 2025</div>
+            <div class="hero-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ~5 min read</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="t-section">
       <div class="container">
-        <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:var(--sp-2xl)" class="reveal">
+        <div class="t-layout">
+          <aside class="t-sidebar">
+            <div class="t-sidebar-title">Sections</div>
+            <nav class="t-nav">
+              <a href="#s1" class="active">Acceptance</a>
+              <a href="#s2">About Us</a>
+              <a href="#s3">Products & Pricing</a>
+              <a href="#s4">Orders</a>
+              <a href="#s5">Payment</a>
+              <a href="#s6">Delivery</a>
+              <a href="#s7">Returns</a>
+              <a href="#s8">Intellectual Property</a>
+              <a href="#s9">Liability</a>
+              <a href="#s10">Governing Law</a>
+              <a href="#s11">Changes</a>
+            </nav>
+          </aside>
 
-          <div>
-            <h3>1. Acceptance of Terms</h3>
-            <p class="text-sm">By accessing or using the Shine website (shineluxury.com) or purchasing any products, you agree to be bound by these Terms of Service. If you do not agree, please do not use our website.</p>
+          <div class="t-cards">
+            <div class="t-card" id="s1">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><h3>1. Acceptance of Terms</h3></div>
+              <p>By accessing or using the Shine website (shineluxury.com) or purchasing any products, you agree to be bound by these Terms of Service. If you do not agree, please do not use our website.</p>
+            </div>
+            <div class="t-card" id="s2">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3>2. About Us</h3></div>
+              <p>Shine Luxury S.L. is a company registered in Spain (CIF: B-00000000), Passeig de Gràcia 10, 08007 Barcelona. Contact: legal@shineluxury.com.</p>
+            </div>
+            <div class="t-card" id="s3">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><h3>3. Products & Pricing</h3></div>
+              <p>All prices shown on the website include VAT at the applicable rate. We reserve the right to modify prices at any time. Product availability is not guaranteed. We will notify you if a product is unavailable after you place an order and provide a full refund or alternative.</p>
+            </div>
+            <div class="t-card" id="s4">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><h3>4. Orders & Contract Formation</h3></div>
+              <p>An order constitutes an offer to purchase. A binding contract is formed only when we send an order confirmation email. We reserve the right to decline any order, for example in the event of pricing errors or fraud suspicion.</p>
+            </div>
+            <div class="t-card" id="s5">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><h3>5. Payment</h3></div>
+              <p>We accept major credit/debit cards and other payment methods listed at checkout. All transactions are encrypted. We do not store full card details. Payment is taken at the point of order.</p>
+            </div>
+            <div class="t-card" id="s6">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><h3>6. Delivery</h3></div>
+              <p>Delivery timescales are estimates and not guaranteed. Risk of loss passes to you upon delivery. See our <a href="shipping.html">Shipping & Returns</a> page for full details.</p>
+            </div>
+            <div class="t-card" id="s7">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></div><h3>7. Returns & Refunds</h3></div>
+              <p>You have the right to cancel a standard purchase within 14 days of receipt under the EU Consumer Rights Directive, and return it for a full refund. Custom fragrances are exempt from this right. See our <a href="shipping.html">Shipping & Returns</a> page for the process.</p>
+            </div>
+            <div class="t-card" id="s8">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>8. Intellectual Property</h3></div>
+              <p>All content on this website — including text, images, logos, and design — is the property of Shine Luxury S.L. or its licensors and is protected by intellectual property law. You may not reproduce or redistribute any content without our written consent.</p>
+            </div>
+            <div class="t-card" id="s9">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h3>9. Limitation of Liability</h3></div>
+              <p>To the extent permitted by law, our liability for any claim arising from your use of the website or purchase of products is limited to the price paid for the relevant product(s). We are not liable for indirect or consequential losses.</p>
+            </div>
+            <div class="t-card" id="s10">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div><h3>10. Governing Law</h3></div>
+              <p>These Terms are governed by Spanish law. Any disputes shall be subject to the exclusive jurisdiction of the courts of Barcelona, Spain, without prejudice to your rights as a consumer under the law of your country of residence within the EU.</p>
+            </div>
+            <div class="t-card" id="s11">
+              <div class="t-card-header"><div class="t-card-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><h3>11. Changes to These Terms</h3></div>
+              <p>We may update these Terms from time to time. The current version is always published on this page. Continued use of our website after an update constitutes acceptance of the new terms.</p>
+            </div>
           </div>
-
-          <div>
-            <h3>2. About Us</h3>
-            <p class="text-sm">Shine Luxury S.L. is a company registered in Spain (CIF: B-00000000), Passeig de Gràcia 10, 08007 Barcelona. Contact: legal@shineluxury.com.</p>
-          </div>
-
-          <div>
-            <h3>3. Products & Pricing</h3>
-            <p class="text-sm">All prices shown on the website include VAT at the applicable rate. We reserve the right to modify prices at any time. Product availability is not guaranteed. We will notify you if a product is unavailable after you place an order and provide a full refund or alternative.</p>
-          </div>
-
-          <div>
-            <h3>4. Orders & Contract Formation</h3>
-            <p class="text-sm">An order constitutes an offer to purchase. A binding contract is formed only when we send an order confirmation email. We reserve the right to decline any order, for example in the event of pricing errors or fraud suspicion.</p>
-          </div>
-
-          <div>
-            <h3>5. Payment</h3>
-            <p class="text-sm">We accept major credit/debit cards and other payment methods listed at checkout. All transactions are encrypted. We do not store full card details. Payment is taken at the point of order.</p>
-          </div>
-
-          <div>
-            <h3>6. Delivery</h3>
-            <p class="text-sm">Delivery timescales are estimates and not guaranteed. Risk of loss passes to you upon delivery. See our <a href="shipping.html" style="color:var(--camel)">Shipping & Returns</a> page for full details.</p>
-          </div>
-
-          <div>
-            <h3>7. Returns & Refunds</h3>
-            <p class="text-sm">You have the right to cancel a standard purchase within 14 days of receipt under the EU Consumer Rights Directive, and return it for a full refund. Custom fragrances are exempt from this right. See our <a href="shipping.html" style="color:var(--camel)">Shipping & Returns</a> page for the process.</p>
-          </div>
-
-          <div>
-            <h3>8. Intellectual Property</h3>
-            <p class="text-sm">All content on this website — including text, images, logos, and design — is the property of Shine Luxury S.L. or its licensors and is protected by intellectual property law. You may not reproduce or redistribute any content without our written consent.</p>
-          </div>
-
-          <div>
-            <h3>9. Limitation of Liability</h3>
-            <p class="text-sm">To the extent permitted by law, our liability for any claim arising from your use of the website or purchase of products is limited to the price paid for the relevant product(s). We are not liable for indirect or consequential losses.</p>
-          </div>
-
-          <div>
-            <h3>10. Governing Law</h3>
-            <p class="text-sm">These Terms are governed by Spanish law. Any disputes shall be subject to the exclusive jurisdiction of the courts of Barcelona, Spain, without prejudice to your rights as a consumer under the law of your country of residence within the EU.</p>
-          </div>
-
-          <div>
-            <h3>11. Changes to These Terms</h3>
-            <p class="text-sm">We may update these Terms from time to time. The current version is always published on this page. Continued use of our website after an update constitutes acceptance of the new terms.</p>
-          </div>
-
         </div>
       </div>
     </section>
   </main>
 
-  <!-- FOOTER -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+
   <footer class="site-footer footer-ultra" id="siteFooter">
     <div class="container">
       <div class="footer-grid">
@@ -128,33 +187,9 @@
             <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
           </div>
         </div>
-        <div>
-          <div class="footer-heading">Shop</div>
-          <div class="footer-links">
-            <a href="shop.html">All Products</a>
-            <a href="shop.html?category=skincare">Skincare</a>
-            <a href="shop.html?category=fragrance">Fragrances</a>
-            <a href="shop.html?category=4">Gift Sets</a>
-          </div>
-        </div>
-        <div>
-          <div class="footer-heading">Company</div>
-          <div class="footer-links">
-            <a href="about.html">Our Brand</a>
-            <a href="contact.html">Contact Us</a>
-            <a href="careers.html">Careers</a>
-            <a href="press.html">Press</a>
-          </div>
-        </div>
-        <div>
-          <div class="footer-heading">Support</div>
-          <div class="footer-links">
-            <a href="shipping.html">Shipping & Returns</a>
-            <a href="faq.html">FAQ</a>
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-          </div>
-        </div>
+        <div><div class="footer-heading">Shop</div><div class="footer-links"><a href="shop.html">All Products</a><a href="shop.html?category=skincare">Skincare</a><a href="shop.html?category=fragrance">Fragrances</a><a href="shop.html?category=4">Gift Sets</a></div></div>
+        <div><div class="footer-heading">Company</div><div class="footer-links"><a href="about.html">Our Brand</a><a href="contact.html">Contact Us</a><a href="careers.html">Careers</a><a href="press.html">Press</a></div></div>
+        <div><div class="footer-heading">Support</div><div class="footer-links"><a href="shipping.html">Shipping & Returns</a><a href="faq.html">FAQ</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div></div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2025 Shine. All rights reserved. Made with love in Spain.</p>
@@ -165,5 +200,24 @@
 
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/search.js" defer></script>
+  <script>
+    // Scroll progress + back to top
+    const prog=document.getElementById('scrollProgress'),btn=document.getElementById('backToTop');
+    window.addEventListener('scroll',()=>{
+      prog.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';
+      btn.classList.toggle('visible',window.scrollY>400);
+    });
+    btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+    // Scroll reveal
+    const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('revealed');obs.unobserve(x.target);}});},{threshold:.12,rootMargin:'0px 0px -30px 0px'});
+    document.querySelectorAll('.t-card').forEach((c,i)=>{c.style.transitionDelay=(i*.06)+'s';obs.observe(c);});
+
+    // Sidebar scroll tracking
+    const cards=document.querySelectorAll('.t-card[id]'),links=document.querySelectorAll('.t-nav a');
+    const so=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){links.forEach(l=>l.classList.remove('active'));const l=document.querySelector(`.t-nav a[href="#${x.target.id}"]`);if(l)l.classList.add('active');}});},{threshold:.3,rootMargin:'-100px 0px -50% 0px'});
+    cards.forEach(c=>so.observe(c));
+    links.forEach(l=>{l.addEventListener('click',e=>{e.preventDefault();document.querySelector(l.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});});});
+  </script>
 </body>
 </html>

@@ -13,6 +13,7 @@ public class ProductoRequestDTO {
     private String     genero;
     private String     tipoFragancia;
     private Integer    idCategoria;
+    private Integer    idSubcategoria;
 
     public ProductoRequestDTO() {}
     public String     getSku()           { return sku; }
@@ -35,4 +36,6 @@ public class ProductoRequestDTO {
     public void       setTipoFragancia(String v) { this.tipoFragancia = v; }
     public Integer    getIdCategoria()   { return idCategoria; }
     public void       setIdCategoria(Integer v) { this.idCategoria = v; }
+    public Integer    getIdSubcategoria()                       { return idSubcategoria; }
+    public void       setIdSubcategoria(Integer idSubcategoria) { this.idSubcategoria = idSubcategoria; }
 }

@@ -55,8 +55,8 @@ public class ProductoDAO {
 
     private Producto insert(Producto p) throws SQLException {
         String sql = "INSERT INTO producto (sku, nombre, descripcion, ingredientes, modo_uso, " +
-                     "precio, stock, genero, tipo_fragancia, id_categoria) " +
-                     "VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING id_producto";
+                     "precio, stock, genero, tipo_fragancia, id_categoria, id_subcategoria) " +
+                     "VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING id_producto";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             setParams(ps, p);
@@ -70,12 +70,12 @@ public class ProductoDAO {
 
     private Producto update(Producto p) throws SQLException {
         String sql = "UPDATE producto SET sku=?, nombre=?, descripcion=?, ingredientes=?, modo_uso=?, " +
-                     "precio=?, stock=?, genero=?, tipo_fragancia=?, id_categoria=? " +
+                     "precio=?, stock=?, genero=?, tipo_fragancia=?, id_categoria=?, id_subcategoria=? " +
                      "WHERE id_producto=?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             setParams(ps, p);
-            ps.setInt(11, p.getIdProducto());
+            ps.setInt(12, p.getIdProducto());
             ps.executeUpdate();
         }
         return p;
@@ -92,6 +92,8 @@ public class ProductoDAO {
         ps.setString(8, p.getGenero());
         ps.setString(9, p.getTipoFragancia());
         ps.setInt(10, p.getCategoria().getIdCategoria());
+        if (p.getIdSubcategoria() != null) ps.setInt(11, p.getIdSubcategoria());
+        else ps.setNull(11, java.sql.Types.INTEGER);
     }
 
     public void decrementarStock(Integer idProducto, int cantidad, Connection conn) throws SQLException {
