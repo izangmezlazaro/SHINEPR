@@ -12,10 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-/**
- * Filtro CORS global. Se ejecuta en todas las rutas ("/*").
- * Permite los orígenes del frontend (Live Server) y maneja preflight OPTIONS.
- */
 @WebFilter(urlPatterns = "/*", filterName = "CorsFilter")
 public class CorsFilter implements Filter {
 
@@ -55,7 +51,7 @@ public class CorsFilter implements Filter {
             resp.setHeader("Vary",                             "Origin");
         }
 
-        // Preflight OPTIONS → responder 200 directamente sin pasar al resto de la cadena
+    
         if ("OPTIONS".equalsIgnoreCase(method)) {
             resp.setStatus(HttpServletResponse.SC_OK);
             return;
@@ -68,9 +64,8 @@ public class CorsFilter implements Filter {
     public void destroy() {}
 
     private boolean isAllowedOrigin(String origin) {
-        if (origin == null) return true; // Permitir peticiones directas (curl, postman)
-        
-        // Permitir cualquier origen local en desarrollo
+        if (origin == null) return true;
+     
         if (origin.contains("localhost") || origin.contains("127.0.0.1")) {
             return true;
         }
