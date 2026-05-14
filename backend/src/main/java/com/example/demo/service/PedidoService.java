@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.AdminPedidoDTO;
 import com.example.demo.dao.DetallePedidoDAO;
 import com.example.demo.dao.DireccionDAO;
+import com.example.demo.dao.ImagenProductoDAO;
 import com.example.demo.dao.PedidoDAO;
 import com.example.demo.dao.ProductoDAO;
 import com.example.demo.dao.UsuarioDAO;
@@ -19,24 +20,27 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PedidoService {
 
-    private final PedidoDAO        pedidoDAO;
-    private final UsuarioDAO       usuarioDAO;
-    private final DireccionDAO     direccionDAO;
-    private final DetallePedidoDAO detallePedidoDAO;
-    private final CarritoService   carritoService;
-    private final ProductoDAO      productoDAO;
+    private final PedidoDAO          pedidoDAO;
+    private final UsuarioDAO         usuarioDAO;
+    private final DireccionDAO       direccionDAO;
+    private final DetallePedidoDAO   detallePedidoDAO;
+    private final CarritoService     carritoService;
+    private final ProductoDAO        productoDAO;
+    private final ImagenProductoDAO  imagenProductoDAO;
 
     public PedidoService() {
-        this.pedidoDAO        = new PedidoDAO();
-        this.usuarioDAO       = new UsuarioDAO();
-        this.direccionDAO     = new DireccionDAO();
-        this.detallePedidoDAO = new DetallePedidoDAO();
-        this.carritoService   = new CarritoService();
-        this.productoDAO      = new ProductoDAO();
+        this.pedidoDAO          = new PedidoDAO();
+        this.usuarioDAO         = new UsuarioDAO();
+        this.direccionDAO       = new DireccionDAO();
+        this.detallePedidoDAO   = new DetallePedidoDAO();
+        this.carritoService     = new CarritoService();
+        this.productoDAO        = new ProductoDAO();
+        this.imagenProductoDAO  = new ImagenProductoDAO();
     }
 
     public List<PedidoResponseDTO> listarPorUsuario(Integer idUsuario) {
@@ -136,7 +140,17 @@ public class PedidoService {
             List<AdminPedidoDTO> pedidos = pedidoDAO.findAllAdmin();
             for (AdminPedidoDTO dto : pedidos) {
                 List<DetallePedido> detalles = detallePedidoDAO.findByPedidoId(dto.getIdPedido());
-                dto.setDetalles(detalles.stream().map(this::toDetalleDto).collect(Collectors.toList()));
+                List<Integer> productoIds = detalles.stream()
+                        .filter(d -> d.getProducto() != null)
+                        .map(d -> d.getProducto().getIdProducto())
+                        .collect(Collectors.toList());
+                Map<Integer, String> imagenPorProducto = imagenProductoDAO.findByProductoIds(productoIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                            img -> img.getProducto().getIdProducto(),
+                            img -> img.getUrl(),
+                            (url1, url2) -> url1));
+                dto.setDetalles(detalles.stream().map(d -> toDetalleDto(d, imagenPorProducto)).collect(Collectors.toList()));
             }
             return pedidos;
         } catch (SQLException e) { throw new RuntimeException(e); }
@@ -158,21 +172,38 @@ public class PedidoService {
             List<DetallePedido> detalles = pedido.getDetalles().isEmpty()
                     ? detallePedidoDAO.findByPedidoId(pedido.getIdPedido())
                     : pedido.getDetalles();
+
+            List<Integer> productoIds = detalles.stream()
+                    .filter(d -> d.getProducto() != null)
+                    .map(d -> d.getProducto().getIdProducto())
+                    .collect(Collectors.toList());
+
+            Map<Integer, String> imagenPorProducto = imagenProductoDAO.findByProductoIds(productoIds)
+                    .stream()
+                    .collect(Collectors.toMap(
+                        img -> img.getProducto().getIdProducto(),
+                        img -> img.getUrl(),
+                        (url1, url2) -> url1));
+
             return new PedidoResponseDTO(
                     pedido.getIdPedido(), pedido.getUsuario().getId(), pedido.getDireccion().getId(),
                     pedido.getEstado(), pedido.getTotal(), pedido.getFecha(),
-                    detalles.stream().map(this::toDetalleDto).collect(Collectors.toList()));
+                    detalles.stream().map(d -> toDetalleDto(d, imagenPorProducto)).collect(Collectors.toList()));
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
-    private DetallePedidoDTO toDetalleDto(DetallePedido d) {
+    private DetallePedidoDTO toDetalleDto(DetallePedido d, Map<Integer, String> imagenPorProducto) {
         BigDecimal subtotal = d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()));
         String nombre = d.getProducto() != null ? d.getProducto().getNombre()
                 : (d.getPerfumeCustom().getNombrePersonalizado() == null || d.getPerfumeCustom().getNombrePersonalizado().isBlank()
                     ? "Perfume personalizado" : d.getPerfumeCustom().getNombrePersonalizado());
-        return new DetallePedidoDTO(d.getId(),
+        DetallePedidoDTO dto = new DetallePedidoDTO(d.getId(),
             d.getProducto() != null ? d.getProducto().getIdProducto() : null,
             d.getPerfumeCustom() != null ? d.getPerfumeCustom().getIdPerfCust() : null,
             nombre, d.getCantidad(), d.getPrecioUnitario(), subtotal);
+        if (d.getProducto() != null) {
+            dto.setImagenUrl(imagenPorProducto.get(d.getProducto().getIdProducto()));
+        }
+        return dto;
     }
 }

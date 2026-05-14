@@ -10,6 +10,7 @@ public class DetallePedidoDTO {
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subtotal;
+    private String  imagenUrl;
 
     public DetallePedidoDTO() {}
     public DetallePedidoDTO(Integer id, Integer idProducto, Integer idPerfCust, String nombre,
@@ -32,4 +33,6 @@ public class DetallePedidoDTO {
     public void       setPrecioUnitario(BigDecimal v) { this.precioUnitario = v; }
     public BigDecimal getSubtotal()       { return subtotal; }
     public void       setSubtotal(BigDecimal v) { this.subtotal = v; }
+    public String     getImagenUrl()      { return imagenUrl; }
+    public void       setImagenUrl(String v) { this.imagenUrl = v; }
 }

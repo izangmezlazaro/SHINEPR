@@ -13,8 +13,12 @@ import java.util.List;
 public class DetallePedidoDAO {
 
     public List<DetallePedido> findByPedidoId(Integer idPedido) throws SQLException {
-        String sql = "SELECT id, id_pedido, id_producto, id_perf_cust, cantidad, precio_unitario " +
-                     "FROM detalle_pedido WHERE id_pedido = ?";
+        String sql = "SELECT dp.id, dp.id_pedido, dp.id_producto, dp.id_perf_cust, dp.cantidad, dp.precio_unitario, " +
+                     "p.nombre AS prod_nombre, pc.nombre_personalizado " +
+                     "FROM detalle_pedido dp " +
+                     "LEFT JOIN producto p ON dp.id_producto = p.id_producto " +
+                     "LEFT JOIN perfume_custom pc ON dp.id_perf_cust = pc.id_perf_cust " +
+                     "WHERE dp.id_pedido = ?";
         List<DetallePedido> list = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -46,9 +50,19 @@ public class DetallePedidoDAO {
         d.setId(rs.getInt("id"));
         Pedido p = new Pedido(); p.setIdPedido(rs.getInt("id_pedido")); d.setPedido(p);
         int idProd = rs.getInt("id_producto");
-        if (!rs.wasNull()) { Producto prod = new Producto(); prod.setIdProducto(idProd); d.setProducto(prod); }
+        if (!rs.wasNull()) {
+            Producto prod = new Producto();
+            prod.setIdProducto(idProd);
+            prod.setNombre(rs.getString("prod_nombre"));
+            d.setProducto(prod);
+        }
         int idPC = rs.getInt("id_perf_cust");
-        if (!rs.wasNull()) { PerfumeCustom pc = new PerfumeCustom(); pc.setIdPerfCust(idPC); d.setPerfumeCustom(pc); }
+        if (!rs.wasNull()) {
+            PerfumeCustom pc = new PerfumeCustom();
+            pc.setIdPerfCust(idPC);
+            pc.setNombrePersonalizado(rs.getString("nombre_personalizado"));
+            d.setPerfumeCustom(pc);
+        }
         d.setCantidad(rs.getInt("cantidad"));
         d.setPrecioUnitario(rs.getBigDecimal("precio_unitario"));
         return d;
