@@ -15,6 +15,7 @@ public class Producto {
     private String     genero;
     private String     tipoFragancia;
     private Categoria  categoria;
+    private Integer    idSubcategoria;
 
     public Producto() {}
 
@@ -66,4 +67,7 @@ public class Producto {
 
     public Categoria  getCategoria()    { return categoria; }
     public void       setCategoria(Categoria categoria) { this.categoria = categoria; }
+
+    public Integer    getIdSubcategoria()                        { return idSubcategoria; }
+    public void       setIdSubcategoria(Integer idSubcategoria)  { this.idSubcategoria = idSubcategoria; }
 }

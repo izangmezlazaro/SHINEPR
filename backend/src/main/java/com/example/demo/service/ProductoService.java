@@ -121,6 +121,7 @@ public class ProductoService {
         Categoria cat = p.getCategoria();
         return new ProductoResponseDTO(p.getIdProducto(), p.getSku(), p.getNombre(), p.getDescripcion(),
             p.getIngredientes(), p.getModoUso(), p.getPrecio(), p.getStock(), p.getGenero(),
-            p.getTipoFragancia(), new CategoriaDTO(cat.getIdCategoria(), cat.getNombre()), imagenes);
+            p.getTipoFragancia(), new CategoriaDTO(cat.getIdCategoria(), cat.getNombre()),
+            p.getIdSubcategoria(), imagenes);
     }
 }

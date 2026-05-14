@@ -67,6 +67,44 @@ public class CarritoItemDAO {
         }
     }
 
+    public void updateCantidad(Integer id, int cantidad) throws SQLException {
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE carrito_item SET cantidad = ? WHERE id = ?")) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public Optional<CarritoItem> findByCarritoIdAndProductoId(Integer idCarrito, Integer idProducto) throws SQLException {
+        String sql = "SELECT id, id_carrito, id_producto, id_perf_cust, cantidad " +
+                     "FROM carrito_item WHERE id_carrito = ? AND id_producto = ?";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCarrito);
+            ps.setInt(2, idProducto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRow(rs));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<CarritoItem> findByCarritoIdAndPerfCustId(Integer idCarrito, Integer idPerfCust) throws SQLException {
+        String sql = "SELECT id, id_carrito, id_producto, id_perf_cust, cantidad " +
+                     "FROM carrito_item WHERE id_carrito = ? AND id_perf_cust = ?";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCarrito);
+            ps.setInt(2, idPerfCust);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRow(rs));
+            }
+        }
+        return Optional.empty();
+    }
+
     public void deleteByCarritoId(Integer idCarrito) throws SQLException {
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM carrito_item WHERE id_carrito = ?")) {

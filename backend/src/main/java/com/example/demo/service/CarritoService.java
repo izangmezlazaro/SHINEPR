@@ -15,6 +15,7 @@ import com.example.demo.exception.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CarritoService {
@@ -44,23 +45,33 @@ public class CarritoService {
         try {
             validarItemExclusivo(request.getIdProducto(), request.getIdPerfCust());
             Carrito carrito = carritoDAO.findByUsuarioId(idUsuario).orElseGet(() -> crearCarrito(idUsuario));
-
-            CarritoItem item = new CarritoItem();
-            item.setCarrito(carrito);
-            item.setCantidad(request.getCantidad());
+            int cantidadAgregar = request.getCantidad() == null ? 1 : request.getCantidad();
 
             if (request.getIdProducto() != null) {
+                Optional<CarritoItem> existing = carritoItemDAO.findByCarritoIdAndProductoId(
+                        carrito.getId(), request.getIdProducto());
+                if (existing.isPresent()) {
+                    CarritoItem item = existing.get();
+                    carritoItemDAO.updateCantidad(item.getId(), item.getCantidad() + cantidadAgregar);
+                    return toDto(carrito);
+                }
                 Producto p = productoDAO.findById(request.getIdProducto())
                         .orElseThrow(() -> new EntityNotFoundException("Producto", request.getIdProducto()));
+                CarritoItem item = new CarritoItem();
+                item.setCarrito(carrito);
+                item.setCantidad(cantidadAgregar);
                 item.setProducto(p);
+                carritoItemDAO.save(item);
             } else {
                 PerfumeCustom pc = perfumeCustomDAO.findById(request.getIdPerfCust())
                         .orElseThrow(() -> new EntityNotFoundException("Perfume personalizado", request.getIdPerfCust()));
+                CarritoItem item = new CarritoItem();
+                item.setCarrito(carrito);
+                item.setCantidad(cantidadAgregar);
                 item.setPerfumeCustom(pc);
+                carritoItemDAO.save(item);
             }
 
-            carritoItemDAO.save(item);
-            carrito.getItems().add(item);
             return toDto(carrito);
         } catch (SQLException e) { throw new RuntimeException(e); }
     }

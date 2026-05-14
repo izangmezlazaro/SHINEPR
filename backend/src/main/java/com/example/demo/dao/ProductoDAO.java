@@ -13,7 +13,7 @@ public class ProductoDAO {
 
     private static final String SELECT_WITH_CAT =
         "SELECT p.id_producto, p.sku, p.nombre, p.descripcion, p.ingredientes, p.modo_uso, " +
-        "p.precio, p.stock, p.genero, p.tipo_fragancia, " +
+        "p.precio, p.stock, p.genero, p.tipo_fragancia, p.id_subcategoria, " +
         "c.id_categoria, c.nombre AS cat_nombre " +
         "FROM producto p JOIN categoria c ON p.id_categoria = c.id_categoria ";
 
@@ -129,6 +129,8 @@ public class ProductoDAO {
         p.setGenero(rs.getString("genero"));
         p.setTipoFragancia(rs.getString("tipo_fragancia"));
         p.setCategoria(cat);
+        int idSub = rs.getInt("id_subcategoria");
+        p.setIdSubcategoria(rs.wasNull() ? null : idSub);
         return p;
     }
 }

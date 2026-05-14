@@ -15,17 +15,19 @@ public class ProductoResponseDTO {
     private String     genero;
     private String     tipoFragancia;
     private CategoriaDTO categoria;
+    private Integer      idSubcategoria;
     private List<ImagenProductoDTO> imagenes;
 
     public ProductoResponseDTO() {}
     public ProductoResponseDTO(Integer idProducto, String sku, String nombre, String descripcion,
                                 String ingredientes, String modoUso, BigDecimal precio, Integer stock,
                                 String genero, String tipoFragancia, CategoriaDTO categoria,
-                                List<ImagenProductoDTO> imagenes) {
+                                Integer idSubcategoria, List<ImagenProductoDTO> imagenes) {
         this.idProducto = idProducto; this.sku = sku; this.nombre = nombre;
         this.descripcion = descripcion; this.ingredientes = ingredientes; this.modoUso = modoUso;
         this.precio = precio; this.stock = stock; this.genero = genero;
-        this.tipoFragancia = tipoFragancia; this.categoria = categoria; this.imagenes = imagenes;
+        this.tipoFragancia = tipoFragancia; this.categoria = categoria;
+        this.idSubcategoria = idSubcategoria; this.imagenes = imagenes;
     }
     public Integer    getIdProducto()    { return idProducto; }
     public void       setIdProducto(Integer v) { this.idProducto = v; }
@@ -49,6 +51,8 @@ public class ProductoResponseDTO {
     public void       setTipoFragancia(String v) { this.tipoFragancia = v; }
     public CategoriaDTO getCategoria()   { return categoria; }
     public void       setCategoria(CategoriaDTO v) { this.categoria = v; }
+    public Integer    getIdSubcategoria()                       { return idSubcategoria; }
+    public void       setIdSubcategoria(Integer idSubcategoria) { this.idSubcategoria = idSubcategoria; }
     public List<ImagenProductoDTO> getImagenes() { return imagenes; }
     public void       setImagenes(List<ImagenProductoDTO> v) { this.imagenes = v; }
 }
