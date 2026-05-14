@@ -565,109 +565,165 @@
     }
   }
 
-  function setupGeneradorIA() {
-    const btnGenerar = document.getElementById('btnGenerarAI');
-    const previewImagen = document.getElementById('previewImagen');
+  // ── AI Generation overlay helpers ───────────────────────────────────────
+  const AI_MESSAGES = [
+    'Crafting your exclusive bottle…',
+    'Blending your chosen notes…',
+    'Applying studio lighting…',
+    'Rendering glass reflections…',
+    'Adding gold typography…',
+    'Almost ready — final touches…'
+  ];
 
-    if (!btnGenerar || !previewImagen) return;
+  function aiOverlayShow(name) {
+    const overlay = document.getElementById('aiGeneratingOverlay');
+    const stateLoading = document.getElementById('aiStateLoading');
+    const stateResult  = document.getElementById('aiStateResult');
+    const msgEl        = document.getElementById('aiLoadingMessage');
+    if (!overlay) return;
+
+    stateLoading.style.display = 'flex';
+    stateResult.style.display  = 'none';
+    overlay.classList.add('ai-overlay--visible');
+    document.body.style.overflow = 'hidden';
+
+    // Rotate status messages
+    let msgIdx = 0;
+    if (msgEl) msgEl.textContent = AI_MESSAGES[0];
+    overlay._msgTimer = setInterval(() => {
+      msgIdx = (msgIdx + 1) % AI_MESSAGES.length;
+      if (msgEl) msgEl.textContent = AI_MESSAGES[msgIdx];
+    }, 3500);
+
+    // Animate sparkles
+    const sparkleContainer = document.getElementById('aiSparkles');
+    if (sparkleContainer) {
+      sparkleContainer.innerHTML = '';
+      for (let i = 0; i < 18; i++) {
+        const sp = document.createElement('div');
+        sp.className = 'ai-sparkle';
+        sp.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*2).toFixed(2)}s;animation-duration:${(1.5+Math.random()*2).toFixed(2)}s`;
+        sparkleContainer.appendChild(sp);
+      }
+    }
+  }
+
+  function aiOverlayShowResult(imageUrl, name) {
+    const stateLoading = document.getElementById('aiStateLoading');
+    const stateResult  = document.getElementById('aiStateResult');
+    const resultImg    = document.getElementById('aiResultImage');
+    const resultName   = document.getElementById('aiResultName');
+    const downloadBtn  = document.getElementById('aiDownloadBtn');
+    const overlay      = document.getElementById('aiGeneratingOverlay');
+
+    if (overlay?._msgTimer) clearInterval(overlay._msgTimer);
+
+    if (resultImg)  resultImg.src = imageUrl;
+    if (resultName) resultName.textContent = name || 'Your Exclusive Fragrance';
+    if (downloadBtn) {
+      downloadBtn.href = imageUrl;
+      downloadBtn.download = (name || 'shine-custom-perfume').replace(/\s+/g, '-').toLowerCase() + '.png';
+    }
+
+    stateLoading.style.display = 'none';
+    stateResult.style.display  = 'flex';
+  }
+
+  function aiOverlayHide() {
+    const overlay = document.getElementById('aiGeneratingOverlay');
+    if (!overlay) return;
+    if (overlay._msgTimer) clearInterval(overlay._msgTimer);
+    overlay.classList.remove('ai-overlay--visible');
+    document.body.style.overflow = '';
+  }
+
+  function setupGeneradorIA() {
+    const btnGenerar    = document.getElementById('btnGenerarAI');
+    const previewImagen = document.getElementById('previewImagen');
+    const closeBtn      = document.getElementById('aiCloseBtn');
+
+    if (!btnGenerar) return;
+
+    // Close overlay → apply image to preview
+    closeBtn?.addEventListener('click', () => {
+      const resultImg = document.getElementById('aiResultImage');
+      if (resultImg?.src && previewImagen) {
+        previewImagen.src = resultImg.src;
+        previewImagen.style.maxHeight = '280px';
+        previewImagen.style.borderRadius = '12px';
+        previewImagen.style.boxShadow = '0 8px 32px rgba(212,175,55,0.25)';
+      }
+      aiOverlayHide();
+      showToast('✨ Design applied to your preview!');
+    });
+
+    // Close on backdrop click
+    document.getElementById('aiGeneratingOverlay')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        const stateResult = document.getElementById('aiStateResult');
+        if (stateResult?.style.display !== 'none') aiOverlayHide();
+      }
+    });
 
     btnGenerar.addEventListener('click', async () => {
-      // 1. Capturar los valores actuales del estado 'selections'
-      const tipo = selections.intensidad || '';
-      const base = selections.base ? getFraganciaLabel(selections.base) : '';
-      const notas = selections.notes.map(getFraganciaLabel).join(', ');
-      const frascoObj = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
-      const frasco = frascoObj ? `${frascoObj.forma} (${frascoObj.capacidadMl}ml)` : '';
+      const tipo         = selections.intensidad || '';
+      const base         = selections.base ? getFraganciaLabel(selections.base) : '';
+      const notas        = selections.notes.map(getFraganciaLabel).filter(Boolean).join(', ');
+      const frascoObj    = selections.idFrasco ? getFrasco(selections.idFrasco) : null;
+      const frasco       = frascoObj ? `${frascoObj.forma} (${frascoObj.capacidadMl}ml)` : '';
       const formaElegida = frascoObj ? frascoObj.forma : 'elegant';
       const nombreUsuario = document.getElementById('perfumeName')?.value.trim() || 'Shine Custom';
 
       if (!tipo && !base && !notas && !frasco) {
-        showToast('Please select some options first.');
+        showToast('Please select some options before generating your design.');
         return;
       }
 
-      const textoOriginalBoton = btnGenerar.innerText;
-
-      // 2. Estado de "Cargando"
+      // Show overlay
+      aiOverlayShow(nombreUsuario);
       btnGenerar.disabled = true;
-      btnGenerar.innerText = "✨ Designing luxury set...";
-      previewImagen.style.transition = "all 0.5s ease";
-      previewImagen.style.animation = "pulseAnimation 1.5s infinite ease-in-out";
-      previewImagen.style.filter = "drop-shadow(0 0 10px rgba(212, 175, 55, 0.5))";
-      
-      if (!document.getElementById('pulseKeyframes')) {
-        const style = document.createElement('style');
-        style.id = 'pulseKeyframes';
-        style.innerHTML = `
-          @keyframes pulseAnimation {
-            0% { opacity: 0.6; transform: scale(0.98); filter: blur(2px); }
-            50% { opacity: 1; transform: scale(1.02); filter: blur(0px); }
-            100% { opacity: 0.6; transform: scale(0.98); filter: blur(2px); }
-          }
-        `;
-        document.head.appendChild(style);
-      }
 
       try {
-        // 3. Preparar los datos usando URLSearchParams
         const params = new URLSearchParams();
-        params.append('tipo', labelIntensidad(tipo));
-        params.append('base', base);
-        params.append('notas', notas);
-        params.append('frasco', frasco);
-        params.append('formaElegida', formaElegida);
+        params.append('tipo',          labelIntensidad(tipo));
+        params.append('base',          base);
+        params.append('notas',         notas);
+        params.append('frasco',        frasco);
+        params.append('formaElegida',  formaElegida);
         params.append('nombreUsuario', nombreUsuario);
 
-        // 4. Petición POST a la ruta /api/generar-custom
-        // Usamos la API del backend asumiendo que ShineAPI.post acepta FormData/URLSearchParams 
-        // o hacemos fetch directamente para tener control total de los headers
         const response = await fetch('http://localhost:8080/api/generar-custom', {
           method: 'POST',
           body: params,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
 
+        let data;
+        try { data = await response.json(); } catch (_) { data = null; }
+
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const detail = data?.error || data?.detail || `HTTP ${response.status}`;
+          throw new Error(detail);
         }
 
-        const data = await response.json();
+        // Extract image — supports both URL and base64 (b64_json)
+        const item = data?.data?.[0];
+        const imageUrl = item?.url
+          ? item.url
+          : item?.b64_json
+            ? 'data:image/png;base64,' + item.b64_json
+            : null;
 
-        // 5. Extraer la imagen (ya sea URL o base64)
-        if (data && data.data && data.data.length > 0) {
-          const item = data.data[0];
-          const nuevaUrlImagen = item.url ? item.url : (item.b64_json ? "data:image/png;base64," + item.b64_json : null);
+        if (!imageUrl) throw new Error('The AI did not return a valid image. Please try again.');
 
-          if (!nuevaUrlImagen) {
-            throw new Error('AI did not return any valid image');
-          }
-
-          // 6. Restaurar inmediatamente sin esperar al onload por si hay bloqueadores
-          previewImagen.style.animation = "none";
-          previewImagen.style.filter = "none";
-          previewImagen.style.transform = "scale(1)";
-          previewImagen.src = nuevaUrlImagen;
-          previewImagen.style.opacity = "1";
-          btnGenerar.disabled = false;
-          btnGenerar.innerText = textoOriginalBoton;
-          showToast('Design generated successfully!');
-        } else {
-            throw new Error('Invalid AI response format');
-        }
+        aiOverlayShowResult(imageUrl, nombreUsuario);
 
       } catch (error) {
-        console.error("Error generating image:", error);
-        alert("✨ We're sorry, there was a problem generating your exclusive design. Please try again in a few moments.");
-        
-        // Restaurar estado
-        previewImagen.style.animation = "none";
-        previewImagen.style.filter = "none";
-        previewImagen.style.transform = "scale(1)";
-        previewImagen.style.opacity = "1";
+        console.error('[Shine AI]', error);
+        aiOverlayHide();
+        showToast('⚠️ ' + (error.message || 'Could not generate your design. Please try again.'));
+      } finally {
         btnGenerar.disabled = false;
-        btnGenerar.innerText = textoOriginalBoton;
       }
     });
   }

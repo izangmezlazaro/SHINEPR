@@ -8,115 +8,119 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
 
 /**
  * POST /api/generar-custom
+ * Generates a luxury perfume AI image using OpenAI gpt-image-1-mini.
  */
 @WebServlet(urlPatterns = "/api/generar-custom", name = "GenerarCustomServlet")
 public class GenerarCustomServlet extends HttpServlet {
 
+    private static final String OPENAI_API_KEY = "";
+
+    private static final String MODEL = "gpt-image-1-mini";
+    private static final int CONNECT_MS = 15_000; // 15 s
+    private static final int READ_MS = 120_000; // 2 min – generation can be slow
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            // Read parameters (sent as application/x-www-form-urlencoded)
-            String tipo = req.getParameter("tipo");
-            String base = req.getParameter("base");
-            String notas = req.getParameter("notas");
-            String frasco = req.getParameter("frasco");
-            String formaElegida = req.getParameter("formaElegida");
-            String nombreUsuario = req.getParameter("nombreUsuario");
+            // ── Read parameters (application/x-www-form-urlencoded) ──────────
+            String tipo = nvl(req.getParameter("tipo"), "Eau de Parfum");
+            String base = nvl(req.getParameter("base"), "");
+            String notas = nvl(req.getParameter("notas"), "floral and woody");
+            String formaElegida = nvl(req.getParameter("formaElegida"), "sleek glass");
+            String nombreUsuario = nvl(req.getParameter("nombreUsuario"), "Shine");
 
-            System.out.println("--- SHINE AI GENERATOR ---");
-            System.out.println("Type: " + tipo);
-            System.out.println("Base: " + base);
-            System.out.println("Notes: " + notas);
-            System.out.println("Bottle: " + frasco);
-            System.out.println("Shape: " + formaElegida);
-            System.out.println("Name: " + nombreUsuario);
+            System.out.println("=== SHINE AI GENERATOR ===");
+            System.out.println("Model     : " + MODEL);
+            System.out.println("Type      : " + tipo);
+            System.out.println("Base      : " + base);
+            System.out.println("Notes     : " + notas);
+            System.out.println("Shape     : " + formaElegida);
+            System.out.println("Name      : " + nombreUsuario);
 
-            // =========================================================
-            // TODO: API FOR IMAGE GENERATION GOES HERE
-            // =========================================================
-            // Construct the prompt with the received information
-            String prompt = "Professional luxury perfume branding mockup. In the center, a "
-                    + (formaElegida != null ? formaElegida : "elegant") +
-                    " glass bottle filled with a translucent liquid. To its right, a premium textured paper " +
-                    "packaging box that matches the bottle's aesthetic. " +
-                    "Both the bottle and the box feature a matching minimalist label with the name '"
-                    + (nombreUsuario != null ? nombreUsuario : "Shine") + "' " +
-                    "printed in elegant gold leaf typography. " +
-                    "Details: The bottle cap is " + (frasco != null ? frasco : "premium glass")
-                    + ". Sophisticated studio lighting, " +
-                    "soft shadows, realistic reflections on the glass. " +
-                    "Background: Dark, neutral, elegant interior. " +
-                    "Cinematic product shot, 8k resolution, sharp focus, no extra decorative objects.";
+            // ── Build the prompt ─────────────────────────────────────────────
+            String prompt = "Luxury perfume product photography on a dark, moody background. "
+                    + "Center: a " + formaElegida + " glass perfume bottle with a translucent liquid. "
+                    + "Beside it, a matching matte-finish premium box. "
+                    + "Both display the name '" + nombreUsuario + "' in minimalist gold serif typography. "
+                    + "Fragrance style: " + tipo + ". "
+                    + (!notas.isEmpty() ? "Scent notes: " + notas + ". " : "")
+                    + "Cinematic studio lighting, realistic glass reflections and soft shadows. "
+                    + "8K photorealistic render, no watermarks, no extra text.";
 
-            String apiKey = System.getenv("OPENAI_API_KEY");
-            if (apiKey == null || apiKey.isEmpty()) {
-                throw new RuntimeException("Environment variable OPENAI_API_KEY is not set.");
-            }
+            String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"");
 
-            // Connection to the OpenAI API
-            java.net.URL url = new java.net.URL("https://api.openai.com/v1/images/generations");
-            java.net.HttpURLConnection con = (java.net.HttpURLConnection) url.openConnection();
+            String body = "{"
+                    + "\"model\":\"" + MODEL + "\","
+                    + "\"prompt\":\"" + safePrompt + "\","
+                    + "\"n\":1,"
+                    + "\"size\":\"1024x1024\""
+                    + "}";
+
+            System.out.println("Prompt    : " + prompt);
+
+            // ── Call OpenAI API ───────────────────────────────────────────────
+            URL apiUrl = new URL("https://api.openai.com/v1/images/generations");
+            HttpURLConnection con = (HttpURLConnection) apiUrl.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", "Bearer " + apiKey);
+            con.setRequestProperty("Authorization", "Bearer " + OPENAI_API_KEY);
             con.setDoOutput(true);
+            con.setConnectTimeout(CONNECT_MS);
+            con.setReadTimeout(READ_MS);
 
-            // Escape quotes in the prompt to avoid JSON errors
-            String safePrompt = prompt.replace("\"", "\\\"");
-
-            // Use DALL-E 3 for best quality possible
-            String requestBody = "{\n" +
-                    "  \"model\": \"chatgpt-image-latest\",\n" +
-                    "  \"prompt\": \"" + safePrompt + "\",\n" +
-                    "  \"n\": 1,\n" +
-                    "  \"size\": \"1024x1024\"\n" +
-                    "}";
-
-            try (java.io.OutputStream os = con.getOutputStream()) {
-                byte[] input = requestBody.getBytes("utf-8");
-                os.write(input, 0, input.length);
+            try (OutputStream os = con.getOutputStream()) {
+                os.write(body.getBytes("utf-8"));
             }
 
-            // Read response from OpenAI
             int status = con.getResponseCode();
-            java.io.InputStream is = (status < 200 || status >= 300) ? con.getErrorStream() : con.getInputStream();
-            java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-            String responseStr = s.hasNext() ? s.next() : "";
-            System.out.println(">> OPENAI STATUS: " + status);
-            System.out.println(">> OPENAI JSON: " + responseStr);
+            InputStream is = (status >= 200 && status < 300)
+                    ? con.getInputStream()
+                    : con.getErrorStream();
 
-            if (status != 200) {
-                System.err.println("OpenAI Error: " + responseStr);
-                // Since OpenAI API Key is denying access to the model,
-                // we will return a mock image so the website doesn't break.
-                String fallbackImage = "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop";
-                String fallbackResponse = "{ \"data\": [ { \"url\": \"" + fallbackImage + "\" } ] }";
-
-                resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().write(fallbackResponse);
-                return;
+            String responseStr;
+            try (Scanner scanner = new Scanner(is, "utf-8")) {
+                responseStr = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
             }
 
-            // OpenAI already returns a JSON with the format { "data": [ { "url": "..." } ]
-            // }
+            System.out.println(">> OPENAI STATUS : " + status);
+            if (status != 200) {
+                System.err.println(">> OPENAI ERROR  : " + responseStr);
+            }
+
+            // ── Return result to frontend ─────────────────────────────────────
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write(responseStr);
+
+            if (status == 200) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.getWriter().write(responseStr);
+            } else {
+                // Return error as JSON so the frontend can display a proper message
+                String safeDetail = responseStr.replace("\\", "\\\\").replace("\"", "\\\"");
+                resp.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+                resp.getWriter().write(
+                        "{\"error\":\"OpenAI returned " + status + "\",\"detail\":\"" + safeDetail + "\"}");
+            }
 
         } catch (Exception e) {
-            // ¡AQUÍ ESTÁN LOS CHIVATOS!
-            System.err.println(">> ¡CRASH FATAL EN EL SERVLET!");
+            System.err.println(">> CRASH IN GenerarCustomServlet!");
             e.printStackTrace();
-
             HttpUtil.writeError(resp, 500, "Internal error generating AI image: " + e.getMessage());
         }
     }
-}
 
-//
+    /**
+     * Returns {@code value} if non-null and non-blank, otherwise {@code fallback}.
+     */
+    private static String nvl(String value, String fallback) {
+        return (value != null && !value.trim().isEmpty()) ? value.trim() : fallback;
+    }
+}
