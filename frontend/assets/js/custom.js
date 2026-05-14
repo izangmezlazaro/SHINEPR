@@ -406,6 +406,27 @@
       return;
     }
 
+    if (!getUsuarioId()) {
+      // Guest: save to guest cart and go to cart
+      const payload = crearPayload();
+      const guestItems = (function () {
+        try { return JSON.parse(localStorage.getItem('shineGuestCart')) || []; } catch (_) { return []; }
+      })();
+      guestItems.push({
+        type: 'custom',
+        payload,
+        nombre: payload.nombrePersonalizado || 'Custom Fragrance',
+        perfumeName: payload.nombrePersonalizado,
+        precioCalculado: payload.precioCalculado,
+        imagenUrl: BOTTLE_IMAGE,
+        cantidad: 1
+      });
+      localStorage.setItem('shineGuestCart', JSON.stringify(guestItems));
+      showToast('Fragrance added to cart');
+      setTimeout(() => { window.location.href = 'cart.html'; }, 700);
+      return;
+    }
+
     const nextBtn = document.getElementById('nextStepBtn');
     if (nextBtn) {
       nextBtn.disabled = true;

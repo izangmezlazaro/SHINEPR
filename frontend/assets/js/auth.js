@@ -63,7 +63,8 @@
           password: passwordInput.value
         });
         persistUser(response.usuario, response.token);
-        window.location.href = 'index.html';
+        const guestCart = JSON.parse(localStorage.getItem('shineGuestCart') || '[]');
+        window.location.href = guestCart.length > 0 ? 'cart.html' : 'index.html';
       } catch (error) {
         showError(errorBox, errorText, error.message || 'Incorrect email or password.');
         passwordInput.value = '';
@@ -126,8 +127,9 @@
         });
         persistUser(response.usuario, response.token);
         successBox?.classList.add('show');
+        const guestCart = JSON.parse(localStorage.getItem('shineGuestCart') || '[]');
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = guestCart.length > 0 ? 'cart.html' : 'index.html';
         }, 700);
       } catch (error) {
         showError(errorBox, errorText, error.message || 'Could not create the account.');

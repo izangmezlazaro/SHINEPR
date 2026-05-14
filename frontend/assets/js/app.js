@@ -472,34 +472,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ---------- Shop: card click → product page, "+" button → add to cart ----------
+  // ---------- Cookie Consent Banner ----------
+  (function () {
+    if (localStorage.getItem('shineCookiesAccepted')) return;
+
+    const banner = document.createElement('div');
+    banner.className = 'cookie-banner';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'Cookie consent');
+    banner.innerHTML = `
+      <div class="cookie-banner__text">
+        We use cookies to save your cart and improve your experience. By continuing you accept our
+        <a href="privacy.html">Cookie Policy</a>.
+      </div>
+      <div class="cookie-banner__actions">
+        <button class="btn btn--sm btn--outline" id="cookieDeclineBtn">Necessary only</button>
+        <button class="btn btn--sm btn--primary" id="cookieAcceptBtn">Accept all</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.classList.add('show'), 300);
+
+    document.getElementById('cookieAcceptBtn').addEventListener('click', () => {
+      localStorage.setItem('shineCookiesAccepted', 'all');
+      banner.classList.remove('show');
+      setTimeout(() => banner.remove(), 420);
+    });
+
+    document.getElementById('cookieDeclineBtn').addEventListener('click', () => {
+      localStorage.setItem('shineCookiesAccepted', 'necessary');
+      banner.classList.remove('show');
+      setTimeout(() => banner.remove(), 420);
+    });
+  })();
+
+  // ---------- Shop: card click → product page ----------
+  // Add-to-cart is handled by carrito.js (capture phase). This only handles navigation.
   const productGrid = document.getElementById('productGrid');
   if (productGrid) {
     productGrid.addEventListener('click', e => {
-      const btn  = e.target.closest('.product-card__action');
+      if (e.target.closest('.product-card__action')) return; // handled by carrito.js
       const card = e.target.closest('[data-id]');
-      if (!card) return;
-
-      if (btn) {
-        e.stopPropagation();
-        ShineCart.add({
-          id:    card.dataset.id,
-          name:  card.dataset.name,
-          price: parseFloat(card.dataset.price),
-          img:   card.dataset.img
-        });
-        showToast(`${card.dataset.name} added to cart`);
-        btn.classList.add('added');
-        setTimeout(() => btn.classList.remove('added'), 1000);
-      } else {
-        window.location.href = `product.html?id=${card.dataset.id}`;
-      }
+      if (card) window.location.href = `product.html?id=${card.dataset.id}`;
     });
   }
 
-  // ---------- Cart Page ----------
+  // ---------- Cart Page (legacy — skipped when carrito.js is present) ----------
   const cartItemsList = document.getElementById('cartItemsList');
-  if (cartItemsList) {
+  if (cartItemsList && !window.cargarCarrito) {
     function renderCart() {
       const items = ShineCart.get();
 

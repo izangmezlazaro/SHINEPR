@@ -485,6 +485,11 @@
   function setupCartCheckoutButton() {
     document.getElementById('checkoutBtn')?.addEventListener('click', event => {
       event.preventDefault();
+      const userId = window.ID_USUARIO || Number(localStorage.getItem('shineUserId')) || null;
+      if (!userId || userId <= 0) {
+        window.location.href = 'login.html';
+        return;
+      }
       window.location.href = 'checkout.html';
     });
   }

@@ -7,10 +7,10 @@
   const FALLBACK_IMAGE = 'assets/img/product-bodyoil.png';
   const CART_CACHE_KEY = 'shine:carrito:v1';
   const CART_CACHE_TTL = 30 * 1000;
+  const GUEST_CART_KEY = 'shineGuestCart';
   let ultimoCarrito = null;
 
   function getUsuarioId() {
-    // Try window.ID_USUARIO first (set by api.js and updated by auth.js on login)
     const fromWindow = window.ID_USUARIO;
     if (fromWindow && Number.isFinite(Number(fromWindow))) return Number(fromWindow);
     const fromStorage = Number(localStorage.getItem('shineUserId'));
@@ -33,11 +33,66 @@
     }).format(Number(value || 0));
   }
 
-  function getCartEndpoint() {
-    const idUsuario = getUsuarioId();
-    if (!idUsuario) return null;
-    return `/carrito`;
+  // ---- Guest Cart (localStorage) ----
+
+  function leerCarritoInvitado() {
+    try {
+      return JSON.parse(localStorage.getItem(GUEST_CART_KEY)) || [];
+    } catch (_) { return []; }
   }
+
+  function guardarCarritoInvitado(items) {
+    try { localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items)); } catch (_) {}
+  }
+
+  function carritoInvitadoADTO(items) {
+    return {
+      items: items.map((item, i) => ({
+        id: `guest-${i}`,
+        nombre: item.nombre || item.perfumeName || 'Custom Fragrance',
+        precioUnitario: Number(item.precio ?? item.precioCalculado ?? 0),
+        cantidad: Number(item.cantidad ?? 1),
+        imagenUrl: item.imagenUrl || FALLBACK_IMAGE,
+        idPerfCust: item.type === 'custom' ? `guest-${i}` : null,
+        _guestIdx: i
+      }))
+    };
+  }
+
+  async function sincronizarCarritoInvitado() {
+    const items = leerCarritoInvitado();
+    if (!items.length) return;
+
+    for (const item of items) {
+      try {
+        if (item.type === 'custom' && item.payload) {
+          const perfume = await window.ShineAPI.post('/perfumes-custom', {
+            ...item.payload,
+            idUsuario: getUsuarioId()
+          });
+          const idPerfCust = perfume.idPerfCust ?? perfume.id;
+          if (idPerfCust) {
+            await window.ShineAPI.post('/carrito/items', {
+              idPerfCust: Number(idPerfCust),
+              idProducto: null,
+              cantidad: Number(item.cantidad || 1)
+            });
+          }
+        } else if (item.type === 'product' && item.idProducto) {
+          await window.ShineAPI.post('/carrito/items', {
+            idProducto: Number(item.idProducto),
+            idPerfCust: null,
+            cantidad: Number(item.cantidad || 1)
+          });
+        }
+      } catch (_) {}
+    }
+
+    guardarCarritoInvitado([]);
+    sessionStorage.removeItem(CART_CACHE_KEY);
+  }
+
+  // ---- Server Cart Cache ----
 
   function leerCarritoCache() {
     try {
@@ -45,7 +100,7 @@
       if (!cached?.timestamp || !cached.data) return null;
       if (Date.now() - cached.timestamp > CART_CACHE_TTL) return null;
       return cached.data;
-    } catch (error) {
+    } catch (_) {
       return null;
     }
   }
@@ -56,16 +111,15 @@
         timestamp: Date.now(),
         data: carrito
       }));
-    } catch (error) {
-      // Cache is an optimization only.
-    }
+    } catch (_) {}
   }
+
+  // ---- Helpers ----
 
   function toApiId(value) {
     if (value === undefined || value === null || value === '') return null;
     const numeric = Number(value);
     if (Number.isFinite(numeric)) return numeric;
-
     const match = String(value).match(/\d+/);
     return match ? Number(match[0]) : null;
   }
@@ -101,7 +155,6 @@
     if (carrito?.total !== undefined && carrito?.total !== null) {
       return Number(carrito.total);
     }
-
     return getItems(carrito).reduce((sum, item) => sum + getItemSubtotal(item), 0);
   }
 
@@ -110,7 +163,6 @@
 
     document.querySelectorAll('.nav-cta').forEach(btn => {
       btn.querySelector('.cart-count')?.remove();
-
       if (count > 0) {
         const badge = document.createElement('span');
         badge.className = 'cart-count';
@@ -180,6 +232,34 @@
     `;
   }
 
+  function renderCartItems(items, isGuest) {
+    return items.map(item => {
+      const id = isGuest ? `guest-${item._guestIdx}` : getItemId(item);
+      const isCustom = isGuest ? item.idPerfCust !== null : Boolean(item.idPerfCust);
+      const name = isGuest ? item.nombre : getItemName(item);
+      const unitPrice = isGuest ? item.precioUnitario : getItemUnitPrice(item);
+      const qty = isGuest ? item.cantidad : getItemQty(item);
+      const imgSrc = item.imagenUrl || FALLBACK_IMAGE;
+
+      return `
+        <div class="cart-item" data-cart-item="${escapeHtml(String(id))}">
+          <img class="cart-item__img" src="${imgSrc}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
+          <div class="cart-item__info">
+            <div class="cart-item__name">${escapeHtml(name)}</div>
+            <div class="cart-item__price">
+              ${escapeHtml(formatCurrency(unitPrice))}
+              ${isCustom ? '<span class="text-sm text-muted"> · Custom perfume</span>' : ''}
+            </div>
+          </div>
+          <div class="qty-selector" aria-label="Quantity">
+            <span>${escapeHtml(String(qty))}</span>
+          </div>
+          <button class="cart-item__remove" type="button" aria-label="Remove item">×</button>
+        </div>
+      `;
+    }).join('');
+  }
+
   function renderCart(carrito) {
     ultimoCarrito = carrito;
     guardarCarritoCache(carrito);
@@ -197,31 +277,28 @@
       return;
     }
 
-    container.innerHTML = items.map(item => {
-      const id = getItemId(item);
-      const isCustom = Boolean(item.idPerfCust);
-      const name = getItemName(item);
-      const unitPrice = getItemUnitPrice(item);
-      const qty = getItemQty(item);
-      const imgSrc = item.imagenUrl || FALLBACK_IMAGE;
+    container.innerHTML = renderCartItems(items, false) +
+      `<a href="shop.html" class="btn btn--outline mt-xl">Continue Shopping</a>`;
+  }
 
-      return `
-        <div class="cart-item" data-cart-item="${escapeHtml(id)}">
-          <img class="cart-item__img" src="${imgSrc}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
-          <div class="cart-item__info">
-            <div class="cart-item__name">${escapeHtml(name)}</div>
-            <div class="cart-item__price">
-              ${escapeHtml(formatCurrency(unitPrice))}
-              ${isCustom ? '<span class="text-sm text-muted"> · Custom perfume</span>' : ''}
-            </div>
-          </div>
-          <div class="qty-selector" aria-label="Quantity">
-            <span>${escapeHtml(qty)}</span>
-          </div>
-          <button class="cart-item__remove" type="button" aria-label="Remove item">×</button>
-        </div>
-      `;
-    }).join('') + `<a href="shop.html" class="btn btn--outline mt-xl">Continue Shopping</a>`;
+  function renderCarritoInvitado() {
+    const guestItems = leerCarritoInvitado();
+    const dto = carritoInvitadoADTO(guestItems);
+    updateCartBadge(dto);
+    updateSummary(dto);
+
+    const container = document.getElementById('cartItemsList');
+    if (!container) return;
+
+    if (!guestItems.length) {
+      renderEmptyCart(container);
+      setCheckoutEnabled(false);
+      return;
+    }
+
+    container.innerHTML = renderCartItems(dto.items, true) +
+      `<a href="shop.html" class="btn btn--outline mt-xl">Continue Shopping</a>`;
+    setCheckoutEnabled(true);
   }
 
   function renderCartError(message) {
@@ -238,35 +315,41 @@
     setCheckoutEnabled(false);
   }
 
-  function renderLoginRequired(container) {
-    if (!container) return;
-    container.innerHTML = `
-      <div class="cart-empty">
-        <p>Please sign in to view your cart.</p>
-        <a href="login.html" class="btn btn--primary">Sign In</a>
-      </div>
-    `;
-    updateSummary({ items: [], total: 0 });
-    setCheckoutEnabled(false);
-  }
-
   async function cargarCarrito() {
     if (!window.ShineAPI) {
       renderCartError('Could not initialize the connection with the API.');
       return null;
     }
 
-    const endpoint = getCartEndpoint();
-    if (!endpoint) {
-      // Not logged in
+    const idUsuario = getUsuarioId();
+
+    if (!idUsuario) {
+      // Guest: render guest cart
       const container = document.getElementById('cartItemsList');
-      if (container) renderLoginRequired(container);
-      updateCartBadge({ items: [] });
+      if (container) {
+        renderCarritoInvitado();
+      } else {
+        // Non-cart page: just update badge
+        const guestItems = leerCarritoInvitado();
+        if (guestItems.length > 0) {
+          updateCartBadge(carritoInvitadoADTO(guestItems));
+        }
+      }
       return null;
     }
 
+    // Logged in: sync guest cart first if any
+    const guestItems = leerCarritoInvitado();
+    if (guestItems.length > 0) {
+      try {
+        await sincronizarCarritoInvitado();
+      } catch (_) {
+        guardarCarritoInvitado([]);
+      }
+    }
+
     try {
-      const carrito = await window.ShineAPI.get(endpoint);
+      const carrito = await window.ShineAPI.get('/carrito');
       renderCart(carrito);
       return carrito;
     } catch (error) {
@@ -280,19 +363,13 @@
       throw new Error('Must provide idProducto or idPerfCust');
     }
 
-    const endpoint = getCartEndpoint();
-    if (!endpoint) {
-      window.location.href = 'login.html';
-      throw new Error('Please sign in to add products to your cart.');
-    }
-
     const body = {
       idProducto: toApiId(idProducto),
       idPerfCust: toApiId(idPerfCust),
       cantidad: Number(cantidad) || 1
     };
 
-    const carrito = await window.ShineAPI.post(`${endpoint}/items`, body);
+    const carrito = await window.ShineAPI.post('/carrito/items', body);
     renderCart(carrito);
     return carrito;
   }
@@ -320,10 +397,8 @@
   }
 
   async function eliminarItemCarrito(idItem) {
-    const endpoint = getCartEndpoint();
-    if (!endpoint) return;
     try {
-      await window.ShineAPI.delete(`${endpoint}/items/${idItem}`);
+      await window.ShineAPI.delete(`/carrito/items/${idItem}`);
       const carrito = await cargarCarrito();
       showToast('Product removed from cart');
       return carrito;
@@ -345,9 +420,33 @@
 
       button.disabled = true;
       try {
-        await añadirAlCarrito(card.dataset.id, 1);
-        button.classList.add('added');
-        setTimeout(() => button.classList.remove('added'), 1000);
+        if (!getUsuarioId()) {
+          // Guest: add to guest cart
+          const idProducto = Number(card.dataset.id);
+          const guestItems = leerCarritoInvitado();
+          const existing = guestItems.find(i => i.type === 'product' && i.idProducto === idProducto);
+          if (existing) {
+            existing.cantidad++;
+          } else {
+            guestItems.push({
+              type: 'product',
+              idProducto,
+              nombre: card.dataset.name || 'Shine Product',
+              precio: Number(card.dataset.price) || 0,
+              imagenUrl: card.dataset.img || FALLBACK_IMAGE,
+              cantidad: 1
+            });
+          }
+          guardarCarritoInvitado(guestItems);
+          updateCartBadge(carritoInvitadoADTO(guestItems));
+          showToast('Product added to cart');
+          button.classList.add('added');
+          setTimeout(() => button.classList.remove('added'), 1000);
+        } else {
+          await añadirAlCarrito(card.dataset.id, 1);
+          button.classList.add('added');
+          setTimeout(() => button.classList.remove('added'), 1000);
+        }
       } finally {
         button.disabled = false;
       }
@@ -367,11 +466,30 @@
       event.stopPropagation();
       event.stopImmediatePropagation();
 
-      eliminarItemCarrito(item.dataset.cartItem);
+      const cartItemId = String(item.dataset.cartItem);
+
+      if (cartItemId.startsWith('guest-')) {
+        const idx = Number(cartItemId.replace('guest-', ''));
+        const guests = leerCarritoInvitado();
+        guests.splice(idx, 1);
+        guardarCarritoInvitado(guests);
+        renderCarritoInvitado();
+        showToast('Product removed from cart');
+      } else {
+        eliminarItemCarrito(cartItemId);
+      }
     }, true);
   }
 
   function scheduleBadgeRefresh() {
+    // Immediately show guest cart badge if not logged in
+    if (!getUsuarioId()) {
+      const guestItems = leerCarritoInvitado();
+      if (guestItems.length > 0) {
+        updateCartBadge(carritoInvitadoADTO(guestItems));
+      }
+    }
+
     const cached = leerCarritoCache();
     if (cached) updateCartBadge(cached);
 
@@ -391,6 +509,8 @@
   window.añadirPerfumeCustomAlCarrito = añadirPerfumeCustomAlCarrito;
   window.anadirPerfumeCustomAlCarrito = añadirPerfumeCustomAlCarrito;
   window.eliminarItemCarrito = eliminarItemCarrito;
+  window.leerCarritoInvitado = leerCarritoInvitado;
+  window.guardarCarritoInvitado = guardarCarritoInvitado;
 
   document.addEventListener('DOMContentLoaded', () => {
     setupCatalogAddButtons();
