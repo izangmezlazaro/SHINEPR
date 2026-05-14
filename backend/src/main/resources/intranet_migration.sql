@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS fichaje (
     tipo             VARCHAR(10)  NOT NULL CHECK (tipo IN ('ENTRADA','SALIDA')),
     fecha_hora       TIMESTAMP    NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_fichaje_fecha ON fichaje ((fecha_hora::date));
+CREATE INDEX IF NOT EXISTS idx_fichaje_fecha ON fichaje (fecha_hora::date);
 CREATE INDEX IF NOT EXISTS idx_fichaje_email ON fichaje (empleado_email);
 
 CREATE TABLE IF NOT EXISTS anuncio (

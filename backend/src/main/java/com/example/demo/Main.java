@@ -96,7 +96,7 @@ public class Main {
     }
 
     private static void runMigrations() {
-        String[] scripts = {"intranet_migration.sql", "puntos_migration.sql", "frascos_migration.sql", "pedido_estado_migration.sql", "pedido_estado_drop.sql", "pedido_estado_add.sql"};
+        String[] scripts = {"intranet_migration.sql", "puntos_migration.sql", "frascos_migration.sql", "pedido_estado_migration.sql"};
         try (Connection conn = ConexionDB.getConnection()) {
             for (String script : scripts) {
                 try (InputStream in = Main.class.getClassLoader().getResourceAsStream(script)) {

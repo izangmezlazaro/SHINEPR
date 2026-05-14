@@ -35,8 +35,4 @@ public class ProductoRequestDTO {
     public void       setTipoFragancia(String v) { this.tipoFragancia = v; }
     public Integer    getIdCategoria()   { return idCategoria; }
     public void       setIdCategoria(Integer v) { this.idCategoria = v; }
-
-    private String imagenUrl;
-    public String     getImagenUrl()     { return imagenUrl; }
-    public void       setImagenUrl(String v) { this.imagenUrl = v; }
 }
