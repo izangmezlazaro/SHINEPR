@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 public final class JsonUtil {
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter D_FMT  = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class,
@@ -26,6 +28,12 @@ public final class JsonUtil {
             .registerTypeAdapter(LocalDateTime.class,
                     (JsonDeserializer<LocalDateTime>) (json, type, ctx) ->
                             LocalDateTime.parse(json.getAsString(), DT_FMT))
+            .registerTypeAdapter(LocalDate.class,
+                    (JsonSerializer<LocalDate>) (src, type, ctx) ->
+                            new JsonPrimitive(src.format(D_FMT)))
+            .registerTypeAdapter(LocalDate.class,
+                    (JsonDeserializer<LocalDate>) (json, type, ctx) ->
+                            LocalDate.parse(json.getAsString(), D_FMT))
             .serializeNulls()
             .create();
 

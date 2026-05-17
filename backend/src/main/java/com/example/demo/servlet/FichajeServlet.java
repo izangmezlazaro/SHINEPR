@@ -4,7 +4,6 @@ import com.example.demo.entity.Fichaje;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.service.FichajeService;
 import com.example.demo.util.HttpUtil;
-import com.example.demo.util.JsonUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -19,7 +18,8 @@ import java.util.List;
 /**
  * GET  /api/v1/fichajes          → listar todos (admin)
  * GET  /api/v1/fichajes?fecha=   → listar por fecha YYYY-MM-DD
- * POST /api/v1/fichajes          → registrar entrada/salida
+ * POST /api/v1/fichajes          → registrar entrada o salida
+ *   body: { "empleadoEmail": "...", "empleadoNombre": "...", "tipo": "ENTRADA"|"SALIDA" }
  */
 @WebServlet(urlPatterns = "/api/v1/fichajes/*", name = "FichajeServlet")
 public class FichajeServlet extends HttpServlet {
@@ -42,11 +42,11 @@ public class FichajeServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            JsonObject body = JsonParser.parseString(HttpUtil.readBody(req)).getAsJsonObject();
-            String empleadoEmail  = body.has("empleadoEmail")  ? body.get("empleadoEmail").getAsString()  : null;
-            String empleadoNombre = body.has("empleadoNombre") ? body.get("empleadoNombre").getAsString() : null;
-            String tipo           = body.has("tipo")           ? body.get("tipo").getAsString()           : null;
-            Fichaje guardado = fichajeService.registrar(empleadoEmail, empleadoNombre, tipo);
+            JsonObject body    = JsonParser.parseString(HttpUtil.readBody(req)).getAsJsonObject();
+            String email       = body.has("empleadoEmail")  ? body.get("empleadoEmail").getAsString()  : null;
+            String nombre      = body.has("empleadoNombre") ? body.get("empleadoNombre").getAsString() : null;
+            String tipo        = body.has("tipo")           ? body.get("tipo").getAsString()           : null;
+            Fichaje guardado   = fichajeService.registrar(email, nombre, tipo);
             HttpUtil.writeJson(resp, 201, guardado);
         } catch (BadRequestException e) {
             HttpUtil.writeError(resp, 400, e.getMessage());

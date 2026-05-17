@@ -31,6 +31,11 @@ public class AuthServlet extends HttpServlet {
                         HttpUtil.readBody(req), AuthRegisterRequestDTO.class);
                 HttpUtil.writeJson(resp, 201, authService.register(dto));
 
+            } else if ("/register-staff".equals(path)) {
+                AuthRegisterRequestDTO dto = com.example.demo.util.JsonUtil.fromJson(
+                        HttpUtil.readBody(req), AuthRegisterRequestDTO.class);
+                HttpUtil.writeJson(resp, 201, authService.registerStaff(dto));
+
             } else if ("/login".equals(path)) {
                 AuthLoginRequestDTO dto = com.example.demo.util.JsonUtil.fromJson(
                         HttpUtil.readBody(req), AuthLoginRequestDTO.class);

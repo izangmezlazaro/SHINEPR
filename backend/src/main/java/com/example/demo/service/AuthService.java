@@ -24,6 +24,18 @@ public class AuthService {
     }
 
     public AuthResponseDTO register(AuthRegisterRequestDTO request) {
+        return registerWithRol(request, "cliente");
+    }
+
+    public AuthResponseDTO registerStaff(AuthRegisterRequestDTO request) {
+        String rol = request.getRol();
+        if (!"empleado".equals(rol) && !"admin".equals(rol)) {
+            throw new BadRequestException("Rol de staff inválido. Usa 'empleado' o 'admin'.");
+        }
+        return registerWithRol(request, rol);
+    }
+
+    private AuthResponseDTO registerWithRol(AuthRegisterRequestDTO request, String rol) {
         try {
             if (usuarioDAO.existsByEmail(request.getEmail())) {
                 throw new BadRequestException("Ya existe una cuenta con ese email.");
@@ -33,7 +45,7 @@ public class AuthService {
             usuario.setEmail(request.getEmail());
             usuario.setPassword(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()));
             usuario.setTelefono(request.getTelefono());
-            usuario.setRol("cliente");
+            usuario.setRol(rol);
             usuario = usuarioDAO.save(usuario);
             String token = jwtUtil.generateToken(usuario.getId(), usuario.getEmail(), usuario.getRol());
             return new AuthResponseDTO(token, toUserDto(usuario));

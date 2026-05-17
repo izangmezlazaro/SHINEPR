@@ -193,10 +193,18 @@ public class PedidoService {
     }
 
     private DetallePedidoDTO toDetalleDto(DetallePedido d, Map<Integer, String> imagenPorProducto) {
-        BigDecimal subtotal = d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()));
-        String nombre = d.getProducto() != null ? d.getProducto().getNombre()
-                : (d.getPerfumeCustom().getNombrePersonalizado() == null || d.getPerfumeCustom().getNombrePersonalizado().isBlank()
-                    ? "Perfume personalizado" : d.getPerfumeCustom().getNombrePersonalizado());
+        BigDecimal precioUnit = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
+        int cantidad = d.getCantidad() != null ? d.getCantidad() : 1;
+        BigDecimal subtotal = precioUnit.multiply(BigDecimal.valueOf(cantidad));
+        String nombre;
+        if (d.getProducto() != null) {
+            nombre = d.getProducto().getNombre();
+        } else if (d.getPerfumeCustom() != null) {
+            String np = d.getPerfumeCustom().getNombrePersonalizado();
+            nombre = (np == null || np.isBlank()) ? "Perfume personalizado" : np;
+        } else {
+            nombre = "Producto sin referencia";
+        }
         DetallePedidoDTO dto = new DetallePedidoDTO(d.getId(),
             d.getProducto() != null ? d.getProducto().getIdProducto() : null,
             d.getPerfumeCustom() != null ? d.getPerfumeCustom().getIdPerfCust() : null,

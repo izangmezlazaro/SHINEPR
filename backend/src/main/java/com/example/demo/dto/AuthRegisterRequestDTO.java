@@ -5,6 +5,7 @@ public class AuthRegisterRequestDTO {
     private String email;
     private String password;
     private String telefono;
+    private String rol;
 
     public AuthRegisterRequestDTO() {}
     public String getNombre()   { return nombre; }
@@ -15,4 +16,6 @@ public class AuthRegisterRequestDTO {
     public void   setPassword(String password) { this.password = password; }
     public String getTelefono() { return telefono; }
     public void   setTelefono(String telefono) { this.telefono = telefono; }
+    public String getRol()      { return rol; }
+    public void   setRol(String rol) { this.rol = rol; }
 }

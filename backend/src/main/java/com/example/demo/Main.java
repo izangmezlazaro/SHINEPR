@@ -62,7 +62,9 @@ public class Main {
         addServlet(ctx, tomcat, "FichajeServlet",        FichajeServlet.class,          "/api/v1/fichajes/*");
         addServlet(ctx, tomcat, "ReunionServlet",        ReunionServlet.class,          "/api/v1/reuniones/*");
         addServlet(ctx, tomcat, "UsuarioServlet",        UsuarioServlet.class,          "/api/v1/usuarios/*");
-        addServlet(ctx, tomcat, "IntranetPedidoServlet", IntranetPedidoServlet.class,   "/api/v1/intranet/pedidos/*");
+        addServlet(ctx, tomcat, "IntranetPedidoServlet",    IntranetPedidoServlet.class,    "/api/v1/intranet/pedidos/*");
+        addServlet(ctx, tomcat, "IntranetDashboardServlet", IntranetDashboardServlet.class, "/api/v1/intranet/dashboard/*");
+        addServlet(ctx, tomcat, "BuzonServlet",          BuzonServlet.class,            "/api/v1/buzon/*");
         addServlet(ctx, tomcat, "GenerarCustomServlet",  GenerarCustomServlet.class, "/api/generar-custom/*");
 
         runMigrations();
@@ -96,7 +98,7 @@ public class Main {
     }
 
     private static void runMigrations() {
-        String[] scripts = {"intranet_migration.sql", "puntos_migration.sql", "frascos_migration.sql", "pedido_estado_migration.sql"};
+        String[] scripts = {"intranet_migration.sql", "puntos_migration.sql", "frascos_migration.sql", "pedido_estado_migration.sql", "buzon_migration.sql", "fichaje_alter_migration.sql"};
         try (Connection conn = ConexionDB.getConnection()) {
             for (String script : scripts) {
                 try (InputStream in = Main.class.getClassLoader().getResourceAsStream(script)) {

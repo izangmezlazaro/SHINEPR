@@ -87,6 +87,40 @@ public class UsuarioDAO {
         return usuario;
     }
 
+    /** Devuelve todos los usuarios con rol 'empleado' o 'admin', ordenados por nombre. */
+    public java.util.List<Usuario> findAllStaff() throws SQLException {
+        String sql = "SELECT id, nombre, email, password, telefono, rol, puntos FROM usuario " +
+                     "WHERE rol IN ('empleado','admin') ORDER BY nombre";
+        java.util.List<Usuario> list = new java.util.ArrayList<>();
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        }
+        return list;
+    }
+
+    /** Cambia el rol de un usuario. */
+    public void updateRol(Integer id, String rol) throws SQLException {
+        String sql = "UPDATE usuario SET rol = ? WHERE id = ?";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, rol);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Elimina un usuario por ID. */
+    public void deleteById(Integer id) throws SQLException {
+        String sql = "DELETE FROM usuario WHERE id = ?";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
     /** Suma puntos al saldo actual del usuario (operación atómica en BD). */
     public void addPuntos(Integer idUsuario, int puntos) throws SQLException {
         String sql = "UPDATE usuario SET puntos = puntos + ? WHERE id = ?";

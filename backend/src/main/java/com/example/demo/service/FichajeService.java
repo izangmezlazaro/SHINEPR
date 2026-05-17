@@ -15,18 +15,29 @@ public class FichajeService {
     public Fichaje registrar(String empleadoEmail, String empleadoNombre, String tipo) {
         if (empleadoEmail == null || empleadoEmail.isBlank())
             throw new BadRequestException("El email del empleado es obligatorio");
-        if (empleadoNombre == null || empleadoNombre.isBlank())
-            throw new BadRequestException("El nombre del empleado es obligatorio");
         if (!"ENTRADA".equals(tipo) && !"SALIDA".equals(tipo))
             throw new BadRequestException("El tipo debe ser ENTRADA o SALIDA");
+
+        String email  = empleadoEmail.trim().toLowerCase();
+        String nombre = (empleadoNombre != null && !empleadoNombre.isBlank()) ? empleadoNombre.trim() : email;
+
         try {
-            Fichaje f = new Fichaje();
-            f.setEmpleadoEmail(empleadoEmail.trim().toLowerCase());
-            f.setEmpleadoNombre(empleadoNombre.trim());
-            f.setTipo(tipo);
-            return fichajeDAO.save(f);
+            if ("ENTRADA".equals(tipo)) {
+                return fichajeDAO.registrarEntrada(email, nombre);
+            } else {
+                int updated = fichajeDAO.registrarSalida(email);
+                if (updated == 0)
+                    throw new BadRequestException("No hay un fichaje de entrada abierto para hoy.");
+                Fichaje f = new Fichaje();
+                f.setEmpleadoEmail(email);
+                f.setEmpleadoNombre(nombre);
+                f.setEstado("COMPLETADO");
+                return f;
+            }
+        } catch (BadRequestException e) {
+            throw e;
         } catch (SQLException e) {
-            throw new RuntimeException("Error al guardar el fichaje", e);
+            throw new RuntimeException("Error al guardar el fichaje: " + e.getMessage(), e);
         }
     }
 
@@ -36,8 +47,10 @@ public class FichajeService {
                     ? LocalDate.parse(fechaStr)
                     : LocalDate.now();
             return fichajeDAO.findByFecha(fecha);
+        } catch (BadRequestException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Error al obtener fichajes", e);
+            throw new RuntimeException("Error al obtener fichajes: " + e.getMessage(), e);
         }
     }
 
@@ -45,7 +58,7 @@ public class FichajeService {
         try {
             return fichajeDAO.findAll();
         } catch (SQLException e) {
-            throw new RuntimeException("Error al obtener fichajes", e);
+            throw new RuntimeException("Error al obtener fichajes: " + e.getMessage(), e);
         }
     }
 }

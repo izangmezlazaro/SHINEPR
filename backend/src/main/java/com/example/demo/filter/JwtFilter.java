@@ -97,11 +97,14 @@ public class JwtFilter implements Filter {
         }
 
         // Intranet — autenticación gestionada en cliente (staff login hardcoded)
-        if (path.startsWith("/api/v1/fichajes"))  return true;
-        if (path.startsWith("/api/v1/anuncios"))  return true;
-        if (path.startsWith("/api/v1/reuniones")) return true;
-        if (path.startsWith("/api/v1/intranet/")) return true;
-        if (path.startsWith("/api/v1/productos")) return true;
+        if (path.startsWith("/api/v1/fichajes"))   return true;
+        if (path.startsWith("/api/v1/anuncios"))   return true;
+        if (path.startsWith("/api/v1/reuniones"))  return true;
+        if (path.startsWith("/api/v1/intranet/"))  return true;
+        if (path.startsWith("/api/v1/productos"))  return true;
+        if (path.startsWith("/api/v1/buzon"))      return true;
+        if (path.startsWith("/api/v1/usuarios"))   return true;
+        if (path.startsWith("/api/v1/subcategorias")) return true;
 
         return false;
     }
