@@ -236,6 +236,7 @@
     return items.map(item => {
       const id = isGuest ? `guest-${item._guestIdx}` : getItemId(item);
       const isCustom = isGuest ? item.idPerfCust !== null : Boolean(item.idPerfCust);
+      const productId = isGuest ? item.idProducto : item.idProducto;
       const name = isGuest ? item.nombre : getItemName(item);
       const unitPrice = isGuest ? item.precioUnitario : getItemUnitPrice(item);
       const qty = isGuest ? item.cantidad : getItemQty(item);
@@ -246,11 +247,19 @@
         if (cachedImg) imgSrc = cachedImg;
       }
 
+      const isLinkable = !isCustom && productId;
+      const linkStart = isLinkable ? `<a href="product.html?id=${productId}" style="color:inherit; text-decoration:none; outline:none; cursor:pointer;">` : '';
+      const linkEnd = isLinkable ? `</a>` : '';
+      const imgLinkStart = isLinkable ? `<a href="product.html?id=${productId}" style="display:contents;">` : '';
+      const imgLinkEnd = isLinkable ? `</a>` : '';
+
       return `
         <div class="cart-item" data-cart-item="${escapeHtml(String(id))}">
-          <img class="cart-item__img" src="${imgSrc}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
+          ${imgLinkStart}
+          <img class="cart-item__img" src="${imgSrc}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'" ${isLinkable ? 'style="cursor:pointer;"' : ''}>
+          ${imgLinkEnd}
           <div class="cart-item__info">
-            <div class="cart-item__name">${escapeHtml(name)}</div>
+            ${linkStart}<div class="cart-item__name" ${isLinkable ? 'style="cursor:pointer;"' : ''}>${escapeHtml(name)}</div>${linkEnd}
             <div class="cart-item__price">
               ${escapeHtml(formatCurrency(unitPrice))}
               ${isCustom ? '<span class="text-sm text-muted"> · Custom perfume</span>' : ''}

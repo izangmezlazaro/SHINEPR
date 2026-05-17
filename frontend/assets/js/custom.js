@@ -376,6 +376,29 @@
     updatePriceBar();
     renderCanvasPreview();
     updateBottleOverlay();
+
+    const personalityProfile = document.getElementById('personalityProfile');
+    if (personalityProfile) {
+      let phrase = 'A perfectly balanced creation, tailored exclusively for you.';
+      const typeStr = (selections.intensidad || '').toLowerCase();
+      const baseLabel = (getFraganciaLabel(selections.base) || '').toLowerCase();
+      const notesCombined = noteLabels.join(' ').toLowerCase();
+
+      if (typeStr === 'elixir' && (baseLabel.includes('wood') || baseLabel.includes('musk') || notesCombined.includes('leather'))) {
+        phrase = 'A bold, intense, and mysterious profile. Crafted for the modern visionary who leaves an unforgettable mark.';
+      } else if (typeStr === 'elixir') {
+        phrase = 'Rich, opulent, and uncompromisingly luxurious. An intense signature scent that speaks volumes.';
+      } else if (baseLabel.includes('floral') || notesCombined.includes('rose') || notesCombined.includes('jasmine')) {
+        phrase = 'An elegant, romantic, and blooming fragrance. Perfect for a sophisticated spirit with a timeless charm.';
+      } else if (baseLabel.includes('citrus') || notesCombined.includes('lemon') || notesCombined.includes('bergamot')) {
+        phrase = 'Bright, energetic, and vibrantly fresh. Designed for an active, optimistic personality that radiates light.';
+      } else if (baseLabel.includes('wood') || notesCombined.includes('sandalwood') || notesCombined.includes('cedar')) {
+        phrase = 'Grounded, warm, and distinctly confident. A sophisticated composition for a composed and strong character.';
+      } else if (typeStr.includes('cologne') || typeStr.includes('mist')) {
+        phrase = 'Light, airy, and effortlessly graceful. The ultimate subtle touch for a clean and minimalist lifestyle.';
+      }
+      personalityProfile.innerHTML = `“${phrase}”`;
+    }
   }
 
   function selectSingleCard(card, group) {
@@ -467,8 +490,15 @@
       return;
     }
 
+    const nameInput = document.getElementById('perfumeName');
+    const rawName = nameInput?.value?.trim();
+    if (!rawName) {
+      showToast('Please enter a name for your fragrance before adding to the cart.');
+      return;
+    }
+
     const aiImg = document.getElementById('aiResultImage')?.src;
-    const imagenFinal = (aiImg && aiImg.startsWith('data:')) ? aiImg : BOTTLE_IMAGE;
+    const imagenFinal = (aiImg && (aiImg.startsWith('data:') || aiImg.startsWith('http'))) ? aiImg : BOTTLE_IMAGE;
 
     if (!getUsuarioId()) {
       // Guest: save to guest cart and go to cart

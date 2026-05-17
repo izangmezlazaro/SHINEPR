@@ -119,14 +119,11 @@ public class CarritoItemDAO {
             "p.sku, p.nombre AS prod_nombre, p.descripcion, p.ingredientes, p.modo_uso, " +
             "p.precio, p.stock, p.genero, p.tipo_fragancia, p.id_categoria, cat.nombre AS cat_nombre, " +
             "pc.nombre_personalizado, pc.intensidad, pc.precio_calculado, " +
-            "COALESCE(img2.url, img1.url) AS imagen_url " +
+            "img1.url AS imagen_url " +
             "FROM carrito_item ci " +
             "LEFT JOIN producto p ON ci.id_producto = p.id_producto " +
             "LEFT JOIN categoria cat ON p.id_categoria = cat.id_categoria " +
             "LEFT JOIN perfume_custom pc ON ci.id_perf_cust = pc.id_perf_cust " +
-            "LEFT JOIN LATERAL (" +
-            "  SELECT url FROM imagen_producto WHERE id_producto = ci.id_producto ORDER BY id_imagen LIMIT 1 OFFSET 1" +
-            ") img2 ON ci.id_producto IS NOT NULL " +
             "LEFT JOIN LATERAL (" +
             "  SELECT url FROM imagen_producto WHERE id_producto = ci.id_producto ORDER BY id_imagen LIMIT 1" +
             ") img1 ON ci.id_producto IS NOT NULL " +

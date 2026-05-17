@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <link rel="icon" type="image/x-icon" href="assets/img/Shine.ico">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="page-custom-perfume">
 
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
@@ -38,19 +38,10 @@
   </div>
 
   <main>
-    <!-- Hero -->
-    <section class="section section--petal" style="padding-bottom:var(--sp-xl)">
-      <div class="container text-center">
-        <a href="index.html" class="reveal" style="display:inline-block;margin-bottom:var(--sp-lg)">
-          <img src="assets/img/ShineN.png" alt="Shine" style="height:52px;width:auto;object-fit:contain">
-        </a>
-        <h1 class="reveal">Create Your Fragrance</h1>
-        <p class="reveal" style="margin:0 auto var(--sp-xl);max-width:560px;text-align:center">Design a scent that's uniquely yours. Choose your fragrance type, select your notes, pick your bottle &mdash; and we'll craft it by hand.</p>
-      </div>
-    </section>
+    <!-- Hero removed for app-like layout -->
 
     <!-- Stepper -->
-    <section class="section" style="padding-top:var(--sp-xl)">
+    <section class="section">
       <div class="container">
         <!-- Progress Bar -->
         <div class="stepper-progress reveal" id="stepperProgress">
@@ -271,43 +262,46 @@
           <!-- STEP 6: Review -->
           <div class="step-panel" data-panel="5">
             <div class="step-panel__inner">
-              <h2>Review Your Creation</h2>
-              <p>Name your fragrance and review your selections before we begin crafting. The name you type is what we send to the label in the AI render (same spelling and capitals).</p>
-              <div class="grid grid-2 mt-xl" style="gap:var(--sp-2xl)">
+              <div class="grid grid-2" style="gap:var(--sp-lg); align-items: center;">
                 <div>
-                  <div class="form-group">
-                    <label class="form-label" for="perfumeName">Name Your Fragrance</label>
-                    <input type="text" class="form-input" id="perfumeName" placeholder="e.g. Midnight Bloom">
+                  <div class="form-group" style="margin-bottom:0.75rem">
+                    <label class="form-label" for="perfumeName" style="font-weight:600;font-size:1rem;color:var(--accent);">Name Your Fragrance</label>
+                    <input type="text" class="form-input" id="perfumeName" placeholder="e.g. Midnight Bloom" style="font-size:1.05rem; padding:0.75rem 1rem; border: 1px solid rgba(212,175,55,0.4); border-radius:var(--r-md); background: rgba(255,255,255,0.8); width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                   </div>
-                  <div style="padding:var(--sp-xl);background:var(--petal);border-radius:var(--r-lg);margin-top:var(--sp-lg)">
-                    <h4 style="margin-bottom:var(--sp-md)">Your Selections</h4>
-                    <div id="reviewType" style="margin-bottom:var(--sp-sm)"><strong>Type:</strong> —</div>
-                    <div id="reviewQuantity" style="margin-bottom:var(--sp-sm)"><strong>Quantity:</strong> —</div>
-                    <div id="reviewBase" style="margin-bottom:var(--sp-sm)"><strong>Base:</strong> —</div>
-                    <div id="reviewNotes" style="margin-bottom:var(--sp-sm)"><strong>Notes:</strong> —</div>
+                  <div id="reviewSelectionsCard" style="padding:var(--sp-md);background:var(--petal);border-radius:var(--r-md);">
+                    <h4 style="margin-bottom:0.5rem; font-size: 1.1rem;">Your Selections</h4>
+                    <div id="reviewType" style="margin-bottom:0.25rem"><strong>Type:</strong> —</div>
+                    <div id="reviewQuantity" style="margin-bottom:0.25rem"><strong>Quantity:</strong> —</div>
+                    <div id="reviewBase" style="margin-bottom:0.25rem"><strong>Base:</strong> —</div>
+                    <div id="reviewNotes" style="margin-bottom:0.25rem"><strong>Notes:</strong> —</div>
                     <div id="reviewBottle"><strong>Bottle:</strong> —</div>
                   </div>
+                  
+                  <!-- Frase de Perfil de Personalidad -->
+                  <div id="personalityProfile" style="margin-top:0.75rem; padding:0.85rem 1rem; border-left: 2px solid var(--accent); background: linear-gradient(90deg, rgba(212,175,55,0.05) 0%, transparent 100%); font-style:italic; color:var(--text); font-size:0.95rem; line-height:1.4; border-radius: 0 var(--r-md) var(--r-md) 0;">
+                    <!-- Rellenado por JS -->
+                  </div>
                 </div>
-                <div class="canvas-preview-panel">
-                  <div class="canvas-preview-wrap">
+                <div class="canvas-preview-panel" style="gap: 0.75rem;">
+                  <div class="canvas-preview-wrap" style="max-width: 330px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: var(--r-md);">
                     <!-- Layer 1: atmosphere canvas (background only) -->
-                    <canvas id="previewCanvas" width="480" height="480" aria-label="Live fragrance preview"></canvas>
+                    <canvas id="previewCanvas" width="480" height="480" aria-label="Live fragrance preview" style="width:100%; height:auto;"></canvas>
                     <!-- Layer 2: selected bottle image (CSS blend) -->
-                    <img id="previewBottleImg" class="canvas-bottle-overlay" src="" alt="Selected bottle">
+                    <img id="previewBottleImg" class="canvas-bottle-overlay" src="" alt="Selected bottle" style="width:100%; height:auto;">
                     <!-- Layer 3: text overlay -->
                     <div class="canvas-text-overlay">
-                      <div id="previewLabel" class="canvas-preview-name">Your Fragrance</div>
-                      <div id="previewComposition" class="canvas-preview-comp">—</div>
+                      <div id="previewLabel" class="canvas-preview-name" style="font-size:1.2rem;">Your Fragrance</div>
+                      <div id="previewComposition" class="canvas-preview-comp" style="font-size:0.75rem;">—</div>
                     </div>
                     <!-- Badge -->
                     <div class="canvas-preview-badge">Live Preview</div>
                   </div>
-                  <button class="btn-generate-ai" id="btnGenerarAI" type="button">
+                  <button class="btn-generate-ai" id="btnGenerarAI" type="button" style="padding: 0.75rem 1.5rem; font-size: 0.9rem;">
                     <span class="btn-generate-ai__shine"></span>
                     <span class="btn-generate-ai__icon">✦</span>
                     <span class="btn-generate-ai__body">
                       <span class="btn-generate-ai__title">Generate Final Design</span>
-                      <span class="btn-generate-ai__sub">AI render &middot; usually a few seconds</span>
+                      <span class="btn-generate-ai__sub" style="font-size:0.65rem;">AI render &middot; usually a few seconds</span>
                     </span>
                   </button>
                 </div>
@@ -387,6 +381,113 @@
   </div>
 
   <style>
+    /* ── App Layout for Custom Perfume (Strict 100vh, Centered, No Scroll) ── */
+    body.page-custom-perfume {
+      height: 100vh;
+      margin: 0;
+      overflow: hidden; /* Fija la pantalla, cero scroll */
+      display: flex;
+      flex-direction: column;
+    }
+    body.page-custom-perfume .site-header {
+      flex-shrink: 0;
+    }
+    body.page-custom-perfume main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    body.page-custom-perfume main > .section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: 0.5rem !important;
+      padding-bottom: 1rem !important;
+      overflow: hidden;
+    }
+    body.page-custom-perfume main > .section > .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    /* Reducir espacio del stepper superior */
+    body.page-custom-perfume #stepperProgress {
+      margin-bottom: 0.5rem !important;
+    }
+
+    body.page-custom-perfume #stepperPanels {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* ABSOLUTAMENTE NADA DE SCROLL interno */
+      margin-top: 0 !important;
+    }
+    body.page-custom-perfume .step-panel {
+      display: none;
+      flex: 1;
+    }
+    body.page-custom-perfume .step-panel.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Centra perfectamente todos los bloques en el medio (incluido Review) */
+      animation: fadeIn 0.4s ease forwards;
+    }
+    body.page-custom-perfume .step-panel__inner {
+      margin: auto 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ajustar textos: Centrar los paneles 1-5 con un ancho máximo elegante */
+    body.page-custom-perfume .step-panel:not([data-panel="5"]) .step-panel__inner h2,
+    body.page-custom-perfume .step-panel:not([data-panel="5"]) .step-panel__inner p {
+      margin-bottom: 0.25rem !important;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 650px;
+    }
+    body.page-custom-perfume .step-panel:not([data-panel="5"]) .step-panel__inner p {
+      margin-bottom: 0 !important;
+      color: var(--muted);
+    }
+    
+    /* Pulir la tarjeta de 'Your Selections' en el último paso usando ID seguro */
+    body.page-custom-perfume #reviewSelectionsCard {
+      text-align: left;
+      border: 1px solid rgba(212,175,55,0.2) !important;
+      background: linear-gradient(145deg, var(--petal) 0%, #fffbf8 100%) !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
+    }
+    
+    /* Sobrescribir el enorme margin-top (mt-xl) del carrusel */
+    body.page-custom-perfume .notes-carousel-wrapper {
+      margin-top: 1.5rem !important; 
+    }
+
+    /* Ajustar elementos inferiores */
+    body.page-custom-perfume #priceBar {
+      margin-top: 0.75rem !important;
+      padding: 0.5rem 1.5rem !important;
+      flex-shrink: 0;
+    }
+    body.page-custom-perfume #stepperNav {
+      margin-top: 0.75rem !important;
+      flex-shrink: 0;
+    }
+    body.page-custom-perfume .site-footer {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* ── Canvas Preview Panel ─────────────────────────────────────────── */
     .canvas-preview-panel {
       display: flex;
