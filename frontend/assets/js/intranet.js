@@ -4,6 +4,9 @@
 
 const INTRANET_API = 'http://localhost:8080/api/v1';
 
+// Cache de pedidos cargados desde API, accesible por todos los módulos
+const _apiOrderCache = {};
+
 function staffSession() {
   try { return JSON.parse(localStorage.getItem('shineStaff')) || {}; } catch { return {}; }
 }
@@ -36,12 +39,15 @@ const tabTitles = {
   home:'Home', dashboard:'Dashboard', orders:'Orders', catalogue:'Catalogue',
   agreements:'Agreement & Laws', 'documents-info':'Documents & Info',
   'objectives-2026':'Objectives 2026', comite:'Employee Committee',
+  calendario:'Calendario',
+  'bright-box':'Bright Box',
   team:'Team', reports:'Reports', settings:'Settings', planner:'Task Planner',
   'admin-roles':'Gestión de Roles', 'admin-fichajes':'Registro de Fichajes',
-  'admin-creacion':'Creación de Productos'
+  'admin-creacion':'Creación de Productos',
+  'admin-bright-box':'Bright Box — Admin'
 };
 
-const ADMIN_ONLY_TABS = ['dashboard', 'orders', 'team', 'reports', 'planner', 'admin-roles', 'admin-fichajes', 'admin-creacion'];
+const ADMIN_ONLY_TABS = ['dashboard', 'orders', 'team', 'reports', 'planner', 'admin-roles', 'admin-fichajes', 'admin-creacion', 'admin-bright-box'];
 
 function goToTab(tab) {
   // Guard: redirigir si no hay sesión
@@ -63,6 +69,9 @@ function goToTab(tab) {
   if (tab === 'admin-fichajes' && typeof window.loadFichajesAdmin === 'function') window.loadFichajesAdmin();
   if (tab === 'catalogue' && typeof window.loadCatalogueProducts === 'function') window.loadCatalogueProducts();
   if (tab === 'orders' && typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
+  if (tab === 'admin-bright-box' && typeof window.loadBrightBoxAdmin === 'function') window.loadBrightBoxAdmin();
+  if (tab === 'team' && typeof window.loadTeamMembers === 'function') window.loadTeamMembers();
+  if (tab === 'admin-roles' && typeof window.loadRolesTable === 'function') window.loadRolesTable();
 }
 
 links.forEach(l => l.addEventListener('click', () => goToTab(l.dataset.tab)));
@@ -317,11 +326,14 @@ const revChart = new Chart(revCtx, {
   }
 });
 
+window.revChart = revChart;
+
 document.querySelectorAll('.period-toggle button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.period-toggle button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const d = revData[btn.dataset.period];
+    const source = window._dashRevData || revData;
+    const d = source[btn.dataset.period];
     revChart.data.labels = d.labels;
     revChart.data.datasets[0].data = d.data;
     revChart.update('active');
@@ -429,7 +441,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 document.getElementById('openNewOrderModal').addEventListener('click', () => openModal('newOrderModal'));
 document.getElementById('openAddProductModal').addEventListener('click', () => openModal('addProductModal'));
 document.getElementById('openAddTaskModal').addEventListener('click', () => openModal('addTaskModal'));
-document.getElementById('openAddMemberModal').addEventListener('click', () => openModal('addMemberModal'));
 document.getElementById('qNewOrder').addEventListener('click', () => openModal('newOrderModal'));
 
 // Submit New Order
@@ -449,8 +460,6 @@ document.getElementById('submitNewOrder').addEventListener('click', () => {
 });
 
 // View Order Detail (API data)
-const _apiOrderCache = {};
-
 document.addEventListener('click', e => {
   const btn = e.target.closest('.view-order-api');
   if (!btn) return;
@@ -466,6 +475,9 @@ document.addEventListener('click', e => {
   const totalCalc = detalles.reduce((s, d) => s + (parseFloat(d.precioUnitario) * d.cantidad), 0);
 
   document.getElementById('orderDetailTitle').textContent = 'Pedido #' + id;
+  document.getElementById('orderDetailTitle').dataset.orderId = id;
+  const statusSelect = document.getElementById('orderDetailStatusSelect');
+  if (statusSelect) statusSelect.value = estado || 'pendiente';
   document.getElementById('orderDetailBody').innerHTML = `
     <div class="dash-grid-2" style="margin-bottom:18px">
       <div>
@@ -500,6 +512,42 @@ document.addEventListener('click', e => {
     </table>
   `;
   openModal('orderDetailModal');
+});
+
+// Guardar estado del pedido desde modal de detalle
+document.getElementById('orderDetailSaveStatus')?.addEventListener('click', async () => {
+  const titleEl   = document.getElementById('orderDetailTitle');
+  const selectEl  = document.getElementById('orderDetailStatusSelect');
+  const orderId   = titleEl?.dataset.orderId;
+  const newStatus = selectEl?.value;
+  if (!orderId || !newStatus) return;
+
+  const btn = document.getElementById('orderDetailSaveStatus');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    const res = await fetch(`${INTRANET_API}/intranet/pedidos/${orderId}/estado`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: newStatus })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    // Actualizar caché local
+    if (_apiOrderCache[orderId]) _apiOrderCache[orderId].estado = newStatus;
+    closeModal('orderDetailModal');
+    showToast(`Estado del pedido #${orderId} actualizado a "${newStatus}"`, 'success');
+    if (typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
+    if (typeof window.updateDashboardKPIs === 'function') window.updateDashboardKPIs();
+  } catch (e) {
+    showToast(`Error al actualizar estado: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar estado';
+  }
 });
 
 // Add Task
@@ -819,14 +867,14 @@ function animateKPIValue(el, target, prefix = '', suffix = '') {
   requestAnimationFrame(update);
 }
 
-// Trigger KPI animation when dashboard tab is shown
+// Trigger KPI refresh when dashboard tab is shown
 const origGoToTab = goToTab;
 goToTab = function(tab) {
   origGoToTab(tab);
   if (tab === 'dashboard') {
     setTimeout(() => {
-      const kpiRev = document.getElementById('kpiRevenue');
-      if (kpiRev) animateKPIValue(kpiRev, 12840, '€');
+      if (typeof window.updateDashboardKPIs === 'function') window.updateDashboardKPIs();
+      if (typeof window.loadActivityFeed === 'function')    window.loadActivityFeed();
     }, 200);
   }
   // Scroll to top on tab change
@@ -1375,10 +1423,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // ── Submit Create Account ──────────────────
+    // ── Submit Create Account → API ────────────
     const submitCreateBtn = document.getElementById('submitCreateAccount');
     if (submitCreateBtn) {
-      submitCreateBtn.addEventListener('click', () => {
+      submitCreateBtn.addEventListener('click', async () => {
         const fname = document.getElementById('ca-fname')?.value.trim();
         const lname = document.getElementById('ca-lname')?.value.trim();
         const email = document.getElementById('ca-email')?.value.trim();
@@ -1390,61 +1438,81 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const initials = (fname[0] + lname[0]).toUpperCase();
-        const colors = ['rose', 'blue', 'green', 'amber', 'teal', 'orange', 'purple'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const roleBadge = role === 'admin' ? '<span class="status status--active">Admin</span>' : '<select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select>';
-        const actionBtns = role === 'admin' ? '<button class="dash-btn dash-btn--outline dash-btn--sm" disabled>Protegido</button>' : '<button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button>';
+        submitCreateBtn.disabled = true;
+        submitCreateBtn.textContent = 'Creando…';
+        try {
+          const res = await fetch(`${INTRANET_API}/auth/register-staff`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: `${fname} ${lname}`, email, password, rol: role })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || err.error || `Error ${res.status}`);
+          }
+          ['ca-fname','ca-lname','ca-email','ca-password','ca-position'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.value = '';
+          });
+          if (window.closeModal) window.closeModal('createAccountModal');
+          if (window.showToast) window.showToast(`Cuenta creada para ${fname} ${lname} (${role})`, 'success');
+          if (typeof window.loadRolesTable === 'function') window.loadRolesTable();
+          if (typeof window.loadTeamMembers === 'function') window.loadTeamMembers();
+        } catch (err) {
+          if (window.showToast) window.showToast(`Error al crear la cuenta: ${err.message}`, 'error');
+        } finally {
+          submitCreateBtn.disabled = false;
+          submitCreateBtn.textContent = 'Crear Cuenta';
+        }
 
-        const tr = document.createElement('tr');
-        tr.dataset.email = email;
-        tr.innerHTML = `
-          <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--${color}" style="width:32px;height:32px;font-size:0.65rem">${initials}</div><strong>${fname} ${lname}</strong></div></td>
-          <td>${email}</td>
-          <td>${roleBadge}</td>
-          <td><span class="status status--active">Activa</span></td>
-          <td><div class="row-actions">${actionBtns}</div></td>
-        `;
-
-        const tbody = document.querySelector('#rolesTable tbody');
-        if (tbody) tbody.appendChild(tr);
-
-        // Clear form
-        ['ca-fname', 'ca-lname', 'ca-email', 'ca-password', 'ca-position'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
-        });
-
-        if (window.closeModal) window.closeModal('createAccountModal');
-        if (window.showToast) window.showToast(`Cuenta creada para ${fname} ${lname} (${role})`, 'success');
       });
     }
 
-    // ── Save Role Changes ─────────────────────
-    document.addEventListener('click', e => {
+    // ── Save Role Changes → API ───────────────
+    document.addEventListener('click', async e => {
       const saveBtn = e.target.closest('.btn-save-role');
       if (!saveBtn) return;
       const tr = saveBtn.closest('tr');
       const select = tr?.querySelector('.role-select');
-      const email = tr?.dataset.email;
-      if (select && email) {
-        const newRole = select.value;
-        if (window.showToast) window.showToast(`Rol actualizado a "${newRole}" para ${email}`, 'success');
+      const userId = tr?.dataset.userId;
+      if (!select || !userId) return;
+      const newRole = select.value;
+      saveBtn.disabled = true;
+      try {
+        const res = await fetch(`${INTRANET_API}/usuarios/${userId}/rol`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rol: newRole })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (window.showToast) window.showToast(`Rol actualizado a "${newRole}"`, 'success');
+        if (typeof window.loadRolesTable === 'function') window.loadRolesTable();
+      } catch (err) {
+        if (window.showToast) window.showToast(`Error al actualizar el rol: ${err.message}`, 'error');
+      } finally {
+        saveBtn.disabled = false;
       }
     });
 
-    // ── Delete Account ────────────────────────
-    document.addEventListener('click', e => {
+    // ── Delete Account → API ──────────────────
+    document.addEventListener('click', async e => {
       const deleteBtn = e.target.closest('.btn-delete-account');
       if (!deleteBtn) return;
       const tr = deleteBtn.closest('tr');
-      const email = tr?.dataset.email;
-      if (email && confirm(`¿Seguro que quieres eliminar la cuenta ${email}?`)) {
+      const userId = tr?.dataset.userId;
+      const nombre = tr?.dataset.nombre || 'este usuario';
+      if (!userId) return;
+      if (!confirm(`¿Eliminar la cuenta de ${nombre}?`)) return;
+      deleteBtn.disabled = true;
+      try {
+        const res = await fetch(`${INTRANET_API}/usuarios/${userId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         tr.style.animation = 'fadeUp 0.3s ease reverse forwards';
-        setTimeout(() => {
-          tr.remove();
-          if (window.showToast) window.showToast(`Cuenta ${email} eliminada`, 'success');
-        }, 300);
+        setTimeout(() => tr.remove(), 300);
+        if (window.showToast) window.showToast(`Cuenta de ${nombre} eliminada`, 'success');
+        if (typeof window.loadTeamMembers === 'function') window.loadTeamMembers();
+      } catch (err) {
+        if (window.showToast) window.showToast(`Error al eliminar: ${err.message}`, 'error');
+        deleteBtn.disabled = false;
       }
     });
 
@@ -1452,13 +1520,18 @@ document.addEventListener('DOMContentLoaded', () => {
     //   ADMIN PANEL: FICHAJES
     // ══════════════════════════════════════════════
 
+    function localDateStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
     const dateFilter = document.getElementById('fichajesDateFilter');
-    if (dateFilter) dateFilter.value = new Date().toISOString().split('T')[0];
+    if (dateFilter) dateFilter.value = localDateStr();
 
     window.loadFichajesAdmin = async function loadFichajesAdmin() {
       const tbody = document.getElementById('fichajesBody');
       if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--dash-muted)">Cargando fichajes…</td></tr>';
-      const fecha = dateFilter?.value || new Date().toISOString().split('T')[0];
+      const fecha = dateFilter?.value || localDateStr();
       try {
         const res = await fetch(`${INTRANET_API}/fichajes?fecha=${fecha}`);
         if (!res.ok) {
@@ -1473,26 +1546,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
-    function renderFichajesAdmin(eventos, fecha) {
+    function renderFichajesAdmin(fichajes, fecha) {
       const tbody = document.getElementById('fichajesBody');
       if (!tbody) return;
-
-      // Agrupar por email: { nombre, entrada, salida }
-      const map = {};
-      // eventos llegan ordenados ASC por fecha_hora
-      eventos.forEach(ev => {
-        const email = ev.empleadoEmail;
-        if (!map[email]) map[email] = { nombre: ev.empleadoNombre, entrada: null, salida: null };
-        const t = new Date(ev.fechaHora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        if (ev.tipo === 'ENTRADA' && !map[email].entrada) map[email].entrada = t; // primera entrada del día
-        if (ev.tipo === 'SALIDA')  map[email].salida  = t;                        // última salida del día
-      });
 
       const fechaDisplay = new Date(fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
       let total = 0, completed = 0, active = 0;
       tbody.innerHTML = '';
 
-      if (Object.keys(map).length === 0) {
+      if (!fichajes.length) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--dash-muted)">No hay fichajes registrados para el ${fechaDisplay}</td></tr>`;
         const el = id => document.getElementById(id);
         if (el('fichajesTotal'))     el('fichajesTotal').textContent     = 0;
@@ -1502,8 +1564,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      Object.values(map).forEach(({ nombre, entrada, salida }) => {
+      fichajes.forEach(f => {
         total++;
+        const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : null;
+        const entrada = fmtTime(f.horaEntrada);
+        const salida  = fmtTime(f.horaSalida);
         let duration = '—', statusHtml = '';
         if (entrada && salida) {
           const [eh, em] = entrada.split(':').map(Number);
@@ -1519,7 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
           statusHtml = '<span class="status status--expired">Sin entrada</span>';
         }
         tbody.innerHTML += `<tr>
-          <td><strong>${escapeHtml(nombre)}</strong></td>
+          <td><strong>${escapeHtml(f.empleadoNombre || '—')}</strong></td>
           <td>${fechaDisplay}</td>
           <td>${entrada || '—'}</td>
           <td>${salida  || '—'}</td>
@@ -1538,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fichajesBtn = document.getElementById('fichajesToday');
     if (fichajesBtn) {
       fichajesBtn.addEventListener('click', () => {
-        if (dateFilter) dateFilter.value = new Date().toISOString().split('T')[0];
+        if (dateFilter) dateFilter.value = localDateStr();
         loadFichajesAdmin();
       });
     }
@@ -1675,6 +1740,126 @@ document.addEventListener('DOMContentLoaded', () => {
 function getAdminUserName() {
   try { const s = JSON.parse(localStorage.getItem('shineStaff')); return s?.name || 'Admin'; } catch { return 'Admin'; }
 }
+
+// ══════════════════════════════════════════════
+//   BRIGHT BOX
+// ══════════════════════════════════════════════
+
+(function initBrightBox() {
+  // ── Anonymous toggle ──────────────────────
+  const bbAnonimo = document.getElementById('bb-anonimo');
+  const bbNombre = document.getElementById('bb-nombre');
+  const bbApellidos = document.getElementById('bb-apellidos');
+  const bbReqMarks = document.querySelectorAll('.bb-name-req');
+
+  if (bbAnonimo) {
+    bbAnonimo.addEventListener('change', () => {
+      const anon = bbAnonimo.checked;
+      if (bbNombre) { bbNombre.disabled = anon; bbNombre.value = anon ? '' : bbNombre.value; bbNombre.placeholder = anon ? 'Anónimo' : 'Tu nombre'; }
+      if (bbApellidos) { bbApellidos.disabled = anon; bbApellidos.value = anon ? '' : bbApellidos.value; bbApellidos.placeholder = anon ? 'Anónimo' : 'Tus apellidos'; }
+      bbReqMarks.forEach(el => { el.style.display = anon ? 'none' : ''; });
+    });
+  }
+
+  // ── Form submit ───────────────────────────
+  const brightBoxForm = document.getElementById('brightBoxForm');
+  if (brightBoxForm) {
+    brightBoxForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const anon = bbAnonimo?.checked || false;
+      const nombre = anon ? 'Anónimo' : (bbNombre?.value.trim() || '');
+      const apellidos = anon ? 'Anónimo' : (bbApellidos?.value.trim() || '');
+      const asunto = document.getElementById('bb-asunto')?.value.trim() || '';
+      const texto = document.getElementById('bb-texto')?.value.trim() || '';
+
+      if (!anon && (!nombre || !apellidos)) {
+        if (window.showToast) showToast('Por favor, rellena tu nombre y apellidos (o activa Anónimo).', 'warn');
+        return;
+      }
+      if (!asunto) {
+        if (window.showToast) showToast('El asunto es obligatorio.', 'warn');
+        return;
+      }
+
+      const submitBtn = brightBoxForm.querySelector('[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Enviando…'; }
+
+      try {
+        const res = await fetch(`${INTRANET_API}/buzon`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, apellidos, asunto, texto })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `Error ${res.status}`);
+        }
+        brightBoxForm.reset();
+        if (bbNombre) { bbNombre.disabled = false; bbNombre.placeholder = 'Tu nombre'; }
+        if (bbApellidos) { bbApellidos.disabled = false; bbApellidos.placeholder = 'Tus apellidos'; }
+        bbReqMarks.forEach(el => { el.style.display = ''; });
+        if (window.showToast) showToast('Mensaje enviado. Gracias por tu confianza.', 'success');
+      } catch (err) {
+        if (window.showToast) showToast(`No se pudo enviar el mensaje: ${err.message}`, 'error');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar mensaje'; }
+      }
+    });
+  }
+
+  // ── Admin: load messages ──────────────────
+  window.loadBrightBoxAdmin = async function loadBrightBoxAdmin() {
+    const loading = document.getElementById('bbAdminLoading');
+    const empty = document.getElementById('bbAdminEmpty');
+    const list = document.getElementById('bbAdminList');
+    if (!list) return;
+
+    if (loading) loading.style.display = '';
+    if (empty) empty.style.display = 'none';
+    list.innerHTML = '';
+
+    try {
+      const res = await fetch(`${INTRANET_API}/buzon`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const mensajes = await res.json();
+
+      if (loading) loading.style.display = 'none';
+
+      if (!mensajes.length) {
+        if (empty) empty.style.display = '';
+        return;
+      }
+
+      list.innerHTML = mensajes.map(m => {
+        const fecha = m.fecha ? new Date(m.fecha).toLocaleString('es-ES', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+        const esAnonimo = m.nombre === 'Anónimo';
+        return `
+          <div class="bb-message-card" style="border:1px solid var(--dash-border);border-radius:12px;padding:18px 20px;margin-bottom:14px;background:var(--dash-surface)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="avatar ${esAnonimo ? 'avatar--rose' : 'avatar--teal'}" style="width:36px;height:36px;font-size:0.7rem;flex-shrink:0">${esAnonimo ? '?' : (escapeHtml(m.nombre[0]) + (m.apellidos?.[0] ? escapeHtml(m.apellidos[0]) : ''))}</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem;color:var(--dash-text)">${esAnonimo ? '<em style="color:var(--dash-muted)">Anónimo</em>' : escapeHtml(m.nombre) + ' ' + escapeHtml(m.apellidos || '')}</div>
+                  <div style="font-size:0.75rem;color:var(--dash-muted)">${fecha}</div>
+                </div>
+              </div>
+              <span style="font-size:0.78rem;background:var(--dash-rose-soft,rgba(212,145,154,.12));color:var(--dash-rose);padding:3px 10px;border-radius:20px;font-weight:500">${escapeHtml(m.asunto)}</span>
+            </div>
+            <p style="font-size:0.88rem;color:var(--dash-text);line-height:1.65;white-space:pre-wrap;margin:0">${escapeHtml(m.texto || '')}</p>
+          </div>`;
+      }).join('');
+
+    } catch (err) {
+      if (loading) loading.style.display = 'none';
+      list.innerHTML = `<p style="color:var(--dash-danger);text-align:center;padding:24px 0">Error al cargar los mensajes: ${escapeHtml(err.message)}</p>`;
+    }
+  };
+
+  // ── Refresh button ────────────────────────
+  document.getElementById('refreshBrightBox')?.addEventListener('click', () => {
+    if (window.loadBrightBoxAdmin) window.loadBrightBoxAdmin();
+  });
+})();
 
 // ── Admin: Announcements ─────────────────────────────────
 const ANNC_TAG_CLASS = { new: 'rose', hr: 'blue', event: 'green', reminder: 'amber', info: 'blue' };
@@ -1911,7 +2096,15 @@ window.loadIntranetOrders = async function () {
   }
 
   try {
-    const pedidos = await fetch(`${INTRANET_API}/intranet/pedidos`).then(r => r.json());
+    const res = await fetch(`${INTRANET_API}/intranet/pedidos`);
+    const pedidos = await res.json();
+
+    if (!res.ok) {
+      const msg = pedidos?.error || `Error del servidor (${res.status})`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-danger)">⚠ ${escapeHtml(msg)}</td></tr>`;
+      console.error('[loadIntranetOrders] Error del servidor:', res.status, pedidos);
+      return;
+    }
 
     if (!Array.isArray(pedidos) || !pedidos.length) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-muted)">No hay pedidos todavía.</td></tr>';
@@ -1946,7 +2139,8 @@ window.loadIntranetOrders = async function () {
     if (badge) badge.textContent = activos;
 
   } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-danger)">No se pudieron cargar los pedidos. Comprueba que el servidor está activo.</td></tr>';
+    console.error('[loadIntranetOrders]', err);
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-danger)">No se pudieron cargar los pedidos. ${escapeHtml(err.message || 'Comprueba que el servidor está activo.')}</td></tr>`;
   }
 };
 
@@ -2229,4 +2423,369 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.showToast) window.showToast(`Error al actualizar: ${e.message}`, 'error');
     }
   });
+});
+
+// ══════════════════════════════════════════════
+//   EQUIPO — carga dinámica desde API
+// ══════════════════════════════════════════════
+
+const TEAM_AVATAR_COLORS = ['rose','blue','green','amber','teal','orange','purple'];
+
+function staffInitials(nombre) {
+  const parts = (nombre || '').trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (nombre || 'US').substring(0, 2).toUpperCase();
+}
+
+window.loadTeamMembers = async function () {
+  const grid = document.getElementById('teamGrid');
+  const countEl = document.getElementById('teamCount');
+  if (!grid) return;
+
+  grid.innerHTML = '<p style="color:var(--dash-muted);padding:20px;grid-column:1/-1;text-align:center">Cargando equipo…</p>';
+
+  try {
+    const staff = await fetch(`${INTRANET_API}/usuarios`).then(r => r.json());
+    if (!Array.isArray(staff) || !staff.length) {
+      grid.innerHTML = '<p style="color:var(--dash-muted);padding:20px;grid-column:1/-1;text-align:center">No hay miembros del equipo registrados.</p>';
+      if (countEl) countEl.textContent = '';
+      return;
+    }
+
+    if (countEl) countEl.textContent = `(${staff.length})`;
+
+    grid.innerHTML = staff.map((u, i) => {
+      const color = TEAM_AVATAR_COLORS[i % TEAM_AVATAR_COLORS.length];
+      const initials = staffInitials(u.nombre);
+      const isAdmin = u.rol === 'admin';
+      const roleLabel = isAdmin ? 'Administrador' : 'Empleado';
+      return `
+        <div class="team-card" data-name="${escapeHtml((u.nombre || '').toLowerCase())}" data-user-id="${u.id}">
+          <div class="team-card__avatar avatar--${color}">${initials}</div>
+          <div class="team-card__name">${escapeHtml(u.nombre || '—')}</div>
+          <div class="team-card__role">${roleLabel}</div>
+          <div class="team-card__email">${escapeHtml(u.email || '—')}</div>
+          <span class="status status--active">Activo</span>
+          <div class="team-card__actions">
+            <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('${escapeHtml(u.nombre || '')}')">Mensaje</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Re-apply active search
+    const q = document.getElementById('teamSearch')?.value.toLowerCase() || '';
+    if (q) {
+      grid.querySelectorAll('.team-card').forEach(card => {
+        card.style.display = card.dataset.name.includes(q) ? '' : 'none';
+      });
+    }
+  } catch (e) {
+    grid.innerHTML = '<p style="color:var(--dash-danger);padding:20px;grid-column:1/-1;text-align:center">Error al cargar el equipo.</p>';
+    console.error('[loadTeamMembers]', e);
+  }
+};
+
+// ══════════════════════════════════════════════
+//   ROLES ADMIN — carga dinámica desde API
+// ══════════════════════════════════════════════
+
+window.loadRolesTable = async function () {
+  const tbody = document.getElementById('rolesTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--dash-muted)">Cargando usuarios…</td></tr>';
+
+  let currentEmail = '';
+  try { currentEmail = (JSON.parse(localStorage.getItem('shineStaff')) || {}).email || ''; } catch {}
+
+  try {
+    const staff = await fetch(`${INTRANET_API}/usuarios`).then(r => r.json());
+    if (!Array.isArray(staff) || !staff.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--dash-muted)">No hay empleados registrados.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = staff.map((u, i) => {
+      const color = TEAM_AVATAR_COLORS[i % TEAM_AVATAR_COLORS.length];
+      const initials = staffInitials(u.nombre);
+      const isCurrentUser = u.email === currentEmail;
+      const isAdmin = u.rol === 'admin';
+
+      const roleBadge = isCurrentUser
+        ? `<span class="status status--active">${isAdmin ? 'Admin' : 'Empleado'} (tú)</span>`
+        : `<select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem">
+             <option value="empleado"${u.rol === 'empleado' ? ' selected' : ''}>Empleado</option>
+             <option value="admin"${isAdmin ? ' selected' : ''}>Admin</option>
+           </select>`;
+
+      const actionBtns = isCurrentUser
+        ? '<button class="dash-btn dash-btn--outline dash-btn--sm" disabled>Cuenta actual</button>'
+        : `<button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button>
+           <button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button>`;
+
+      return `<tr data-user-id="${u.id}" data-nombre="${escapeHtml(u.nombre || '')}">
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar avatar--${color}" style="width:32px;height:32px;font-size:0.65rem">${initials}</div>
+          <strong>${escapeHtml(u.nombre || '—')}</strong>
+        </div></td>
+        <td>${escapeHtml(u.email || '—')}</td>
+        <td>${roleBadge}</td>
+        <td><span class="status status--active">Activa</span></td>
+        <td><div class="row-actions">${actionBtns}</div></td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--dash-danger)">Error al cargar usuarios: ${escapeHtml(e.message)}</td></tr>`;
+    console.error('[loadRolesTable]', e);
+  }
+};
+
+// ══════════════════════════════════════════════
+//   DASHBOARD KPIs — datos reales desde API
+// ══════════════════════════════════════════════
+
+window.updateDashboardKPIs = async function () {
+  try {
+    const s = await fetch(`${INTRANET_API}/intranet/dashboard`).then(r => r.json());
+    if (!s || typeof s !== 'object') return;
+
+    // ── KPI cards ────────────────────────────────────────────────────────────
+    const kpiRev    = document.getElementById('kpiRevenue');
+    const kpiOrd    = document.getElementById('kpiOrders');
+    const kpiCust   = document.getElementById('kpiCustomers');
+    const kpiActive = document.getElementById('kpiActiveOrders');
+    const pillPend  = document.getElementById('pillPendingOrders');
+    const badge     = document.querySelector('.sidebar-link[data-tab="orders"] .badge');
+
+    if (kpiRev)    animateKPIValue(kpiRev,    Math.round(s.monthRevenue), '€', '');
+    if (kpiOrd)    animateKPIValue(kpiOrd,    s.totalOrders, '', '');
+    if (kpiCust)   animateKPIValue(kpiCust,   s.totalCustomers, '', '');
+    if (kpiActive) animateKPIValue(kpiActive, s.activeOrders, '', '');
+    if (pillPend)  pillPend.textContent = s.activeOrders;
+    if (badge)     badge.textContent   = s.activeOrders;
+
+    // ── KPI change indicators ────────────────────────────────────────────────
+    const revChange = document.getElementById('kpiRevenueChange');
+    if (revChange && s.lastMonthRevenue > 0) {
+      const pct = ((s.monthRevenue - s.lastMonthRevenue) / s.lastMonthRevenue * 100).toFixed(1);
+      const up  = pct >= 0;
+      revChange.className = 'kpi-card__change' + (up ? ' up' : ' down');
+      revChange.textContent = (up ? '↑' : '↓') + ' ' + Math.abs(pct) + '% vs mes anterior';
+    } else if (revChange) {
+      revChange.textContent = 'Mes actual';
+    }
+
+    const ordChange = document.getElementById('kpiOrdersChange');
+    if (ordChange) ordChange.textContent = s.activeOrders + ' activos';
+
+    const custChange = document.getElementById('kpiCustomersChange');
+    if (custChange) custChange.textContent = s.totalCustomers + ' registrados';
+
+    const activeChange = document.getElementById('kpiActiveOrdersChange');
+    if (activeChange) activeChange.textContent = s.activeOrders > 0 ? s.activeOrders + ' pendientes' : 'Al día';
+
+    // ── Revenue chart ────────────────────────────────────────────────────────
+    if (window.revChart && s.revenueWeek && s.revenueMonth && s.revenueYear) {
+      window._dashRevData = {
+        week:  { labels: s.revenueWeek.map(p => p.label),  data: s.revenueWeek.map(p => p.value)  },
+        month: { labels: s.revenueMonth.map(p => p.label), data: s.revenueMonth.map(p => p.value) },
+        year:  { labels: s.revenueYear.map(p => p.label),  data: s.revenueYear.map(p => p.value)  }
+      };
+      const active = document.querySelector('.period-toggle button.active')?.dataset?.period || 'week';
+      const d = window._dashRevData[active];
+      revChart.data.labels = d.labels;
+      revChart.data.datasets[0].data = d.data;
+      revChart.update();
+    }
+
+    // ── Pedidos recientes ────────────────────────────────────────────────────
+    const tbody = document.getElementById('dashRecentOrdersBody');
+    if (tbody && Array.isArray(s.recentOrders)) {
+      const statusMap   = { procesando:'status--pending', pendiente:'status--pending', enviado:'status--shipped', entregado:'status--active', cancelado:'status--danger' };
+      const statusLabel = { procesando:'Procesando', pendiente:'Pendiente', enviado:'Enviado', entregado:'Entregado', cancelado:'Cancelado' };
+      if (s.recentOrders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--dash-muted)">Sin pedidos aún</td></tr>';
+      } else {
+        tbody.innerHTML = s.recentOrders.map(o => {
+          const estado = (o.estado || '').toLowerCase();
+          const name   = (o.customerName || '').split(' ')[0] + (o.customerName?.split(' ')[1] ? ' ' + o.customerName.split(' ')[1][0] + '.' : '');
+          return `<tr>
+            <td>#SH-${o.id}</td>
+            <td>${escapeHtml(name)}</td>
+            <td>€${parseFloat(o.total).toFixed(2)}</td>
+            <td><span class="status ${statusMap[estado] || 'status--pending'}">${statusLabel[estado] || o.estado}</span></td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+    // ── Mejores productos ────────────────────────────────────────────────────
+    const topEl = document.getElementById('dashTopProducts');
+    if (topEl && Array.isArray(s.topProducts)) {
+      const ranks = ['gold', 'silver', 'bronze', '', ''];
+      if (s.topProducts.length === 0) {
+        topEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--dash-muted)">Sin ventas registradas</div>';
+      } else {
+        const maxRev = s.topProducts[0]?.revenue || 1;
+        topEl.innerHTML = s.topProducts.map((p, i) => {
+          const pct = Math.round((p.revenue / maxRev) * 100);
+          return `<div class="top-product">
+            <div class="top-product__rank ${ranks[i] || ''}">${i + 1}</div>
+            <div class="top-product__info">
+              <span>${escapeHtml(p.nombre)}</span>
+              <div class="top-product__bar"><div style="width:${pct}%"></div></div>
+            </div>
+            <span class="top-product__val">€${Math.round(p.revenue).toLocaleString('es-ES')}</span>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Sync notification dropdown with low stock and recent orders
+    syncNotifications(s);
+
+  } catch (e) {
+    console.warn('[updateDashboardKPIs]', e);
+  }
+};
+
+// ══════════════════════════════════════════════
+//   FEED DE ACTIVIDAD RECIENTE (escalable)
+//   Consume GET /api/v1/intranet/actividad
+//   Para añadir nuevos tipos de evento, solo
+//   ampliar ActividadDAO.java en el backend.
+// ══════════════════════════════════════════════
+
+const ACTIVITY_ICONS = {
+  order:      '<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
+  clock:      '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  'clock-out':'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><line x1="15" y1="3" x2="19" y2="7"/>',
+  megaphone:  '<path d="M22 3L9.218 10.083"/><path d="M11.038 14.962L9 22l2-4 2 4-2.038-7.038z"/><path d="M2 8.5h7l-2 7H2z"/><path d="M22 3L11 14.5"/>',
+  inbox:      '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/>',
+  default:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+};
+
+window.loadActivityFeed = async function () {
+  const actList  = document.getElementById('dashActivityList');
+  const actCount = document.getElementById('dashActivityCount');
+  if (!actList) return;
+
+  try {
+    const items = await fetch(`${INTRANET_API}/intranet/actividad`).then(r => r.json());
+
+    if (actCount) actCount.textContent = Array.isArray(items) ? Math.min(items.length, 20) : 0;
+
+    if (!Array.isArray(items) || !items.length) {
+      actList.innerHTML = '<div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-muted)"></div><div><p style="color:var(--dash-muted)">Sin actividad reciente</p></div></div>';
+      return;
+    }
+
+    actList.innerHTML = items.map(it => {
+      const ts  = it.timestamp ? new Date(it.timestamp) : null;
+      const sub = ts ? relativeTime(ts) : '';
+      const svg = ACTIVITY_ICONS[it.icono] || ACTIVITY_ICONS.default;
+      return `<div class="timeline-item">
+        <div class="timeline-dot" style="background:${escapeHtml(it.color || 'var(--dash-muted)')}">
+          <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2">${svg}</svg>
+        </div>
+        <div>
+          <p>${escapeHtml(it.descripcion || '')}</p>
+          <small style="color:var(--dash-muted)">${escapeHtml(sub)}</small>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    console.warn('[loadActivityFeed]', e);
+    actList.innerHTML = '<div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-muted)"></div><div><p style="color:var(--dash-muted)">No se pudo cargar la actividad</p></div></div>';
+  }
+};
+
+function relativeTime(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)   return 'Ahora mismo';
+  if (mins < 60)  return `hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)   return `hace ${hrs} hora${hrs > 1 ? 's' : ''}`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Ayer';
+  return `hace ${days} días`;
+}
+
+function syncNotifications(stats) {
+  const list = document.querySelector('.notif-list');
+  if (!list) return;
+  const items = [];
+
+  (stats.recentOrders || []).slice(0, 2).forEach(o => {
+    const ts = o.fecha ? new Date(o.fecha) : null;
+    items.push(`<div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-success)"></div><div><p>Nuevo pedido <strong>#SH-${o.id}</strong> recibido</p><small>${ts ? relativeTime(ts) : ''}</small></div></div>`);
+  });
+
+  (stats.lowStockProducts || []).slice(0, 2).forEach(p => {
+    items.push(`<div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-warning)"></div><div><p><strong>${escapeHtml(p.nombre)}</strong> con stock bajo (${p.stock} unidades)</p><small>Ahora</small></div></div>`);
+  });
+
+  if (items.length > 0) {
+    list.innerHTML = items.join('');
+    const cnt = document.getElementById('notifCount');
+    if (cnt) cnt.textContent = items.length;
+  }
+}
+
+// ══════════════════════════════════════════════
+//   HOME STATS PILLS — datos reales
+// ══════════════════════════════════════════════
+
+async function updateHomeStats() {
+  // Reuniones hoy
+  try {
+    const meetings = await fetch(`${INTRANET_API}/reuniones`).then(r => r.json());
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = (meetings || []).filter(m => (m.fecha || '') === today).length;
+    const pill = document.getElementById('pillMeetingsToday');
+    if (pill) pill.textContent = todayCount;
+  } catch {}
+
+  // Mensajes en el buzón
+  try {
+    const msgs = await fetch(`${INTRANET_API}/buzon`).then(r => r.json());
+    const pill = document.getElementById('pillBuzonCount');
+    if (pill) pill.textContent = (msgs || []).length;
+  } catch {}
+
+  // Pedidos pendientes (reutiliza la llamada de KPIs para admin)
+  if (window._staffRole === 'admin') {
+    try {
+      const pedidos = await fetch(`${INTRANET_API}/intranet/pedidos`).then(r => r.json());
+      const pending = (pedidos || []).filter(p => ['procesando', 'pendiente'].includes((p.estado || '').toLowerCase())).length;
+      const pill = document.getElementById('pillPendingOrders');
+      if (pill) pill.textContent = pending;
+    } catch {}
+  }
+}
+
+// ── Inicialización al cargar la página ────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateHomeStats();
+  // Pre-cargar equipo al inicio
+  if (typeof window.loadTeamMembers === 'function') window.loadTeamMembers();
+  // Pre-cargar roles, KPIs y feed de actividad si es admin
+  // Espera 300ms para que el role system termine de leer localStorage
+  setTimeout(() => {
+    if (window._staffRole === 'admin') {
+      if (typeof window.loadRolesTable === 'function')      window.loadRolesTable();
+      if (typeof window.updateDashboardKPIs === 'function') window.updateDashboardKPIs();
+      if (typeof window.loadActivityFeed === 'function')    window.loadActivityFeed();
+      if (typeof window.loadIntranetOrders === 'function')  window.loadIntranetOrders();
+    }
+  }, 300);
+
+  // Auto-refresh del feed de actividad cada 60 segundos
+  setInterval(() => {
+    if (window._staffRole === 'admin') {
+      if (typeof window.loadActivityFeed === 'function')    window.loadActivityFeed();
+      if (typeof window.updateDashboardKPIs === 'function') window.updateDashboardKPIs();
+    }
+  }, 60000);
 });

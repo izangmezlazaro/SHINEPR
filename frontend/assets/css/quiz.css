@@ -372,6 +372,7 @@
 .kit-products { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
 
 .kit-card {
+  position: relative;
   display: grid;
   grid-template-columns: 60px 1fr auto;
   align-items: center;
@@ -385,6 +386,35 @@
   opacity: 0;
   transform: translateY(14px);
   animation: kitUp .5s ease-out both;
+}
+
+.kit-card-remove {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(26,26,26,.08);
+  color: var(--text-muted, #888);
+  font-size: .7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .2s, background .2s, color .2s;
+}
+
+.kit-card:hover .kit-card-remove {
+  opacity: 1;
+}
+
+.kit-card-remove:hover {
+  background: #e8525a;
+  color: #fff;
 }
 
 .kit-card:nth-child(1) { animation-delay: .1s; }

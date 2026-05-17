@@ -84,6 +84,14 @@
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
       <span>Objetivos 2026</span>
     </a>
+    <a class="sidebar-link" data-tab="calendario" data-tooltip="Calendario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Calendario</span>
+    </a>
+    <a class="sidebar-link" data-tab="bright-box" data-tooltip="Bright Box">
+      <svg viewBox="0 0 24 24"><path d="M22 8.01V18a2 2 0 01-2 2H4a2 2 0 01-2-2V8.01"/><rect x="2" y="4" width="20" height="4" rx="1"/><path d="M10 13h4"/></svg>
+      <span>Bright Box</span>
+    </a>
 
     <div class="sidebar-section admin-only"><span>Admin</span></div>
     <a class="sidebar-link admin-only" data-tab="admin-roles" data-tooltip="Roles">
@@ -97,6 +105,10 @@
     <a class="sidebar-link admin-only" data-tab="admin-creacion" data-tooltip="Creación">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       <span>Creación</span>
+    </a>
+    <a class="sidebar-link admin-only" data-tab="admin-bright-box" data-tooltip="Bright Box">
+      <svg viewBox="0 0 24 24"><path d="M22 8.01V18a2 2 0 01-2 2H4a2 2 0 01-2-2V8.01"/><rect x="2" y="4" width="20" height="4" rx="1"/><path d="M10 13h4"/></svg>
+      <span>Bright Box</span>
     </a>
 
     <div class="sidebar-section"><span>Sistema</span></div>
@@ -193,15 +205,15 @@
         <div class="home-hero-right">
           <div class="home-stat-pill">
             <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-            <span><strong>5</strong> pedidos pendientes</span>
+            <span><strong id="pillPendingOrders">—</strong> pedidos pendientes</span>
           </div>
           <div class="home-stat-pill">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            <span><strong>3</strong> mensajes sin leer</span>
+            <span><strong id="pillBuzonCount">—</strong> mensajes buzón</span>
           </div>
           <div class="home-stat-pill">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span><strong>2</strong> reuniones hoy</span>
+            <span><strong id="pillMeetingsToday">—</strong> reuniones hoy</span>
           </div>
         </div>
       </div>
@@ -460,22 +472,6 @@
           </div>
         </div>
 
-        <!-- Calendario -->
-        <div class="home-card home-card--calendar">
-          <div class="home-card-header">
-            <h3>
-              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Calendario
-            </h3>
-            <div class="home-card-actions">
-              <button class="home-view-all" id="openAnnualCalendar">Ver año completo</button>
-              <button class="home-admin-btn admin-only" id="openCalendarEdit">+ Evento</button>
-            </div>
-          </div>
-          <div id="miniCalendar"></div>
-          <div class="cal-legend" id="calLegendMini"></div>
-        </div>
-
       </div><!-- /home-grid -->
     </div><!-- /sec-home -->
 
@@ -504,10 +500,10 @@
         <div class="kpi-card kpi-card--green" data-tip="Ingresos acumulados del mes">
           <div class="kpi-card__top">
             <div class="kpi-card__icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" stroke="#16A34A"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-            <div class="kpi-card__change up">↑ 14.2%</div>
+            <div class="kpi-card__change up" id="kpiRevenueChange">↑ 0%</div>
           </div>
           <div class="kpi-card__label">Ingresos (MTM)</div>
-          <div class="kpi-card__value" id="kpiRevenue">€12,840</div>
+          <div class="kpi-card__value" id="kpiRevenue">—</div>
           <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
             <defs><linearGradient id="sg1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#16A34A" stop-opacity="0.3"/><stop offset="100%" stop-color="#16A34A" stop-opacity="0"/></linearGradient></defs>
             <path d="M0,34 L17,28 L34,30 L51,20 L68,24 L85,12 L102,8 L120,4" fill="none" stroke="#16A34A" stroke-width="2"/>
@@ -517,10 +513,10 @@
         <div class="kpi-card kpi-card--blue" data-tip="Total de pedidos este mes">
           <div class="kpi-card__top">
             <div class="kpi-card__icon" style="background:#DBEAFE"><svg viewBox="0 0 24 24" stroke="#2563EB"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
-            <div class="kpi-card__change up">↑ 8 esta semana</div>
+            <div class="kpi-card__change up" id="kpiOrdersChange">—</div>
           </div>
           <div class="kpi-card__label">Pedidos</div>
-          <div class="kpi-card__value">47</div>
+          <div class="kpi-card__value" id="kpiOrders">—</div>
           <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
             <defs><linearGradient id="sg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563EB" stop-opacity="0.3"/><stop offset="100%" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs>
             <path d="M0,28 L17,32 L34,20 L51,26 L68,14 L85,18 L102,8 L120,4" fill="none" stroke="#2563EB" stroke-width="2"/>
@@ -530,10 +526,10 @@
         <div class="kpi-card kpi-card--rose" data-tip="Total de clientes registrados">
           <div class="kpi-card__top">
             <div class="kpi-card__icon" style="background:var(--dash-blush)"><svg viewBox="0 0 24 24" stroke="var(--dash-rose)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-            <div class="kpi-card__change up">↑ 23 nuevos</div>
+            <div class="kpi-card__change up" id="kpiCustomersChange">—</div>
           </div>
           <div class="kpi-card__label">Clientes</div>
-          <div class="kpi-card__value">312</div>
+          <div class="kpi-card__value" id="kpiCustomers">—</div>
           <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
             <defs><linearGradient id="sg3" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D4919A" stop-opacity="0.3"/><stop offset="100%" stop-color="#D4919A" stop-opacity="0"/></linearGradient></defs>
             <path d="M0,30 L17,26 L34,22 L51,18 L68,16 L85,12 L102,8 L120,5" fill="none" stroke="#D4919A" stroke-width="2"/>
@@ -543,10 +539,10 @@
         <div class="kpi-card kpi-card--amber" data-tip="Acuerdos con socios activos">
           <div class="kpi-card__top">
             <div class="kpi-card__icon" style="background:#FEF3C7"><svg viewBox="0 0 24 24" stroke="#D97706"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div class="kpi-card__change">2 pendientes</div>
+            <div class="kpi-card__change" id="kpiActiveOrdersChange">—</div>
           </div>
-          <div class="kpi-card__label">Acuerdos Activos</div>
-          <div class="kpi-card__value">6</div>
+          <div class="kpi-card__label">Pedidos Activos</div>
+          <div class="kpi-card__value" id="kpiActiveOrders">—</div>
           <svg class="kpi-sparkline" viewBox="0 0 120 44" preserveAspectRatio="none">
             <defs><linearGradient id="sg4" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#D97706" stop-opacity="0.3"/><stop offset="100%" stop-color="#D97706" stop-opacity="0"/></linearGradient></defs>
             <path d="M0,22 L30,22 L50,26 L70,22 L90,20 L110,18 L120,18" fill="none" stroke="#D97706" stroke-width="2"/>
@@ -570,14 +566,10 @@
           </div>
         </div>
         <div class="dash-card">
-          <div class="dash-card__header"><span class="dash-card__title">Actividad Reciente</span><span class="notif-count-sm">5</span></div>
+          <div class="dash-card__header"><span class="dash-card__title">Actividad Reciente</span><span class="notif-count-sm" id="dashActivityCount">0</span></div>
           <div class="dash-card__body" style="padding:0 20px">
-            <div class="timeline">
-              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-success)"></div><div><p>Nuevo pedido <strong>#SH-1047</strong> recibido</p><small>hace 2 horas</small></div></div>
-              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-info)"></div><div><p>Acuerdo con <strong>Sephora ES</strong> firmado</p><small>hace 5 horas</small></div></div>
-              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-warning)"></div><div><p><strong>Rose Mist Toner</strong> con stock bajo (12 unidades)</p><small>Ayer</small></div></div>
-              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-rose)"></div><div><p>Nuevo miembro <strong>Sofia Chen</strong> añadido</p><small>hace 2 días</small></div></div>
-              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-success)"></div><div><p>Pedido personalizado <strong>#CP-018</strong> completado</p><small>hace 3 días</small></div></div>
+            <div class="timeline" id="dashActivityList">
+              <div class="timeline-item"><div class="timeline-dot" style="background:var(--dash-muted)"></div><div><p style="color:var(--dash-muted)">Cargando actividad…</p></div></div>
             </div>
           </div>
         </div>
@@ -587,21 +579,15 @@
         <div class="dash-card">
           <div class="dash-card__header"><span class="dash-card__title">Pedidos Recientes</span><a class="dash-btn dash-btn--outline dash-btn--sm" data-goto="orders">Ver Todo</a></div>
           <div class="dash-card__body" style="padding:0">
-            <table class="dash-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>
-              <tr><td>#SH-1047</td><td>Laura M.</td><td>€154.00</td><td><span class="status status--pending">Procesando</span></td></tr>
-              <tr><td>#SH-1046</td><td>James K.</td><td>€89.00</td><td><span class="status status--shipped">Enviado</span></td></tr>
-              <tr><td>#SH-1045</td><td>Sofia P.</td><td>€232.00</td><td><span class="status status--active">Entregado</span></td></tr>
-              <tr><td>#SH-1044</td><td>Marc T.</td><td>€65.00</td><td><span class="status status--shipped">Enviado</span></td></tr>
+            <table class="dash-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody id="dashRecentOrdersBody">
+              <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--dash-muted)">Cargando…</td></tr>
             </tbody></table>
           </div>
         </div>
         <div class="dash-card">
           <div class="dash-card__header"><span class="dash-card__title">Mejores Productos</span></div>
-          <div class="dash-card__body" style="padding:6px 0">
-            <div class="top-product"><div class="top-product__rank gold">1</div><div class="top-product__info"><span>Radiant Glow Serum</span><div class="top-product__bar"><div style="width:78%"></div></div></div><span class="top-product__val">€4,272</span></div>
-            <div class="top-product"><div class="top-product__rank silver">2</div><div class="top-product__info"><span>Noir Essence EDP</span><div class="top-product__bar"><div style="width:55%"></div></div></div><span class="top-product__val">€2,640</span></div>
-            <div class="top-product"><div class="top-product__rank bronze">3</div><div class="top-product__info"><span>Velvet Hydra Cream</span><div class="top-product__bar"><div style="width:42%"></div></div></div><span class="top-product__val">€1,950</span></div>
-            <div class="top-product"><div class="top-product__rank">4</div><div class="top-product__info"><span>Signature Gift Box</span><div class="top-product__bar"><div style="width:30%"></div></div></div><span class="top-product__val">€1,160</span></div>
+          <div class="dash-card__body" style="padding:6px 0" id="dashTopProducts">
+            <div style="padding:20px;text-align:center;color:var(--dash-muted)">Cargando…</div>
           </div>
         </div>
       </div>
@@ -815,18 +801,9 @@
             </div>
           </div>
 
-          <!-- 1.3 Infografías: Modificación de Contrato y Despido -->
-          <div class="section-block">
-            <h3>1.3 Cambios de Contrato de un Vistazo</h3>
-          </div>
-          <div class="infographic-img-grid reveal-on-scroll">
-            <img src="assets/img/intranet/infografia-modificacion-contrato.jpg" alt="Infografía Modificación de Contrato" class="infographic-img">
-            <img src="assets/img/intranet/infografia-despido-disciplinario.jpg" alt="Infografía Despido Disciplinario" class="infographic-img">
-          </div>
-
-          <!-- 1.4 Logros del Comité (estilo noticias) -->
+          <!-- 1.3 Logros del Comité (estilo noticias) -->
           <div class="section-block" style="margin-top:24px">
-            <h3>1.4 Logros Recientes</h3>
+            <h3>1.3 Logros Recientes</h3>
             <p>Acuerdos clave que el Comité de Empresa ha conseguido para el equipo.</p>
           </div>
           <div class="news-grid reveal-on-scroll">
@@ -870,6 +847,7 @@
 
         </div>
       </div>
+
     </div>
 
     <!-- ══ ACUERDOS ══ -->
@@ -948,6 +926,17 @@
               </div>
             </div>
 
+          </div>
+
+          <!-- Infografías: Modificación de Contrato y Despido -->
+          <div class="ag-section-header" style="margin-top:28px">
+            <span class="ag-section-line"></span>
+            <span class="ag-section-label">Cambios de Contrato de un Vistazo</span>
+            <span class="ag-section-line"></span>
+          </div>
+          <div class="infographic-img-grid reveal-on-scroll">
+            <img src="assets/img/intranet/infografia-modificacion-contrato.jpg" alt="Infografía Modificación de Contrato" class="infographic-img">
+            <img src="assets/img/intranet/infografia-despido-disciplinario.jpg" alt="Infografía Despido Disciplinario" class="infographic-img">
           </div>
 
           <!-- Píldoras del convenio -->
@@ -1089,6 +1078,40 @@
               <a href="docs/plan-igualdad.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
             </div>
           </div>
+
+      
+        
+          <div class="download-list" style="margin-top:1rem">
+            <div class="document-item">
+              <div>
+                <div class="document-title">📅 Calendario Laboral — Zaragoza 2026</div>
+                <div class="document-desc">Calendario oficial con festivos nacionales, autonómicos y locales de Zaragoza para el año 2026.</div>
+              </div>
+              <a href="docs/calendario_laboral_shine.pdf" download class="dash-btn dash-btn--rose dash-btn--download"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 21h14"/></svg> Descargar</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CALENDARIO ══ -->
+    <div class="dash-section" id="sec-calendario">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">Calendario Laboral</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="home-view-all" id="openAnnualCalendar">Ver año completo</button>
+            <button class="home-admin-btn admin-only" id="openCalendarEdit">+ Evento</button>
+          </div>
+        </div>
+        <div class="dash-card__body">
+          <div class="section-block" style="margin-bottom:1.25rem">
+            <p>Aquí se centralizan todos los eventos del equipo. Consulta las <strong>fiestas oficiales</strong> de Zaragoza y Aragón, los <strong>eventos y reuniones de empresa</strong>, y las <strong>vacaciones de tus compañeros</strong> — todo en un único lugar para que puedas organizar tu tiempo sin sorpresas.</p>
+          </div>
+          <div class="cal-section-wrap">
+            <div id="miniCalendar"></div>
+            <div class="cal-legend" id="calLegendMini"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1103,90 +1126,11 @@
       </div>
       <div class="dash-card">
         <div class="dash-card__header">
-          <span class="dash-card__title">Miembros del Equipo <span style="color:var(--dash-muted);font-weight:400;font-size:0.82rem">(7)</span></span>
-          <button class="dash-btn dash-btn--rose" id="openAddMemberModal">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir Miembro
-          </button>
+          <span class="dash-card__title">Miembros del Equipo <span id="teamCount" style="color:var(--dash-muted);font-weight:400;font-size:0.82rem"></span></span>
         </div>
         <div class="dash-card__body">
           <div class="team-grid" id="teamGrid">
-            <div class="team-card" data-name="elena ruiz">
-              <div class="team-card__avatar avatar--rose">ER</div>
-              <div class="team-card__name">Elena Ruiz</div>
-              <div class="team-card__role">Directora Creativa</div>
-              <div class="team-card__email">elena@shine-beauty.com</div>
-              <span class="status status--active">Activa</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Elena Ruiz')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="marco torres">
-              <div class="team-card__avatar avatar--blue">MT</div>
-              <div class="team-card__name">Marco Torres</div>
-              <div class="team-card__role">Jefe de I+D</div>
-              <div class="team-card__email">marco@shine-beauty.com</div>
-              <span class="status status--active">Activo</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Marco Torres')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="sofia chen">
-              <div class="team-card__avatar avatar--green">SC</div>
-              <div class="team-card__name">Sofia Chen</div>
-              <div class="team-card__role">Operaciones</div>
-              <div class="team-card__email">sofia@shine-beauty.com</div>
-              <span class="status status--active">Activa</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Sofia Chen')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="lucas pena">
-              <div class="team-card__avatar avatar--amber">LP</div>
-              <div class="team-card__name">Lucas Peña</div>
-              <div class="team-card__role">Director de Ventas</div>
-              <div class="team-card__email">lucas@shine-beauty.com</div>
-              <span class="status status--active">Activo</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Lucas Peña')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="anna kowalski">
-              <div class="team-card__avatar avatar--teal">AK</div>
-              <div class="team-card__name">Anna Kowalski</div>
-              <div class="team-card__role">Responsable de Marketing</div>
-              <div class="team-card__email">anna@shine-beauty.com</div>
-              <span class="status status--active">Activa</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Anna Kowalski')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="david obi">
-              <div class="team-card__avatar avatar--orange">DO</div>
-              <div class="team-card__name">David Obi</div>
-              <div class="team-card__role">Logística</div>
-              <div class="team-card__email">david@shine-beauty.com</div>
-              <span class="status status--draft">Ausente</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('David Obi')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
-            <div class="team-card" data-name="claire dupont">
-              <div class="team-card__avatar avatar--purple">CD</div>
-              <div class="team-card__name">Claire Dupont</div>
-              <div class="team-card__role">Finanzas</div>
-              <div class="team-card__email">claire@shine-beauty.com</div>
-              <span class="status status--active">Activa</span>
-              <div class="team-card__actions">
-                <button class="dash-btn dash-btn--outline dash-btn--sm" onclick="openChat('Claire Dupont')">Mensaje</button>
-                <button class="dash-btn dash-btn--outline dash-btn--sm">Editar</button>
-              </div>
-            </div>
+            <p style="color:var(--dash-muted);padding:20px;grid-column:1/-1;text-align:center">Cargando equipo…</p>
           </div>
         </div>
       </div>
@@ -1305,63 +1249,8 @@
           </button>
         </div>
         <div class="dash-card__body" style="padding:0;overflow-x:auto">
-          <table class="dash-table" id="rolesTable"><thead><tr><th>Empleado</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-            <tr data-email="admin@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--rose" style="width:32px;height:32px;font-size:0.65rem">ER</div><strong>Elena Ruiz</strong></div></td>
-              <td>admin@shine-beauty.com</td>
-              <td><span class="status status--active">Admin</span></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm" disabled>Protegido</button></div></td>
-            </tr>
-            <tr data-email="elena@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--rose" style="width:32px;height:32px;font-size:0.65rem">ER</div><strong>Elena Ruiz</strong></div></td>
-              <td>elena@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="marco@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--blue" style="width:32px;height:32px;font-size:0.65rem">MT</div><strong>Marco Torres</strong></div></td>
-              <td>marco@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="sofia@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--green" style="width:32px;height:32px;font-size:0.65rem">SC</div><strong>Sofia Chen</strong></div></td>
-              <td>sofia@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="lucas@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--amber" style="width:32px;height:32px;font-size:0.65rem">LP</div><strong>Lucas Peña</strong></div></td>
-              <td>lucas@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="anna@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--teal" style="width:32px;height:32px;font-size:0.65rem">AK</div><strong>Anna Kowalski</strong></div></td>
-              <td>anna@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="david@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--orange" style="width:32px;height:32px;font-size:0.65rem">DO</div><strong>David Obi</strong></div></td>
-              <td>david@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--draft">Ausente</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
-            <tr data-email="claire@shine-beauty.com">
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="avatar avatar--purple" style="width:32px;height:32px;font-size:0.65rem">CD</div><strong>Claire Dupont</strong></div></td>
-              <td>claire@shine-beauty.com</td>
-              <td><select class="dash-input role-select" style="width:auto;padding:4px 8px;font-size:0.78rem"><option value="empleado" selected>Empleado</option><option value="admin">Admin</option></select></td>
-              <td><span class="status status--active">Activa</span></td>
-              <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm btn-save-role">Guardar</button><button class="dash-btn dash-btn--danger dash-btn--sm btn-delete-account">Eliminar</button></div></td>
-            </tr>
+          <table class="dash-table" id="rolesTable"><thead><tr><th>Empleado</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="rolesTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--dash-muted)">Cargando usuarios…</td></tr>
           </tbody></table>
         </div>
       </div>
@@ -1477,6 +1366,71 @@
               <button type="reset" class="dash-btn dash-btn--outline">Limpiar</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BRIGHT BOX — EMPLEADO ══ -->
+    <div class="dash-section" id="sec-bright-box">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">📦 Bright Box</span>
+        </div>
+        <div class="dash-card__body">
+          <div class="section-block" style="margin-bottom:24px">
+            <p style="color:var(--dash-muted);font-size:0.92rem;line-height:1.7">Este es un espacio seguro y confidencial para compartir tus preocupaciones, problemas o sucesos laborales con los que estés descontento. Si prefieres no identificarte, activa la opción <strong>Anónimo</strong> — tu identidad no quedará registrada.</p>
+          </div>
+          <form id="brightBoxForm">
+            <div class="dash-grid-2">
+              <div class="dash-form-group">
+                <label class="dash-label">Nombre <span class="bb-name-req" style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="bb-nombre" placeholder="Tu nombre">
+              </div>
+              <div class="dash-form-group">
+                <label class="dash-label">Apellidos <span class="bb-name-req" style="color:var(--dash-danger)">*</span></label>
+                <input class="dash-input" id="bb-apellidos" placeholder="Tus apellidos">
+              </div>
+            </div>
+            <div class="dash-form-group" style="margin-bottom:20px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <label class="toggle"><input type="checkbox" id="bb-anonimo"><span class="toggle__track"></span></label>
+                <span style="font-size:0.85rem;font-weight:500;color:var(--dash-text);cursor:pointer" onclick="document.getElementById('bb-anonimo').click()">Enviar como Anónimo</span>
+              </div>
+            </div>
+            <div class="dash-form-group">
+              <label class="dash-label">Asunto <span style="color:var(--dash-danger)">*</span></label>
+              <input class="dash-input" id="bb-asunto" placeholder="Describe brevemente el asunto" required>
+            </div>
+            <div class="dash-form-group">
+              <label class="dash-label">Mensaje</label>
+              <textarea class="dash-input" id="bb-texto" rows="6" placeholder="Explica con detalle tu situación, lo que ha ocurrido o lo que te preocupa…" style="resize:vertical"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button type="submit" class="dash-btn dash-btn--rose">Enviar mensaje</button>
+              <button type="reset" class="dash-btn dash-btn--outline">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN: BRIGHT BOX ══ -->
+    <div class="dash-section admin-only" id="sec-admin-bright-box">
+      <div class="dash-card">
+        <div class="dash-card__header">
+          <span class="dash-card__title">📦 Bright Box — Mensajes Recibidos</span>
+          <button class="dash-btn dash-btn--outline dash-btn--sm" id="refreshBrightBox">
+            <svg viewBox="0 0 24 24" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+            Actualizar
+          </button>
+        </div>
+        <div class="dash-card__body">
+          <div id="bbAdminLoading" style="text-align:center;padding:40px 0;color:var(--dash-muted)">Cargando mensajes…</div>
+          <div id="bbAdminEmpty" style="display:none;text-align:center;padding:40px 0;color:var(--dash-muted)">
+            <svg viewBox="0 0 24 24" width="40" height="40" style="opacity:.3;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"><path d="M22 8.01V18a2 2 0 01-2 2H4a2 2 0 01-2-2V8.01"/><rect x="2" y="4" width="20" height="4" rx="1"/><path d="M10 13h4"/></svg>
+            <p>No hay mensajes en el Bright Box todavía.</p>
+          </div>
+          <div id="bbAdminList"></div>
         </div>
       </div>
     </div>
@@ -1685,9 +1639,18 @@
     <div class="modal__body" id="orderDetailBody">
       <!-- Filled by JS -->
     </div>
-    <div class="modal__footer">
+    <div class="modal__footer" style="flex-wrap:wrap;gap:10px">
       <button class="dash-btn dash-btn--outline" data-close="orderDetailModal">Cerrar</button>
-      <button class="dash-btn dash-btn--rose">Imprimir Factura</button>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+        <select id="orderDetailStatusSelect" class="dash-input" style="padding:6px 10px;font-size:0.82rem;width:auto">
+          <option value="pendiente">Pendiente</option>
+          <option value="procesando">Procesando</option>
+          <option value="enviado">Enviado</option>
+          <option value="entregado">Entregado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <button class="dash-btn dash-btn--rose" id="orderDetailSaveStatus">Guardar estado</button>
+      </div>
     </div>
   </div>
 </div>

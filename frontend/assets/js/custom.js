@@ -36,11 +36,11 @@
     '11': 'Panther sleek feline sculptural bottle'
   };
   const INTENSITY_PARTICLE_COLOR = {
-    elixir:          '#d4af37',
-    eau_de_parfum:   '#c8a060',
-    eau_de_toilette: '#8ab4cc',
-    eau_de_cologne:  '#90b888',
-    body_mist:       '#d4b8a8'
+    elixir:          '#c46090',
+    eau_de_parfum:   '#d480aa',
+    eau_de_toilette: '#e8a8c8',
+    eau_de_cologne:  '#d4a0b8',
+    body_mist:       '#f0c8dc'
   };
   const _imgCache = {};
   let _canvasTimer = null;
@@ -658,9 +658,9 @@
 
     // 1. Dark premium gradient background
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0,   '#1c1208');
-    grad.addColorStop(0.5, '#0d0904');
-    grad.addColorStop(1,   '#080604');
+    grad.addColorStop(0,   '#1c0812');
+    grad.addColorStop(0.5, '#0d0408');
+    grad.addColorStop(1,   '#080406');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 

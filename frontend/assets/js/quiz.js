@@ -162,7 +162,8 @@
     container.innerHTML = kit.map(p => {
       const price = Number(p.precio) || 0;
       total += price;
-      return `<div class="kit-card" data-id="${p.idProducto}">
+      return `<div class="kit-card" data-id="${p.idProducto}" data-price="${price}">
+        <button class="kit-card-remove" aria-label="Remove from kit" title="Remove">✕</button>
         <img class="kit-card-img" src="${getProductImage(p)}" alt="${p.nombre || ''}" onerror="this.src='${FALLBACK_IMG}'">
         <div>
           <div class="kit-card-cat">${getCategoryLabel(p._cat)}</div>
@@ -174,6 +175,25 @@
 
     totalEl.textContent = fmt(total);
     window._shineKit = kit;
+
+    container.addEventListener('click', e => {
+      const btn = e.target.closest('.kit-card-remove');
+      if (!btn) return;
+      const card = btn.closest('.kit-card');
+      const id = Number(card.dataset.id);
+      const price = Number(card.dataset.price) || 0;
+
+      card.style.transition = 'opacity .2s, transform .2s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(20px)';
+
+      setTimeout(() => {
+        card.remove();
+        window._shineKit = (window._shineKit || []).filter(p => p.idProducto !== id);
+        const newTotal = (window._shineKit).reduce((s, p) => s + (Number(p.precio) || 0), 0);
+        totalEl.textContent = fmt(newTotal);
+      }, 200);
+    });
   }
 
   // ── Accept Kit ────────────────────────────
