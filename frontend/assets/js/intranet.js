@@ -414,8 +414,8 @@ function filterCatalogue() {
     tr.style.display = (!search || text.includes(search)) && (!cat || category === cat) ? '' : 'none';
   });
 }
-document.getElementById('catalogueSearch').addEventListener('input', filterCatalogue);
-document.getElementById('categoryFilter').addEventListener('change', filterCatalogue);
+document.getElementById('catalogueSearch')?.addEventListener('input', filterCatalogue);
+document.getElementById('categoryFilter')?.addEventListener('change', filterCatalogue);
 
 // Team Search
 document.getElementById('teamSearch').addEventListener('input', e => {
@@ -512,6 +512,45 @@ document.addEventListener('click', e => {
     </table>
   `;
   openModal('orderDetailModal');
+
+  // Mostrar botón "Bizum recibido" solo si el pago está pendiente
+  const confirmBtn = document.getElementById('orderDetailConfirmBizum');
+  confirmBtn.style.display = 'none';
+  confirmBtn.dataset.pedidoId = id;
+  fetch(`${INTRANET_API}/pagos/pedido/${id}`)
+    .then(r => r.ok ? r.json() : null)
+    .then(pago => {
+      if (pago && pago.estado === 'pendiente') {
+        confirmBtn.style.display = 'inline-flex';
+        confirmBtn.textContent = '✓ Bizum recibido';
+        confirmBtn.disabled = false;
+      }
+    })
+    .catch(() => {});
+});
+
+// Confirmar pago Bizum desde intranet
+document.getElementById('orderDetailConfirmBizum')?.addEventListener('click', async function () {
+  const idPedido = this.dataset.pedidoId;
+  if (!idPedido) return;
+  this.disabled = true;
+  this.textContent = 'Confirmando…';
+  try {
+    const res = await fetch(`${INTRANET_API}/pagos/pedido/${idPedido}/confirmar`, { method: 'PUT' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    this.style.display = 'none';
+    closeModal('orderDetailModal');
+    showToast(`Pago del pedido #${idPedido} confirmado. ¡Puntos añadidos!`, 'success');
+    if (typeof window.loadIntranetOrders === 'function') window.loadIntranetOrders();
+    if (typeof window.updateDashboardKPIs === 'function') window.updateDashboardKPIs();
+  } catch (e) {
+    showToast(`Error al confirmar: ${e.message}`, 'error');
+    this.disabled = false;
+    this.textContent = '✓ Bizum recibido';
+  }
 });
 
 // Guardar estado del pedido desde modal de detalle
@@ -2330,7 +2369,7 @@ window.loadCatalogueProducts = async function () {
 
     tbody.innerHTML = products.map(p => renderCatalogueRow(p, hiddenIds, isAdmin)).join('');
     setupCatalogueRowActions();
-    filterCatalogue();
+    if (typeof filterCatalogue === 'function') filterCatalogue();
   } catch (e) {
     console.error('[loadCatalogueProducts]', e);
     if (window.showToast) window.showToast(`Error al cargar el catálogo: ${e.message}`, 'warn');
@@ -2564,6 +2603,12 @@ window.updateDashboardKPIs = async function () {
     if (pillPend)  pillPend.textContent = s.activeOrders;
     if (badge)     badge.textContent   = s.activeOrders;
 
+    // ── Home stats strip ─────────────────────────────────────────────────────
+    const statRev    = document.getElementById('statRevenue');
+    const statOrders = document.getElementById('statActiveOrders');
+    if (statRev)    animateKPIValue(statRev,    Math.round(s.monthRevenue), '', ' €');
+    if (statOrders) animateKPIValue(statOrders, s.activeOrders, '', '');
+
     // ── KPI change indicators ────────────────────────────────────────────────
     const revChange = document.getElementById('kpiRevenueChange');
     if (revChange && s.lastMonthRevenue > 0) {
@@ -2649,6 +2694,15 @@ window.updateDashboardKPIs = async function () {
   }
 };
 
+// ── Home stats: miembros totales ─────────────────────────────────────────────
+async function loadStatMembers() {
+  try {
+    const staff = await fetch(`${INTRANET_API}/usuarios`).then(r => r.json());
+    const el = document.getElementById('statMembers');
+    if (el && Array.isArray(staff)) el.textContent = staff.length;
+  } catch {}
+}
+
 // ══════════════════════════════════════════════
 //   FEED DE ACTIVIDAD RECIENTE (escalable)
 //   Consume GET /api/v1/intranet/actividad
@@ -2715,22 +2769,54 @@ function relativeTime(date) {
 function syncNotifications(stats) {
   const list = document.querySelector('.notif-list');
   if (!list) return;
-  const items = [];
 
-  (stats.recentOrders || []).slice(0, 2).forEach(o => {
-    const ts = o.fecha ? new Date(o.fecha) : null;
-    items.push(`<div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-success)"></div><div><p>Nuevo pedido <strong>#SH-${o.id}</strong> recibido</p><small>${ts ? relativeTime(ts) : ''}</small></div></div>`);
+  const entries = [];
+
+  (stats.recentOrders || []).slice(0, 3).forEach(o => {
+    entries.push({
+      ts: o.fecha ? new Date(o.fecha) : new Date(0),
+      html: `<div class="notif-item notif-item--unread">
+        <div class="notif-dot" style="background:var(--dash-success)"></div>
+        <div><p>Nuevo pedido <strong>#${o.id}</strong> de ${escapeHtml(o.customerName || '')}</p>
+        <small>${o.fecha ? relativeTime(new Date(o.fecha)) : ''}</small></div>
+      </div>`
+    });
   });
 
-  (stats.lowStockProducts || []).slice(0, 2).forEach(p => {
-    items.push(`<div class="notif-item notif-item--unread"><div class="notif-dot" style="background:var(--dash-warning)"></div><div><p><strong>${escapeHtml(p.nombre)}</strong> con stock bajo (${p.stock} unidades)</p><small>Ahora</small></div></div>`);
+  (stats.lowStockProducts || []).forEach(p => {
+    entries.push({
+      ts: new Date(),
+      html: `<div class="notif-item notif-item--unread">
+        <div class="notif-dot" style="background:var(--dash-warning)"></div>
+        <div><p><strong>${escapeHtml(p.nombre)}</strong> con stock bajo (${p.stock} unidades)</p>
+        <small>Ahora</small></div>
+      </div>`
+    });
   });
 
-  if (items.length > 0) {
-    list.innerHTML = items.join('');
+  (stats.recentAnuncios || []).forEach(a => {
+    entries.push({
+      ts: a.fecha ? new Date(a.fecha) : new Date(0),
+      html: `<div class="notif-item notif-item--unread">
+        <div class="notif-dot" style="background:var(--dash-rose)"></div>
+        <div><p>Nuevo anuncio: <strong>${escapeHtml(a.titulo)}</strong></p>
+        <small>${a.fecha ? relativeTime(new Date(a.fecha)) : ''}</small></div>
+      </div>`
+    });
+  });
+
+  entries.sort((a, b) => b.ts - a.ts);
+
+  if (entries.length === 0) {
+    list.innerHTML = `<div class="notif-item"><div class="notif-dot"></div><div><p style="color:var(--dash-muted);font-size:.8rem">Sin notificaciones nuevas</p></div></div>`;
     const cnt = document.getElementById('notifCount');
-    if (cnt) cnt.textContent = items.length;
+    if (cnt) { cnt.textContent = '0'; cnt.style.display = 'none'; }
+    return;
   }
+
+  list.innerHTML = entries.map(e => e.html).join('');
+  const cnt = document.getElementById('notifCount');
+  if (cnt) { cnt.textContent = entries.length; cnt.style.display = ''; }
 }
 
 // ══════════════════════════════════════════════
@@ -2772,6 +2858,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof window.loadTeamMembers === 'function') window.loadTeamMembers();
   // Pre-cargar roles, KPIs y feed de actividad si es admin
   // Espera 300ms para que el role system termine de leer localStorage
+  loadStatMembers();
   setTimeout(() => {
     if (window._staffRole === 'admin') {
       if (typeof window.loadRolesTable === 'function')      window.loadRolesTable();
