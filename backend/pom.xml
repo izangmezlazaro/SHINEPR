@@ -90,6 +90,12 @@
             <artifactId>logback-classic</artifactId>
             <version>1.5.6</version>
         </dependency>
+        <!-- ═══ Jakarta Mail (Angus Mail) — envío de emails SMTP ════════════════ -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.3</version>
+        </dependency>
 
     </dependencies>
 
