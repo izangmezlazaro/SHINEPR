@@ -100,6 +100,26 @@ public class PedidoDAO {
         }
     }
 
+    public void updateEstado(Integer idPedido, String estado, Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "UPDATE pedido SET estado = ? WHERE id_pedido = ?")) {
+            ps.setString(1, estado);
+            ps.setInt(2, idPedido);
+            ps.executeUpdate();
+        }
+    }
+
+    public String getEstadoActual(Integer idPedido, Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT estado FROM pedido WHERE id_pedido = ?")) {
+            ps.setInt(1, idPedido);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("estado");
+            }
+        }
+        return null;
+    }
+
     private Pedido mapRow(ResultSet rs) throws SQLException {
         Pedido p = new Pedido();
         p.setIdPedido(rs.getInt("id_pedido"));

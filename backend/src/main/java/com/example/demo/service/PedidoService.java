@@ -75,19 +75,6 @@ public class PedidoService {
                     throw new BadRequestException("No se puede crear un pedido con el carrito vacío");
                 }
 
-                // Validar stock antes de crear el pedido
-                for (CarritoItem item : carrito.getItems()) {
-                    if (item.getProducto() != null) {
-                        Producto producto = item.getProducto();
-                        int stockDisponible = producto.getStock() == null ? 0 : producto.getStock();
-                        if (stockDisponible < item.getCantidad()) {
-                            throw new BadRequestException(
-                                "Stock insuficiente para \"" + producto.getNombre() +
-                                "\". Disponible: " + stockDisponible + ", solicitado: " + item.getCantidad());
-                        }
-                    }
-                }
-
                 Pedido pedido = new Pedido();
                 pedido.setUsuario(usuario);
                 pedido.setDireccion(direccion);
@@ -112,14 +99,10 @@ public class PedidoService {
                 // Insertar pedido en la transacción compartida
                 pedidoDAO.save(pedido, conn);
 
-                // Insertar detalles y reducir stock en la misma transacción
+                // Insertar detalles (sin tocar stock — se descuenta al pasar a "procesando")
                 for (DetallePedido detalle : detalles) {
                     detalle.setPedido(pedido);
                     detallePedidoDAO.save(detalle, conn);
-                    if (detalle.getProducto() != null) {
-                        productoDAO.decrementarStock(
-                            detalle.getProducto().getIdProducto(), detalle.getCantidad(), conn);
-                    }
                 }
 
                 // Vaciar carrito (usa su propio conn)
@@ -156,9 +139,41 @@ public class PedidoService {
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
-    public void actualizarEstado(Integer idPedido, String estado) {
-        try {
-            pedidoDAO.updateEstado(idPedido, estado);
+    public void actualizarEstado(Integer idPedido, String nuevoEstado) {
+        try (Connection conn = ConexionDB.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String estadoActual = pedidoDAO.getEstadoActual(idPedido, conn);
+                if (estadoActual == null)
+                    throw new EntityNotFoundException("Pedido", idPedido);
+
+                pedidoDAO.updateEstado(idPedido, nuevoEstado, conn);
+
+                // Descontar stock al confirmar el pedido
+                if ("procesando".equals(nuevoEstado) && "pendiente".equals(estadoActual)) {
+                    List<DetallePedido> detalles = detallePedidoDAO.findByPedidoId(idPedido);
+                    for (DetallePedido d : detalles) {
+                        if (d.getProducto() != null)
+                            productoDAO.decrementarStock(
+                                d.getProducto().getIdProducto(), d.getCantidad(), conn);
+                    }
+                }
+
+                // Restaurar stock si se cancela un pedido ya confirmado
+                if ("cancelado".equals(nuevoEstado) && "procesando".equals(estadoActual)) {
+                    List<DetallePedido> detalles = detallePedidoDAO.findByPedidoId(idPedido);
+                    for (DetallePedido d : detalles) {
+                        if (d.getProducto() != null)
+                            productoDAO.incrementarStock(
+                                d.getProducto().getIdProducto(), d.getCantidad(), conn);
+                    }
+                }
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 

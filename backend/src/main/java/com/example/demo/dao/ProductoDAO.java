@@ -109,6 +109,15 @@ public class ProductoDAO {
         }
     }
 
+    public void incrementarStock(Integer idProducto, int cantidad, Connection conn) throws SQLException {
+        String sql = "UPDATE producto SET stock = stock + ? WHERE id_producto = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            ps.executeUpdate();
+        }
+    }
+
     public void delete(Integer id) throws SQLException {
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement("DELETE FROM producto WHERE id_producto = ?")) {
