@@ -60,7 +60,18 @@ public class PagoServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String path = req.getPathInfo();
-            if (path == null || !path.endsWith("/estado")) {
+            if (path == null) { HttpUtil.writeError(resp, 404, "Ruta no encontrada"); return; }
+
+            // PUT /api/v1/pagos/pedido/{idPedido}/confirmar  → confirmar pago bizum desde intranet
+            if (path.matches("/pedido/\\d+/confirmar")) {
+                String idStr = path.replace("/pedido/", "").replace("/confirmar", "");
+                int idPedido = Integer.parseInt(idStr);
+                HttpUtil.writeJson(resp, 200, pagoService.confirmarPagoPorPedido(idPedido));
+                return;
+            }
+
+            // PUT /api/v1/pagos/{id}/estado  → cambio manual de estado
+            if (!path.endsWith("/estado")) {
                 HttpUtil.writeError(resp, 404, "Ruta no encontrada"); return;
             }
             String withoutEstado = path.substring(0, path.lastIndexOf("/estado"));
