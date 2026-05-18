@@ -24,6 +24,7 @@ public class DashboardDAO {
             stats.setRecentOrders(recentOrders(conn));
             stats.setTopProducts(topProducts(conn));
             stats.setLowStockProducts(lowStock(conn));
+            stats.setRecentAnuncios(recentAnuncios(conn));
             return stats;
         }
     }
@@ -193,6 +194,31 @@ public class DashboardDAO {
                     rs.getString("nombre"),
                     rs.getDouble("total_revenue"),
                     rs.getInt("units_sold")
+                ));
+            }
+        }
+        return list;
+    }
+
+    // ── Recent announcements ─────────────────────────────────────────────────
+
+    private List<DashboardStatsDTO.RecentAnuncio> recentAnuncios(Connection conn) throws SQLException {
+        String sql =
+            "SELECT id, titulo, tag, fecha FROM anuncio" +
+            " WHERE fecha >= NOW() - INTERVAL '7 days'" +
+            " ORDER BY fecha DESC LIMIT 3";
+
+        List<DashboardStatsDTO.RecentAnuncio> list = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Timestamp ts = rs.getTimestamp("fecha");
+                String fechaStr = ts != null ? ts.toLocalDateTime().toString() : "";
+                list.add(new DashboardStatsDTO.RecentAnuncio(
+                    rs.getInt("id"),
+                    rs.getString("titulo"),
+                    rs.getString("tag"),
+                    fechaStr
                 ));
             }
         }

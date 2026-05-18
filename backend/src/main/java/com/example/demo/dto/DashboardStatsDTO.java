@@ -15,9 +15,10 @@ public class DashboardStatsDTO {
     private List<ChartPoint> revenueMonth;
     private List<ChartPoint> revenueYear;
 
-    private List<RecentOrder>   recentOrders;
-    private List<TopProduct>    topProducts;
-    private List<LowStockItem>  lowStockProducts;
+    private List<RecentOrder>    recentOrders;
+    private List<TopProduct>     topProducts;
+    private List<LowStockItem>   lowStockProducts;
+    private List<RecentAnuncio>  recentAnuncios;
 
     // ── Getters / Setters ────────────────────────────────────────────────────
 
@@ -56,6 +57,9 @@ public class DashboardStatsDTO {
 
     public List<LowStockItem> getLowStockProducts()              { return lowStockProducts; }
     public void               setLowStockProducts(List<LowStockItem> v) { this.lowStockProducts = v; }
+
+    public List<RecentAnuncio> getRecentAnuncios()                  { return recentAnuncios; }
+    public void                setRecentAnuncios(List<RecentAnuncio> v) { this.recentAnuncios = v; }
 
     // ── Nested DTOs ──────────────────────────────────────────────────────────
 
@@ -102,6 +106,19 @@ public class DashboardStatsDTO {
             this.id     = id;
             this.nombre = nombre;
             this.stock  = stock;
+        }
+    }
+
+    public static class RecentAnuncio {
+        public int    id;
+        public String titulo;
+        public String tag;
+        public String fecha;
+        public RecentAnuncio(int id, String titulo, String tag, String fecha) {
+            this.id     = id;
+            this.titulo = titulo;
+            this.tag    = tag;
+            this.fecha  = fecha;
         }
     }
 }
