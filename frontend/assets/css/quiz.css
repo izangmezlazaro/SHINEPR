@@ -390,31 +390,35 @@
 
 .kit-card-remove {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: none;
-  background: rgba(26,26,26,.08);
-  color: var(--text-muted, #888);
-  font-size: .7rem;
+  border: 1.5px solid rgba(220, 80, 90, .35);
+  background: rgba(232, 82, 90, .1);
+  color: #c94040;
+  font-size: .8rem;
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity .2s, background .2s, color .2s;
-}
-
-.kit-card:hover .kit-card-remove {
   opacity: 1;
+  transition: background .18s, color .18s, border-color .18s, transform .18s, box-shadow .18s;
 }
 
 .kit-card-remove:hover {
   background: #e8525a;
+  border-color: #e8525a;
   color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(232, 82, 90, .45);
+}
+
+.kit-card-remove:active {
+  transform: scale(.92);
 }
 
 .kit-card:nth-child(1) { animation-delay: .1s; }

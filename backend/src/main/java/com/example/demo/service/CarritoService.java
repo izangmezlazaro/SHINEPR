@@ -89,6 +89,24 @@ public class CarritoService {
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
+    public CarritoDTO actualizarCantidad(Integer idUsuario, Integer idItem, int cantidad) {
+        try {
+            Carrito carrito = carritoDAO.findByUsuarioId(idUsuario)
+                    .orElseThrow(() -> new EntityNotFoundException("Carrito de usuario", idUsuario));
+            CarritoItem item = carritoItemDAO.findById(idItem)
+                    .orElseThrow(() -> new EntityNotFoundException("Item de carrito", idItem));
+            if (!item.getCarrito().getId().equals(carrito.getId())) {
+                throw new BadRequestException("El item no pertenece al carrito del usuario");
+            }
+            if (cantidad <= 0) {
+                carritoItemDAO.delete(idItem);
+            } else {
+                carritoItemDAO.updateCantidad(idItem, cantidad);
+            }
+            return toDto(carrito);
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
     public void vaciar(Integer idUsuario) {
         try {
             Carrito carrito = carritoDAO.findByUsuarioId(idUsuario)

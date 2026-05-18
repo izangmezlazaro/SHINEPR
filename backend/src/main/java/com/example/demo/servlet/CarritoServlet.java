@@ -55,6 +55,30 @@ public class CarritoServlet extends HttpServlet {
     }
 
     @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            Integer userId = HttpUtil.getAuthUserId(req);
+            if (userId == null) { HttpUtil.writeError(resp, 401, "No autenticado"); return; }
+            String path = req.getPathInfo();
+            if (path == null || !path.startsWith("/items/")) {
+                HttpUtil.writeError(resp, 400, "Ruta no válida"); return;
+            }
+            int idItem = HttpUtil.extractId(path.substring("/items".length()));
+            CarritoItemRequestDTO dto = JsonUtil.fromJson(HttpUtil.readBody(req), CarritoItemRequestDTO.class);
+            if (dto.getCantidad() == null || dto.getCantidad() < 1) {
+                HttpUtil.writeError(resp, 400, "La cantidad debe ser al menos 1"); return;
+            }
+            HttpUtil.writeJson(resp, 200, carritoService.actualizarCantidad(userId, idItem, dto.getCantidad()));
+        } catch (BadRequestException e) {
+            HttpUtil.writeError(resp, 400, e.getMessage());
+        } catch (EntityNotFoundException e) {
+            HttpUtil.writeError(resp, 404, e.getMessage());
+        } catch (Exception e) {
+            HttpUtil.writeError(resp, 500, "Error interno: " + e.getMessage());
+        }
+    }
+
+    @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Integer userId = HttpUtil.getAuthUserId(req);

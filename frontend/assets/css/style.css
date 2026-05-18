@@ -1111,6 +1111,27 @@ main { padding-top: var(--header-h); }
   line-height: 40px;
 }
 
+.qty-input {
+  width: 48px;
+  height: 40px;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--fs-md);
+  font-family: inherit;
+  border: none;
+  border-left: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  background: transparent;
+  color: inherit;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-input:focus {
+  background: var(--blush);
+}
+
 /* Accordion */
 .accordion { border-top: 1px solid var(--border-light); margin-top: var(--sp-xl); }
 

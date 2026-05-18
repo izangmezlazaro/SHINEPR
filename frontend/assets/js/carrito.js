@@ -266,7 +266,9 @@
             </div>
           </div>
           <div class="qty-selector" aria-label="Quantity">
-            <span>${escapeHtml(String(qty))}</span>
+            <button class="qty-btn qty-minus" type="button" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" value="${escapeHtml(String(qty))}" aria-label="Quantity">
+            <button class="qty-btn qty-plus" type="button" aria-label="Increase quantity">+</button>
           </div>
           <button class="cart-item__remove" type="button" aria-label="Remove item">×</button>
         </div>
@@ -410,6 +412,16 @@
     }
   }
 
+  async function actualizarCantidadItem(idItem, nuevaCantidad) {
+    try {
+      const carrito = await window.ShineAPI.put(`/carrito/items/${idItem}`, { cantidad: nuevaCantidad });
+      renderCart(carrito);
+    } catch (error) {
+      showToast(error.message || 'Could not update quantity');
+      cargarCarrito();
+    }
+  }
+
   async function eliminarItemCarrito(idItem) {
     try {
       await window.ShineAPI.delete(`/carrito/items/${idItem}`);
@@ -473,26 +485,78 @@
 
     container.addEventListener('click', event => {
       const removeButton = event.target.closest('.cart-item__remove');
+      const minusButton  = event.target.closest('.qty-minus');
+      const plusButton   = event.target.closest('.qty-plus');
       const item = event.target.closest('[data-cart-item]');
-      if (!removeButton || !item) return;
+      if (!item) return;
+      if (!removeButton && !minusButton && !plusButton) return;
 
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
 
       const cartItemId = String(item.dataset.cartItem);
+      const isGuest = cartItemId.startsWith('guest-');
 
-      if (cartItemId.startsWith('guest-')) {
-        const idx = Number(cartItemId.replace('guest-', ''));
-        const guests = leerCarritoInvitado();
-        guests.splice(idx, 1);
-        guardarCarritoInvitado(guests);
-        renderCarritoInvitado();
-        showToast('Product removed from cart');
-      } else {
-        eliminarItemCarrito(cartItemId);
+      if (removeButton) {
+        if (isGuest) {
+          const idx = Number(cartItemId.replace('guest-', ''));
+          const guests = leerCarritoInvitado();
+          guests.splice(idx, 1);
+          guardarCarritoInvitado(guests);
+          renderCarritoInvitado();
+          showToast('Product removed from cart');
+        } else {
+          eliminarItemCarrito(cartItemId);
+        }
+        return;
       }
+
+      const qtyInput = item.querySelector('.qty-input');
+      const currentQty = qtyInput ? Number(qtyInput.value) : 1;
+      const delta = minusButton ? -1 : 1;
+      const newQty = currentQty + delta;
+
+      applyQtyChange(cartItemId, isGuest, newQty);
     }, true);
+
+    container.addEventListener('change', event => {
+      const qtyInput = event.target.closest('.qty-input');
+      const item = event.target.closest('[data-cart-item]');
+      if (!qtyInput || !item) return;
+
+      const cartItemId = String(item.dataset.cartItem);
+      const isGuest = cartItemId.startsWith('guest-');
+      const newQty = parseInt(qtyInput.value, 10);
+
+      if (!Number.isFinite(newQty) || newQty < 1) {
+        qtyInput.value = 1;
+        applyQtyChange(cartItemId, isGuest, 1);
+        return;
+      }
+
+      applyQtyChange(cartItemId, isGuest, newQty);
+    }, true);
+  }
+
+  function applyQtyChange(cartItemId, isGuest, newQty) {
+    if (isGuest) {
+      const idx = Number(cartItemId.replace('guest-', ''));
+      const guests = leerCarritoInvitado();
+      if (newQty <= 0) {
+        guests.splice(idx, 1);
+      } else {
+        guests[idx].cantidad = newQty;
+      }
+      guardarCarritoInvitado(guests);
+      renderCarritoInvitado();
+    } else {
+      if (newQty <= 0) {
+        eliminarItemCarrito(cartItemId);
+      } else {
+        actualizarCantidadItem(cartItemId, newQty);
+      }
+    }
   }
 
   function scheduleBadgeRefresh() {
