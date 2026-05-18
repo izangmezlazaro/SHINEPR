@@ -67,6 +67,7 @@ public class Main {
         addServlet(ctx, tomcat, "IntranetActividadServlet", IntranetActividadServlet.class, "/api/v1/intranet/actividad/*");
         addServlet(ctx, tomcat, "BuzonServlet",          BuzonServlet.class,            "/api/v1/buzon/*");
         addServlet(ctx, tomcat, "GenerarCustomServlet",  GenerarCustomServlet.class, "/api/generar-custom/*");
+        addServlet(ctx, tomcat, "WebhookBunqServlet",    WebhookBunqServlet.class,   "/api/v1/webhook/*");
 
         runMigrations();
 

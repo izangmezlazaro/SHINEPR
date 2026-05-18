@@ -60,6 +60,29 @@ public class PagoService {
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
+    public PagoDTO confirmarPagoPorPedido(Integer idPedido) {
+        try {
+            Pago pago = pagoDAO.findByPedidoId(idPedido)
+                    .orElseThrow(() -> new EntityNotFoundException("Pago de pedido " + idPedido));
+            if ("completado".equals(pago.getEstado())) {
+                return toDto(pago);
+            }
+            pago.setEstado("completado");
+            PagoDTO result = toDto(pagoDAO.save(pago));
+
+            Pedido pedido = pedidoService.findPedido(idPedido);
+            if (pedido.getTotal() != null) {
+                int puntos = (int) Math.round(pedido.getTotal().doubleValue() * 10);
+                if (puntos > 0) {
+                    usuarioDAO.addPuntos(pedido.getUsuario().getId(), puntos);
+                }
+            }
+            pedidoService.actualizarEstado(idPedido, "procesando");
+
+            return result;
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
     public PagoDTO actualizarEstado(Integer idPago, String estado) {
         try {
             Pago pago = pagoDAO.findById(idPago)

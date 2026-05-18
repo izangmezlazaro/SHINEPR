@@ -96,6 +96,9 @@ public class JwtFilter implements Filter {
             if (path.startsWith("/api/v1/notas-olfativas")) return true;
         }
 
+        // Webhook de bunq — autenticado por X-Webhook-Secret, no por JWT
+        if (path.startsWith("/api/v1/webhook/")) return true;
+
         // Intranet — autenticación gestionada en cliente (staff login hardcoded)
         if (path.startsWith("/api/v1/fichajes"))   return true;
         if (path.startsWith("/api/v1/anuncios"))   return true;
