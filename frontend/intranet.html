@@ -709,26 +709,26 @@
           <div class="video-welcome reveal-on-scroll" style="margin-bottom:28px">
             <div class="video-welcome__inner">
               <!-- Miniatura / placeholder del vídeo -->
-              <div class="video-thumb" id="videoPlaceholder">
+              <div class="video-thumb" id="videoPlaceholder" onclick="window.open('https://youtu.be/VVCDrqnwsWQ','_blank')" style="cursor:pointer">
                 <img src="assets/img/intranet/preview.jpg" alt="Preview vídeo comité" class="video-thumb__img">
                 <div class="video-thumb__overlay"></div>
                 <div class="video-thumb__play">
                   <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 </div>
-                <div class="video-thumb__badge">⏱ 1:30 min</div>
-                <button class="video-thumb__expand" title="Ver en grande" onclick="document.getElementById('videoPlaceholder').requestFullscreen?.()">
+                <div class="video-thumb__badge">⏱ 2:00 min</div>
+                <a class="video-thumb__expand" href="https://youtu.be/VVCDrqnwsWQ" target="_blank" title="Ver en YouTube" onclick="event.stopPropagation()">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                </button>
+                </a>
               </div>
               <!-- Info lateral -->
               <div class="video-welcome__info">
                 <div class="video-welcome__tag">Vídeo de bienvenida</div>
                 <h3 class="video-welcome__title">Bienvenido a la Intranet de Shine</h3>
                 <p class="video-welcome__desc">Un recorrido rápido por la intranet a cargo de tu Comité de Empresa — todo lo que necesitas saber sobre este espacio, tus derechos y cómo mantenerte informado.</p>
-                <button class="video-welcome__cta" onclick="document.getElementById('videoPlaceholder').click()">
+                <a class="video-welcome__cta" href="https://youtu.be/VVCDrqnwsWQ" target="_blank" rel="noopener">
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   Reproducir vídeo
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -792,7 +792,7 @@
               <div class="news-card__body">
                 <span class="news-card__tag">Salud y Seguridad</span>
                 <div class="news-card__title">Mejora Ergonómica de los Puestos de Trabajo</div>
-                <div class="news-card__excerpt">Todos los puestos de trabajo recibirán sillas ergonómicas, monitores regulables y mejor iluminación antes del Q3 2026. Presupuesto asegurado: €12.000.</div>
+                <div class="news-card__excerpt">Todos los puestos de trabajo recibirán sillas ergonómicas, monitores regulables y mejor iluminación antes del T3 2026.</div>
                 <div class="news-card__meta">Comité · Febrero 2026</div>
               </div>
             </div>
@@ -810,7 +810,7 @@
               <div class="news-card__body">
                 <span class="news-card__tag">Igualdad</span>
                 <div class="news-card__title">Auditoría de Brecha Salarial de Género Completada</div>
-                <div class="news-card__excerpt">El Comité impulsó una auditoría salarial independiente. Los resultados muestran una brecha del 2,1%, con medidas correctoras acordadas para 2026.</div>
+                <div class="news-card__excerpt">El Comité impulsó una auditoría salarial independiente. Los resultados muestran una brecha nula gracias a un arduo trabajo, con medidas correctoras acordadas para 2026.</div>
                 <div class="news-card__meta">Comité · Diciembre 2025</div>
               </div>
             </div>
@@ -922,7 +922,7 @@
             <div class="pildora"><strong>Día personal 🗓️</strong> Los convenios suelen incluir días discrecionales de descanso personal una vez equilibrada la jornada anual.</div>
             <div class="pildora"><strong>Plus nocturno 🌙</strong> Trabajar entre las 22:00 y las 06:00 suele generar un plus específico sobre la tarifa horaria base.</div>
             <div class="pildora"><strong>Ayuda escolar 🎒</strong> Ayuda para empleados con hijos en edad escolar. Consulta los plazos anuales de solicitud.</div>
-            <div class="pildora"><strong>Plus de penosidad 🥽</strong> Los puestos con riesgo o condiciones difíciles pueden tener derecho a compensación adicional.</div>
+            <div class="pildora"><strong>Plus de peligrosidad 🥽</strong> Los puestos con riesgo o condiciones difíciles pueden tener derecho a compensación adicional.</div>
             <div class="pildora"><strong>Acompañamiento médico 🏥</strong> El convenio suele permitir tiempo para acompañar a familiares de primer grado a consultas médicas.</div>
             <div class="pildora"><strong>Reconocimiento por antigüedad 🎖️</strong> La experiencia se reconoce mediante aumentos salariales o beneficios vinculados a los años de servicio.</div>
             <div class="pildora"><strong>Ropa de trabajo 👕</strong> El empresario debe proporcionar uniformes y equipos de protección sin coste.</div>
