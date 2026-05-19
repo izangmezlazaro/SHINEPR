@@ -297,7 +297,7 @@
           idCategoria: productoActual.categoria?.idCategoria
         };
 
-        const res = await fetch(`http://localhost:8080/api/v1/productos/${productoActual.idProducto}`, {
+        const res = await fetch(`https://api.shinebeauty.store/api/v1/productos/${productoActual.idProducto}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

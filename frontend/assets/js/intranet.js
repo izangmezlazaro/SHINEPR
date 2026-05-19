@@ -2,7 +2,7 @@
    SHINE INTRANET v3 — JavaScript Engine
 ══════════════════════════════════════════ */
 
-const INTRANET_API = 'http://localhost:8080/api/v1';
+const INTRANET_API = 'https://api.shinebeauty.store/api/v1';
 
 // Cache de pedidos cargados desde API, accesible por todos los módulos
 const _apiOrderCache = {};
