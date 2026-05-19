@@ -49,4 +49,5 @@ public final class AppConfig {
     public static String dbPassword()      { return get("db.password"); }
     public static String jwtSecret()       { return get("jwt.secret"); }
     public static long   jwtExpirationMs() { return Long.parseLong(get("jwt.expiration.ms")); }
+    public static String openaiApiKey()    { return get("openai.api.key"); }
 }

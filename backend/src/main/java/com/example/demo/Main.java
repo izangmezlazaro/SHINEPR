@@ -5,6 +5,7 @@ import com.example.demo.filter.JwtFilter;
 import com.example.demo.servlet.*;
 import com.example.demo.util.ConexionDB;
 
+import jakarta.servlet.Filter;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
@@ -42,8 +43,8 @@ public class Main {
         ctx.setParentClassLoader(Thread.currentThread().getContextClassLoader());
 
         // ── Filtros ──────────────────────────────────────────────────────────
-        addFilter(ctx, "CorsFilter", CorsFilter.class, "/*");
-        addFilter(ctx, "JwtFilter",  JwtFilter.class,  "/api/v1/*");
+        addFilter(ctx, "CorsFilter", new CorsFilter(), "/*");
+        addFilter(ctx, "JwtFilter",  new JwtFilter(),  "/api/v1/*");
 
         // ── Servlets ─────────────────────────────────────────────────────────
         addServlet(ctx, tomcat, "AuthServlet",           AuthServlet.class,          "/api/v1/auth/*");
@@ -70,6 +71,7 @@ public class Main {
         addServlet(ctx, tomcat, "WebhookBunqServlet",    WebhookBunqServlet.class,   "/api/v1/webhook/*");
         addServlet(ctx, tomcat, "ValidarBizumServlet",   ValidarBizumServlet.class,  "/api/v1/intranet/validar-bizum");
         addServlet(ctx, tomcat, "FacturaServlet",        FacturaServlet.class,       "/api/v1/facturas/*");
+        addServlet(ctx, tomcat, "ImagenIAServlet",       ImagenIAServlet.class,      "/api/v1/ia/imagen");
 
         runMigrations();
 
@@ -89,10 +91,11 @@ public class Main {
         ctx.addServletMappingDecoded(pattern, name);
     }
 
-    private static void addFilter(Context ctx, String name, Class<?> clazz, String pattern) {
+    private static void addFilter(Context ctx, String name, Filter filterInstance, String pattern) {
         FilterDef fd = new FilterDef();
         fd.setFilterName(name);
-        fd.setFilterClass(clazz.getName());
+        fd.setFilterClass(filterInstance.getClass().getName());
+        fd.setFilter(filterInstance);
         ctx.addFilterDef(fd);
 
         FilterMap fm = new FilterMap();
