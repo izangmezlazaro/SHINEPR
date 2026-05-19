@@ -260,21 +260,37 @@
                     </div>
                   </div>
 
-                  <!-- QR Code canvas -->
-                  <div id="bizumQrContainer" style="
-                    display:inline-block;
-                    background:#fff;
-                    padding:12px;
+                  <!-- Phone Number & Timer -->
+                  <div style="
+                    display:flex; flex-direction:column; gap:12px;
+                    background:#f1fdf4;
+                    padding:20px;
                     border-radius:12px;
                     margin-bottom:16px;
-                    box-shadow:0 2px 12px rgba(0,0,0,0.1);
+                    border: 1px solid #c6f6d5;
                   ">
-                    <canvas id="bizumQrCanvas"></canvas>
+                    <p style="margin:0;font-size:0.9rem;color:#166534;font-weight:600">
+                      Envía el Bizum a este número:
+                    </p>
+                    <div style="
+                      font-size:1.8rem;
+                      font-weight:800;
+                      color:#15803d;
+                      letter-spacing:1px;
+                      user-select:all;
+                    ">
+                      +34 684 085 815
+                    </div>
+                    <div style="margin-top:8px;font-size:0.85rem;color:#166534">
+                      Tiempo restante para completar el pago:
+                      <br>
+                      <strong id="bizumCountdown" style="font-size:1.2rem;color:#b91c1c;font-family:monospace;margin-top:4px;display:inline-block">05:00</strong>
+                    </div>
                   </div>
 
                   <!-- Instructions -->
                   <p style="margin:0 0 8px;font-size:0.8rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">
-                    Escanea con tu app bancaria
+                    Introduce el concepto exacto
                   </p>
 
                   <!-- Order ID + Amount summary -->

@@ -338,15 +338,13 @@
     return '';
   }
 
-  // ── Bizum QR Code Generator ──────────────────────────────────────────────
-  //   Número de teléfono de la tienda para recibir pagos Bizum
-  const SHINE_BIZUM_PHONE = '34684085815';
+  // ── Bizum UI & Timer ──────────────────────────────────────────────
+  let _bizumTimer = null;
+  let _timerIniciado = false;
 
-  let _qrGenerado = false;
-
-  function generarBizumQR() {
-    const canvas = document.getElementById('bizumQrCanvas');
-    if (!canvas || typeof QRCode === 'undefined') return;
+  function iniciarBizumUI() {
+    if (_timerIniciado) return;
+    _timerIniciado = true;
 
     // Calculamos el total actual en tiempo real
     const subtotal = getSubtotal();
@@ -354,11 +352,8 @@
     const shipping = getShippingCost();
     const total    = (subtotal + tax + shipping).toFixed(2);
 
-    // ID provisional de pedido para mostrar en el QR (se asigna el definitivo al pagar)
+    // ID provisional de pedido para el concepto
     const orderId = 'SHINE-' + Math.floor(100000 + Math.random() * 900000);
-
-    // URL del protocolo Bizum (compatible con app bancaria española)
-    const bizumUrl = `https://bizum.me/?phone=${SHINE_BIZUM_PHONE}&amount=${total}&concept=Pedido+${orderId}`;
 
     // Actualizar labels del panel
     const labelId     = document.getElementById('bizumOrderIdLabel');
@@ -366,23 +361,30 @@
     if (labelId)     labelId.textContent     = orderId;
     if (labelAmount) labelAmount.textContent = `€${total}`;
 
-    // Generar QR en el canvas
-    QRCode.toCanvas(canvas, bizumUrl, {
-      width:            192,
-      margin:           1,
-      color: {
-        dark:  '#000000',
-        light: '#ffffff'
-      },
-      errorCorrectionLevel: 'M'
-    }, function(error) {
-      if (error) {
-        console.error('[BizumQR] Error generando QR:', error);
-      } else {
-        _qrGenerado = true;
-        console.log('[BizumQR] QR generado para:', bizumUrl);
+    // Iniciar cuenta atrás de 5 minutos (300 segundos)
+    let timeLeft = 300;
+    const countdownEl = document.getElementById('bizumCountdown');
+    
+    if (_bizumTimer) clearInterval(_bizumTimer);
+    
+    _bizumTimer = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(_bizumTimer);
+        if (countdownEl) countdownEl.textContent = "00:00";
+        showToast("El tiempo para pagar ha expirado. Por favor, recarga la página para intentarlo de nuevo.");
+        const nextBtn = document.getElementById('coNextBtn');
+        if (nextBtn) {
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Tiempo expirado';
+        }
+        return;
       }
-    });
+      
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      if (countdownEl) countdownEl.textContent = `${m}:${s}`;
+    }, 1000);
   }
 
   async function crearPedidoYPagarBizum() {
@@ -483,8 +485,8 @@
       currentStep++;
       if (currentStep === 2) {
         renderSummaryItems();
-        // Generar QR Bizum al llegar al paso de pago
-        setTimeout(generarBizumQR, 150);
+        // Iniciar timer Bizum al llegar al paso de pago
+        setTimeout(iniciarBizumUI, 150);
       }
       updateStepper();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -497,7 +499,8 @@
 
       if (currentStep > 0) {
         currentStep--;
-        _qrGenerado = false; // Resetear QR si el usuario retrocede
+        _timerIniciado = false;
+        if (_bizumTimer) clearInterval(_bizumTimer);
         updateStepper();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -511,8 +514,8 @@
       if (event.target.matches('input[name="co-address"]')) syncAddressSummary();
       if (event.target.matches('input[name="co-shipping"]')) {
         syncShippingSummary();
-        // Si ya estamos en el paso de pago, regenerar QR con nuevo total
-        if (currentStep === 2 && !_qrGenerado) generarBizumQR();
+        // Si ya estamos en el paso de pago, actualizar el total
+        if (currentStep === 2 && !_timerIniciado) iniciarBizumUI();
       }
     });
 
