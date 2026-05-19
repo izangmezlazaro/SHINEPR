@@ -1507,6 +1507,37 @@ body {
 .home-punched .home-punch-status {
   color: #216a33;
 }
+/* Home stats strip */
+.home-stats-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.home-stat-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--dash-card);
+  border: 1px solid var(--dash-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  flex: 1;
+  min-width: 160px;
+}
+.home-stat-box__icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.home-stat-box__icon--green { background: #DCFCE7; }
+.home-stat-box__icon--blue  { background: #DBEAFE; }
+.home-stat-box__icon--rose  { background: var(--dash-blush); }
+.home-stat-box__icon svg { width: 17px; height: 17px; stroke-width: 2; fill: none; }
+.home-stat-box__label { display: block; font-size: 0.68rem; color: var(--dash-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.home-stat-box__value { display: block; font-size: 1.2rem; font-weight: 700; color: var(--dash-text); }
+
 .home-card--punch { grid-column: 1 / -1; }
 .home-card--punch .home-card-header h3 svg {
   width: 16px; height: 16px;

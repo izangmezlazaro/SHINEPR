@@ -6,7 +6,7 @@ const ID_USUARIO = Number(localStorage.getItem('shineUserId')) || null;
 window.ID_USUARIO = ID_USUARIO;
 
 (function () {
-  const API_BASE_URL = 'http://localhost:8080/api/v1';
+  const API_BASE_URL = 'https://api.shinebeauty.store/api/v1';
   const DEFAULT_HEADERS = {
     Accept: 'application/json'
   };
