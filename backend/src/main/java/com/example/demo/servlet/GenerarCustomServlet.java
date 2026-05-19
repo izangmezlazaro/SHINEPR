@@ -30,12 +30,7 @@ public class GenerarCustomServlet extends HttpServlet {
 
     private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
             ? System.getenv("OPENAI_API_KEY")
-            : "AQUI VA LA API KEY DE OPENAI"; // <--
-                                              // PEGA
-                                              // TU
-                                              // API
-                                              // KEY
-                                              // AQUÍ
+            : "API AQUI"; // <--
 
     private static final String MODEL = "gpt-image-1-mini";
     private static final int CONNECT_MS = 15_000; // 15 s

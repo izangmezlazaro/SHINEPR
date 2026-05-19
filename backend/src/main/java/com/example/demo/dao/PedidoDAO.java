@@ -30,7 +30,7 @@ public class PedidoDAO {
     public List<Pedido> findByUsuarioId(Integer idUsuario) throws SQLException {
         List<Pedido> list = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT + "WHERE id_usuario = ? ORDER BY fecha DESC")) {
+             PreparedStatement ps = conn.prepareStatement(SELECT + "WHERE id_usuario = ? ORDER BY id_pedido DESC")) {
             ps.setInt(1, idUsuario);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(mapRow(rs));
@@ -70,7 +70,7 @@ public class PedidoDAO {
             "       u.nombre AS u_nombre, u.email AS u_email " +
             "FROM pedido p " +
             "JOIN usuario u ON p.id_usuario = u.id " +
-            "ORDER BY p.fecha DESC";
+            "ORDER BY p.id_pedido DESC";
         List<AdminPedidoDTO> result = new ArrayList<>();
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

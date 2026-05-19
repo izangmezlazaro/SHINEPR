@@ -27,15 +27,15 @@ import java.time.LocalDateTime;
  * Body: { "idPedido": 42 }
  *
  * Flujo:
- *  1. Actualiza el estado del pedido de 'pendiente_bizum' → 'procesando'
- *  2. Actualiza el pago asociado a 'completado' y registra la fecha de pago
- *  3. Envía email de confirmación al cliente
+ * 1. Actualiza el estado del pedido de 'pendiente_bizum' → 'procesando'
+ * 2. Actualiza el pago asociado a 'completado' y registra la fecha de pago
+ * 3. Envía email de confirmación al cliente
  */
 @WebServlet(urlPatterns = "/api/v1/intranet/validar-bizum", name = "ValidarBizumServlet")
 public class ValidarBizumServlet extends HttpServlet {
 
-    private final PedidoDAO  pedidoDAO  = new PedidoDAO();
-    private final PagoDAO    pagoDAO    = new PagoDAO();
+    private final PedidoDAO pedidoDAO = new PedidoDAO();
+    private final PagoDAO pagoDAO = new PagoDAO();
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @Override
@@ -63,7 +63,8 @@ public class ValidarBizumServlet extends HttpServlet {
                     }
                     if (!"pendiente_bizum".equalsIgnoreCase(estadoActual)) {
                         HttpUtil.writeError(resp, 409,
-                            "El pedido #" + idPedido + " no está en estado 'pendiente_bizum'. Estado actual: " + estadoActual);
+                                "El pedido #" + idPedido + " no está en estado 'pendiente_bizum'. Estado actual: "
+                                        + estadoActual);
                         conn.rollback();
                         return;
                     }
@@ -72,13 +73,15 @@ public class ValidarBizumServlet extends HttpServlet {
                     pedidoDAO.updateEstado(idPedido, "procesando", conn);
 
                     // ── 2.5 Descontar stock ──
-                    try (var ps = conn.prepareStatement("SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = ? AND id_producto IS NOT NULL")) {
+                    try (var ps = conn.prepareStatement(
+                            "SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = ? AND id_producto IS NOT NULL")) {
                         ps.setInt(1, idPedido);
                         try (var rs = ps.executeQuery()) {
                             while (rs.next()) {
                                 int prodId = rs.getInt("id_producto");
                                 int cant = rs.getInt("cantidad");
-                                try (var updatePs = conn.prepareStatement("UPDATE producto SET stock = GREATEST(stock - ?, 0) WHERE id_producto = ?")) {
+                                try (var updatePs = conn.prepareStatement(
+                                        "UPDATE producto SET stock = GREATEST(stock - ?, 0) WHERE id_producto = ?")) {
                                     updatePs.setInt(1, cant);
                                     updatePs.setInt(2, prodId);
                                     updatePs.executeUpdate();
@@ -112,40 +115,41 @@ public class ValidarBizumServlet extends HttpServlet {
                     conn.commit();
 
                     // ── 4. Obtener datos del cliente y generar factura ──────────
-                    String emailCliente   = "—";
-                    String nombreCliente  = "Cliente";
-                    String totalStr       = "0.00";
-                    byte[] pdfBytes       = null;
+                    String emailCliente = "—";
+                    String nombreCliente = "Cliente";
+                    String totalStr = "0.00";
+                    byte[] pdfBytes = null;
 
                     try {
-                        com.example.demo.dto.PedidoResponseDTO pedidoDTO = new com.example.demo.service.PedidoService().obtenerPorId(idPedido);
+                        com.example.demo.dto.PedidoResponseDTO pedidoDTO = new com.example.demo.service.PedidoService()
+                                .obtenerPorId(idPedido);
                         if (pedidoDTO != null) {
                             if (pedidoDTO.getTotal() != null) {
                                 totalStr = pedidoDTO.getTotal().toPlainString();
                             }
                             // Generar PDF de la factura
                             pdfBytes = new com.example.demo.service.FacturaService().generarFacturaPdf(pedidoDTO);
-                            
+
                             // Buscar email del usuario
                             String[] datos = fetchClienteData(pedidoDTO.getIdUsuario());
                             nombreCliente = datos[0];
-                            emailCliente  = datos[1];
+                            emailCliente = datos[1];
                         }
                     } catch (Exception ex) {
-                        System.err.println("[ValidarBizumServlet] Error al obtener datos o generar factura: " + ex.getMessage());
+                        System.err.println(
+                                "[ValidarBizumServlet] Error al obtener datos o generar factura: " + ex.getMessage());
                     }
 
                     // ── 5. Enviar email de confirmación ─────────────────────
                     // Ejecutamos en hilo separado para no bloquear la respuesta HTTP
-                    final String emailFinal   = emailCliente;
-                    final String nombreFinal  = nombreCliente;
-                    final String totalFinal   = totalStr;
-                    final int    pedidoIdFinal = idPedido;
+                    final String emailFinal = emailCliente;
+                    final String nombreFinal = nombreCliente;
+                    final String totalFinal = totalStr;
+                    final int pedidoIdFinal = idPedido;
                     final byte[] finalPdfBytes = pdfBytes;
 
-                    Thread emailThread = new Thread(() ->
-                        EmailUtil.enviarConfirmacionBizum(emailFinal, nombreFinal, pedidoIdFinal, totalFinal, finalPdfBytes)
-                    );
+                    Thread emailThread = new Thread(() -> EmailUtil.enviarConfirmacionBizum(emailFinal, nombreFinal,
+                            pedidoIdFinal, totalFinal, finalPdfBytes));
                     emailThread.setDaemon(true);
                     emailThread.start();
 
@@ -155,7 +159,8 @@ public class ValidarBizumServlet extends HttpServlet {
                     result.addProperty("idPedido", idPedido);
                     result.addProperty("nuevoEstado", "procesando");
                     result.addProperty("emailEnviado", !emailCliente.equals("—"));
-                    result.addProperty("mensaje", "Pago Bizum validado correctamente. Email de confirmación enviado a " + emailCliente);
+                    result.addProperty("mensaje",
+                            "Pago Bizum validado correctamente. Email de confirmación enviado a " + emailCliente);
                     HttpUtil.writeJson(resp, 200, result);
 
                 } catch (Exception e) {
@@ -174,14 +179,14 @@ public class ValidarBizumServlet extends HttpServlet {
     /** Obtiene [nombre, email] del cliente por su userId. */
     private String[] fetchClienteData(int userId) throws Exception {
         try (Connection conn = ConexionDB.getConnection();
-             var ps = conn.prepareStatement("SELECT nombre, email FROM usuario WHERE id = ?")) {
+                var ps = conn.prepareStatement("SELECT nombre, email FROM usuario WHERE id = ?")) {
             ps.setInt(1, userId);
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new String[]{ rs.getString("nombre"), rs.getString("email") };
+                    return new String[] { rs.getString("nombre"), rs.getString("email") };
                 }
             }
         }
-        return new String[]{ "Cliente", "—" };
+        return new String[] { "Cliente", "—" };
     }
 }
