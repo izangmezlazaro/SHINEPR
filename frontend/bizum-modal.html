@@ -1,0 +1,257 @@
+<!-- ═══════════════════════════════════════════════════════
+     MODAL BIZUM — Pegar justo antes del cierre </body>
+     en checkout.html
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- Overlay del modal -->
+<div id="bizumModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.18);position:relative;font-family:inherit">
+
+    <!-- Botón cerrar -->
+    <button id="bizumClose" style="position:absolute;top:16px;right:18px;background:none;border:none;cursor:pointer;font-size:22px;color:#aaa;line-height:1">✕</button>
+
+    <!-- Logo / título -->
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:#f0f4ff;border-radius:50px;padding:8px 18px;margin-bottom:12px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b5bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span style="font-weight:700;color:#3b5bff;font-size:15px">Pago por Bizum</span>
+      </div>
+      <h3 style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e">Completa tu pago</h3>
+      <p style="margin:6px 0 0;font-size:13px;color:#888">Tienes <strong>5 minutos</strong> para realizar la transferencia</p>
+    </div>
+
+    <!-- Cronómetro -->
+    <div style="text-align:center;margin-bottom:24px">
+      <div id="bizumTimer" style="font-size:48px;font-weight:800;color:#1a1a2e;letter-spacing:-2px;font-variant-numeric:tabular-nums">05:00</div>
+      <div style="height:6px;background:#f0f0f0;border-radius:99px;margin-top:8px;overflow:hidden">
+        <div id="bizumTimerBar" style="height:100%;width:100%;background:linear-gradient(90deg,#3b5bff,#7c3aed);border-radius:99px;transition:width 1s linear"></div>
+      </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div style="background:#f8f9ff;border-radius:14px;padding:20px;margin-bottom:20px">
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="background:#e8edff;color:#3b5bff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">1</span>
+        <div>
+          <div style="font-size:12px;color:#888;margin-bottom:2px">Envía el Bizum a este número</div>
+          <div style="font-size:18px;font-weight:700;color:#1a1a2e;letter-spacing:1px" id="bizumPhone">+31 613 432 513</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="background:#e8edff;color:#3b5bff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">2</span>
+        <div>
+          <div style="font-size:12px;color:#888;margin-bottom:2px">Importe exacto</div>
+          <div style="font-size:24px;font-weight:800;color:#1a1a2e" id="bizumAmount">€0.00</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <span style="background:#e8edff;color:#3b5bff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:2px">3</span>
+        <div style="flex:1">
+          <div style="font-size:12px;color:#888;margin-bottom:4px">Escribe este código en el <strong>concepto/asunto</strong></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="bizumCode" style="font-size:22px;font-weight:800;color:#3b5bff;letter-spacing:3px;background:#e8edff;padding:8px 16px;border-radius:8px;font-family:monospace">SHN-XXXXXX</div>
+            <button id="bizumCopyBtn" onclick="copyBizumCode()" style="background:#3b5bff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;font-weight:600">Copiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado del pago -->
+    <div id="bizumStatus" style="text-align:center;font-size:13px;color:#888;min-height:20px;margin-bottom:16px">
+      ⏳ Esperando confirmación del pago…
+    </div>
+
+    <!-- Botón simular (SOLO SANDBOX) -->
+    <div style="text-align:center;margin-bottom:12px">
+      <button id="bizumSimulateBtn" onclick="simulateBizumPayment()" style="background:#10b981;color:#fff;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;width:100%">
+        🧪 [SANDBOX] Simular pago recibido
+      </button>
+    </div>
+
+    <p style="text-align:center;font-size:11px;color:#bbb;margin:0">
+      🔒 Tu pedido se confirmará automáticamente al detectar el pago
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPT BIZUM — Pegar al final del <script> de checkout
+     ═══════════════════════════════════════════════════ -->
+<script>
+const PAYMENT_SERVER = 'http://localhost:3001';
+
+let bizumTimerInterval = null;
+let bizumPollInterval  = null;
+let bizumCurrentCode   = null;
+let bizumSecondsLeft   = 300;
+
+// ── Abrir modal Bizum ─────────────────────────────────
+async function openBizumModal(totalAmount) {
+  try {
+    // Crear pago en el servidor
+    const res = await fetch(`${PAYMENT_SERVER}/api/payment/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: totalAmount, orderId: 'ORD-' + Date.now() }),
+    });
+
+    if (!res.ok) throw new Error('Error al crear el pago');
+    const data = await res.json();
+
+    bizumCurrentCode  = data.code;
+    bizumSecondsLeft  = 300;
+
+    // Rellenar modal
+    document.getElementById('bizumCode').textContent   = data.code;
+    document.getElementById('bizumAmount').textContent = `€${parseFloat(data.amount).toFixed(2)}`;
+    document.getElementById('bizumPhone').textContent  = formatPhone(data.phone);
+    document.getElementById('bizumStatus').innerHTML   = '⏳ Esperando confirmación del pago…';
+    document.getElementById('bizumStatus').style.color = '#888';
+    document.getElementById('bizumSimulateBtn').style.display = 'block';
+
+    // Mostrar modal
+    const modal = document.getElementById('bizumModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Arrancar cronómetro
+    startBizumTimer();
+
+    // Arrancar polling de estado
+    startBizumPolling();
+
+  } catch (err) {
+    alert('Error al iniciar el pago. ¿Está corriendo el servidor? (node server.js)');
+    console.error(err);
+  }
+}
+
+// ── Cronómetro ────────────────────────────────────────
+function startBizumTimer() {
+  clearInterval(bizumTimerInterval);
+  updateTimerDisplay();
+
+  bizumTimerInterval = setInterval(() => {
+    bizumSecondsLeft--;
+    updateTimerDisplay();
+
+    if (bizumSecondsLeft <= 0) {
+      clearInterval(bizumTimerInterval);
+      clearInterval(bizumPollInterval);
+      onBizumExpired();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(bizumSecondsLeft / 60)).padStart(2, '0');
+  const s = String(bizumSecondsLeft % 60).padStart(2, '0');
+  document.getElementById('bizumTimer').textContent = `${m}:${s}`;
+
+  const pct = (bizumSecondsLeft / 300) * 100;
+  const bar = document.getElementById('bizumTimerBar');
+  bar.style.width = pct + '%';
+
+  // Color de alerta cuando quedan menos de 60s
+  if (bizumSecondsLeft <= 60) {
+    bar.style.background = 'linear-gradient(90deg,#ef4444,#f97316)';
+    document.getElementById('bizumTimer').style.color = '#ef4444';
+  }
+}
+
+// ── Polling de estado ─────────────────────────────────
+function startBizumPolling() {
+  clearInterval(bizumPollInterval);
+  bizumPollInterval = setInterval(async () => {
+    try {
+      const res  = await fetch(`${PAYMENT_SERVER}/api/payment/status/${bizumCurrentCode}`);
+      const data = await res.json();
+
+      if (data.status === 'CONFIRMED') {
+        clearInterval(bizumTimerInterval);
+        clearInterval(bizumPollInterval);
+        onBizumConfirmed();
+      } else if (data.status === 'EXPIRED' || data.status === 'WRONG_AMOUNT') {
+        clearInterval(bizumTimerInterval);
+        clearInterval(bizumPollInterval);
+        onBizumExpired(data.status);
+      }
+    } catch (err) {
+      console.error('Error polling estado:', err);
+    }
+  }, 3000); // cada 3 segundos
+}
+
+// ── Pago confirmado ───────────────────────────────────
+function onBizumConfirmed() {
+  document.getElementById('bizumStatus').innerHTML = '✅ <strong style="color:#10b981">¡Pago confirmado!</strong> Redirigiendo…';
+  document.getElementById('bizumSimulateBtn').style.display = 'none';
+  document.getElementById('bizumTimer').style.color = '#10b981';
+  document.getElementById('bizumTimerBar').style.background = '#10b981';
+
+  setTimeout(() => {
+    closeBizumModal();
+    // Redirigir a página de confirmación o mostrar mensaje
+    window.location.href = 'orders.html?status=confirmed&code=' + bizumCurrentCode;
+  }, 2000);
+}
+
+// ── Pago expirado / error ─────────────────────────────
+function onBizumExpired(reason = 'EXPIRED') {
+  const msg = reason === 'WRONG_AMOUNT'
+    ? '❌ Importe incorrecto. Contacta con soporte.'
+    : '⏰ Tiempo agotado. Vuelve a intentarlo.';
+  document.getElementById('bizumStatus').innerHTML = `<span style="color:#ef4444">${msg}</span>`;
+  document.getElementById('bizumTimer').style.color = '#ef4444';
+  document.getElementById('bizumSimulateBtn').style.display = 'none';
+}
+
+// ── Simular pago (solo sandbox) ───────────────────────
+async function simulateBizumPayment() {
+  try {
+    const res = await fetch(`${PAYMENT_SERVER}/api/payment/simulate-confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: bizumCurrentCode }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('bizumStatus').innerHTML = '🧪 Pago simulado enviado, verificando…';
+    }
+  } catch (err) {
+    alert('Error al simular. ¿Está corriendo el servidor?');
+  }
+}
+
+// ── Copiar código ─────────────────────────────────────
+function copyBizumCode() {
+  navigator.clipboard.writeText(bizumCurrentCode || '').then(() => {
+    const btn = document.getElementById('bizumCopyBtn');
+    btn.textContent = '✓ Copiado';
+    btn.style.background = '#10b981';
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.style.background = '#3b5bff'; }, 2000);
+  });
+}
+
+// ── Cerrar modal ──────────────────────────────────────
+function closeBizumModal() {
+  clearInterval(bizumTimerInterval);
+  clearInterval(bizumPollInterval);
+  document.getElementById('bizumModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function formatPhone(phone) {
+  // +31613432513 → +31 613 432 513
+  return phone.replace(/(\+\d{2})(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
+}
+
+// ── Event listeners ───────────────────────────────────
+document.getElementById('bizumClose').addEventListener('click', closeBizumModal);
+document.getElementById('bizumModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('bizumModal')) closeBizumModal();
+});
+</script>
