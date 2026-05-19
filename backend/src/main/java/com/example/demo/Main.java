@@ -69,6 +69,7 @@ public class Main {
         addServlet(ctx, tomcat, "GenerarCustomServlet",  GenerarCustomServlet.class, "/api/generar-custom/*");
         addServlet(ctx, tomcat, "WebhookBunqServlet",    WebhookBunqServlet.class,   "/api/v1/webhook/*");
         addServlet(ctx, tomcat, "ValidarBizumServlet",   ValidarBizumServlet.class,  "/api/v1/intranet/validar-bizum");
+        addServlet(ctx, tomcat, "FacturaServlet",        FacturaServlet.class,       "/api/v1/facturas/*");
 
         runMigrations();
 

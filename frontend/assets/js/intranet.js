@@ -2190,6 +2190,16 @@ window.loadIntranetOrders = async function () {
            </button>`
         : '';
 
+      // Botón "Factura" solo para pedidos procesando, enviado o entregado
+      const facturaBtn = ['procesando', 'enviado', 'entregado'].includes(estado)
+        ? `<a href="${INTRANET_API}/facturas/${p.idPedido}" target="_blank"
+              class="dash-btn dash-btn--sm"
+              style="background:#f3f4f6;color:#374151;border-color:#d1d5db;white-space:nowrap;text-decoration:none"
+              title="Descargar Factura en PDF">
+              📄 Factura
+           </a>`
+        : '';
+
       return `<tr data-status="${cls}" data-pedido-id="${p.idPedido}" ${estado === 'pendiente_bizum' ? 'style="background:rgba(22,163,74,0.06)"' : ''}>
         <td><strong>#${p.idPedido}</strong></td>
         <td>${fecha}</td>
@@ -2200,6 +2210,7 @@ window.loadIntranetOrders = async function () {
         <td><div class="row-actions">
           <button class="dash-btn dash-btn--outline dash-btn--sm view-order-api" data-id="${p.idPedido}">Ver</button>
           ${validarBtn}
+          ${facturaBtn}
         </div></td>
       </tr>`;
     }).join('');
@@ -2209,10 +2220,16 @@ window.loadIntranetOrders = async function () {
     const badge = document.querySelector('.sidebar-link[data-tab="orders"] .badge');
     if (badge) badge.textContent = activos;
 
+    // Resetear scroll al principio para ver los pedidos más recientes
+    const tableWrapper = tbody.closest('.table-container') || tbody.closest('div');
+    if (tableWrapper) tableWrapper.scrollTop = 0;
+
     // ── Delegar click en botones "Validar Pago" ─────────────────────────────
-    tbody.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.btn-validar-bizum');
-      if (!btn) return;
+    if (!tbody.dataset.bizumListenerAttached) {
+      tbody.dataset.bizumListenerAttached = 'true';
+      tbody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.btn-validar-bizum');
+        if (!btn) return;
 
       const idPedido = parseInt(btn.dataset.id, 10);
       if (!idPedido) return;
@@ -2265,7 +2282,8 @@ window.loadIntranetOrders = async function () {
         if (window.showToast) showToast(`Error al validar: ${escapeHtml(err.message)}`, 'error');
         console.error('[ValidarBizum]', err);
       }
-    });
+      });
+    }
 
   } catch (err) {
     console.error('[loadIntranetOrders]', err);

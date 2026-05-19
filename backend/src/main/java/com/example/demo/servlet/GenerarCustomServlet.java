@@ -30,12 +30,12 @@ public class GenerarCustomServlet extends HttpServlet {
 
     private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
             ? System.getenv("OPENAI_API_KEY")
-            : "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"; // <--
-                                                                                                                                                                                      // PEGA
-                                                                                                                                                                                      // TU
-                                                                                                                                                                                      // API
-                                                                                                                                                                                      // KEY
-                                                                                                                                                                                      // AQUÍ
+            : "AQUI VA LA API KEY DE OPENAI"; // <--
+                                              // PEGA
+                                              // TU
+                                              // API
+                                              // KEY
+                                              // AQUÍ
 
     private static final String MODEL = "gpt-image-1-mini";
     private static final int CONNECT_MS = 15_000; // 15 s
@@ -87,20 +87,19 @@ public class GenerarCustomServlet extends HttpServlet {
             // Compact prompt + strict label copy (user casing / punctuation preserved
             // in-image)
             String notasClause = notas.isEmpty() ? "" : ", infused with " + notas + " notes";
-            String baseClause  = base.isEmpty()  ? "" : ", base " + base;
-            String prompt =
-                "Ultra-premium luxury perfume editorial photograph. "
-                + "Subject: a " + formaElegida + " " + tipo + " perfume bottle standing upright "
-                + baseClause
-                + notasClause
-                + ". "
-                + "Beside the bottle, its matching luxury gift box (rectangular matte black with gold foil embossing, slightly open, lid resting at an angle). "
-                + "Both bottle and box display the label: <<<" + nombreEtiqueta + ">>> "
-                + "(reproduce label text EXACTLY — same capitals, spaces, accents, punctuation; no translation, no autocorrect). "
-                + "Scene: dark cinematic studio, black marble surface, single overhead spotlight casting soft shadows, "
-                + "scattered dried rose petals and botanicals at the base, delicate smoke wisps rising. "
-                + "Gold foil accents on label. Photorealistic, 8K render, depth of field, ultra-sharp glass reflections. "
-                + "Professional luxury fragrance brand campaign style. No people, no text except the label.";
+            String baseClause = base.isEmpty() ? "" : ", base " + base;
+            String prompt = "Ultra-premium luxury perfume editorial photograph. "
+                    + "Subject: a " + formaElegida + " " + tipo + " perfume bottle standing upright "
+                    + baseClause
+                    + notasClause
+                    + ". "
+                    + "Beside the bottle, its matching luxury gift box (rectangular matte black with rose gold foil embossing, slightly open, lid resting at an angle). "
+                    + "Both bottle and box display the label: <<<" + nombreEtiqueta + ">>> "
+                    + "(reproduce label text EXACTLY — same capitals, spaces, accents, punctuation; no translation, no autocorrect). "
+                    + "Scene: dark cinematic studio, black marble surface, single overhead spotlight and subtle rim lighting on the glass, "
+                    + "scattered dried botanicals in soft nude and white tones at the base, delicate smoke wisps rising. "
+                    + "Rose gold foil accents on label. Photorealistic, 8K render, macro depth of field, ultra-sharp glass reflections. "
+                    + "Professional luxury fragrance brand campaign style. No people, no text except the exact label.";
 
             JsonObject openAiRequest = new JsonObject();
             openAiRequest.addProperty("model", MODEL);

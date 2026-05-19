@@ -78,7 +78,7 @@ public class ValidarBizumServlet extends HttpServlet {
                             while (rs.next()) {
                                 int prodId = rs.getInt("id_producto");
                                 int cant = rs.getInt("cantidad");
-                                try (var updatePs = conn.prepareStatement("UPDATE producto SET stock = stock - ? WHERE id_producto = ?")) {
+                                try (var updatePs = conn.prepareStatement("UPDATE producto SET stock = GREATEST(stock - ?, 0) WHERE id_producto = ?")) {
                                     updatePs.setInt(1, cant);
                                     updatePs.setInt(2, prodId);
                                     updatePs.executeUpdate();
@@ -111,24 +111,28 @@ public class ValidarBizumServlet extends HttpServlet {
 
                     conn.commit();
 
-                    // ── 4. Obtener datos del cliente para el email ──────────
-                    Pedido pedido = pedidoDAO.findById(idPedido).orElse(null);
+                    // ── 4. Obtener datos del cliente y generar factura ──────────
                     String emailCliente   = "—";
                     String nombreCliente  = "Cliente";
                     String totalStr       = "0.00";
+                    byte[] pdfBytes       = null;
 
-                    if (pedido != null) {
-                        if (pedido.getTotal() != null) {
-                            totalStr = pedido.getTotal().toPlainString();
-                        }
-                        try {
-                            // Buscar email del usuario asociado al pedido
-                            String[] datos = fetchClienteData(pedido.getUsuario().getId());
+                    try {
+                        com.example.demo.dto.PedidoResponseDTO pedidoDTO = new com.example.demo.service.PedidoService().obtenerPorId(idPedido);
+                        if (pedidoDTO != null) {
+                            if (pedidoDTO.getTotal() != null) {
+                                totalStr = pedidoDTO.getTotal().toPlainString();
+                            }
+                            // Generar PDF de la factura
+                            pdfBytes = new com.example.demo.service.FacturaService().generarFacturaPdf(pedidoDTO);
+                            
+                            // Buscar email del usuario
+                            String[] datos = fetchClienteData(pedidoDTO.getIdUsuario());
                             nombreCliente = datos[0];
                             emailCliente  = datos[1];
-                        } catch (Exception ex) {
-                            System.err.println("[ValidarBizumServlet] No se pudieron obtener datos del cliente: " + ex.getMessage());
                         }
+                    } catch (Exception ex) {
+                        System.err.println("[ValidarBizumServlet] Error al obtener datos o generar factura: " + ex.getMessage());
                     }
 
                     // ── 5. Enviar email de confirmación ─────────────────────
@@ -137,9 +141,10 @@ public class ValidarBizumServlet extends HttpServlet {
                     final String nombreFinal  = nombreCliente;
                     final String totalFinal   = totalStr;
                     final int    pedidoIdFinal = idPedido;
+                    final byte[] finalPdfBytes = pdfBytes;
 
                     Thread emailThread = new Thread(() ->
-                        EmailUtil.enviarConfirmacionBizum(emailFinal, nombreFinal, pedidoIdFinal, totalFinal)
+                        EmailUtil.enviarConfirmacionBizum(emailFinal, nombreFinal, pedidoIdFinal, totalFinal, finalPdfBytes)
                     );
                     emailThread.setDaemon(true);
                     emailThread.start();

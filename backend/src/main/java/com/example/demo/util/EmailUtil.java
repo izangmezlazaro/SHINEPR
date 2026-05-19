@@ -29,7 +29,7 @@ public final class EmailUtil {
      * @param totalStr     Total del pedido formateado (p.ej. "49.95")
      */
     public static void enviarConfirmacionBizum(String toEmail, String toName,
-                                                int idPedido, String totalStr) {
+                                                int idPedido, String totalStr, byte[] pdfBytes) {
         try {
             String smtpHost     = AppConfig.get("mail.smtp.host");
             String smtpPort     = AppConfig.get("mail.smtp.port");
@@ -59,7 +59,25 @@ public final class EmailUtil {
             message.setSubject("✅ Pago Bizum confirmado — Pedido #SHINE-" + idPedido);
 
             String html = buildHtmlBody(toName, idPedido, totalStr);
-            message.setContent(html, "text/html; charset=UTF-8");
+            
+            // Usar Multipart para soportar texto HTML y adjuntos
+            Multipart multipart = new MimeMultipart();
+            
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setContent(html, "text/html; charset=UTF-8");
+            multipart.addBodyPart(textPart);
+            
+            // Adjuntar la factura PDF si se proporciona
+            if (pdfBytes != null && pdfBytes.length > 0) {
+                MimeBodyPart attachmentPart = new MimeBodyPart();
+                jakarta.mail.util.ByteArrayDataSource bds = new jakarta.mail.util.ByteArrayDataSource(pdfBytes, "application/pdf");
+                attachmentPart.setDataHandler(new jakarta.activation.DataHandler(bds));
+                attachmentPart.setFileName("Factura_SHINE-" + idPedido + ".pdf");
+                attachmentPart.setDisposition(Part.ATTACHMENT); // <-- Evita que marque como spam por adjunto malformado
+                multipart.addBodyPart(attachmentPart);
+            }
+            
+            message.setContent(multipart);
 
             Transport.send(message);
             System.out.println("[EmailUtil] Email de confirmación enviado a: " + toEmail);
