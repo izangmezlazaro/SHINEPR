@@ -469,6 +469,58 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('shineStaff');
         window.location.href = 'index.html';
       });
+
+      // ---------- Mobile Nav — update when logged in ----------
+      const mobileNavEl = document.getElementById('mobileNav');
+      if (mobileNavEl) {
+        // Hide the login link in mobile nav
+        const mobileLoginLink = mobileNavEl.querySelector('a[href="login.html"]');
+        if (mobileLoginLink) mobileLoginLink.style.display = 'none';
+
+        const intranetMobileLink = hasStaffAccess ? `
+          <a href="intranet.html" class="mobile-nav__link mobile-nav__link--staff">
+            Intranet ${staffUser.role === 'admin' ? '(Admin)' : '(Staff)'}
+          </a>` : '';
+
+        const userSection = document.createElement('div');
+        userSection.className = 'mobile-nav__user-section';
+        userSection.innerHTML = `
+          <div class="mobile-nav__avatar">${escapeHtml(user.initials)}</div>
+          <div class="mobile-nav__user-name">${escapeHtml(user.name || user.email || '')}</div>
+          <a href="account.html" class="mobile-nav__link">My Account</a>
+          <a href="orders.html" class="mobile-nav__link">My Orders</a>
+          <a href="profile.html" class="mobile-nav__link">My Profile</a>
+          <a href="addresses.html" class="mobile-nav__link">My Addresses</a>
+          ${intranetMobileLink}
+          <button class="mobile-nav__signout-btn" id="mobileSignOutBtn">Sign Out</button>
+        `;
+
+        const cartMobileLink = mobileNavEl.querySelector('a[href="cart.html"]');
+        if (cartMobileLink) {
+          mobileNavEl.insertBefore(userSection, cartMobileLink);
+        } else {
+          mobileNavEl.appendChild(userSection);
+        }
+
+        // Close mobile nav when user section links are clicked
+        userSection.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            document.getElementById('hamburgerBtn')?.classList.remove('open');
+            mobileNavEl.classList.remove('open');
+            document.body.style.overflow = '';
+          });
+        });
+
+        document.getElementById('mobileSignOutBtn')?.addEventListener('click', async () => {
+          if (window.ShineAPI) {
+            try { await window.ShineAPI.post('/auth/logout', {}); } catch(e) {}
+          }
+          localStorage.removeItem('shineUser');
+          localStorage.removeItem('shineUserId');
+          localStorage.removeItem('shineStaff');
+          window.location.href = 'index.html';
+        });
+      }
     }
   }
 

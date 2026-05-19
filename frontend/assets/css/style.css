@@ -2847,3 +2847,210 @@ body.search-open { overflow: hidden; }
   .cookie-banner__actions { width: 100%; }
   .cookie-banner__actions .btn { flex: 1; justify-content: center; }
 }
+
+/* ============================================================
+   MOBILE ENHANCEMENTS
+   Todas las reglas están dentro de @media — el escritorio
+   no se ve afectado.
+   ============================================================ */
+
+/* ── Logo ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .brand img { height: 58px; }
+}
+
+/* ── Mobile Nav — más limpio y con CTAs visuales ─────────────── */
+@media (max-width: 768px) {
+  .mobile-nav {
+    gap: var(--sp-lg);
+    padding: calc(var(--header-h) + var(--sp-lg)) var(--sp-xl) var(--sp-2xl);
+    align-items: center;
+  }
+  .mobile-nav a {
+    font-size: clamp(1.2rem, 5vw, 1.75rem);
+    padding: 10px var(--sp-xl);
+    border-radius: var(--r-md);
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+  .mobile-nav a[href="login.html"] {
+    background: var(--rose);
+    color: #fff !important;
+    border-radius: var(--r-full);
+    font-size: var(--fs-base);
+    font-weight: 600;
+    padding: 13px var(--sp-xl);
+    margin-top: var(--sp-xs);
+  }
+  .mobile-nav a[href="cart.html"] {
+    background: var(--noir);
+    color: var(--ivory) !important;
+    border-radius: var(--r-full);
+    font-size: var(--fs-base);
+    font-weight: 600;
+    padding: 13px var(--sp-xl);
+  }
+}
+
+/* ── Mobile Nav — sección de usuario logueado ── */
+.mobile-nav__user-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 300px;
+  padding-top: var(--sp-lg);
+  border-top: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.mobile-nav__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--blush);
+  color: var(--rose);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.mobile-nav__user-name {
+  font-family: var(--font-heading);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-sm);
+  text-align: center;
+}
+
+/* Override the large .mobile-nav a styles for user-section links */
+.mobile-nav .mobile-nav__link {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 9px var(--sp-lg);
+  border-radius: var(--r-md);
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  background: transparent;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+
+.mobile-nav .mobile-nav__link:hover {
+  color: var(--rose);
+  background: var(--blush);
+}
+
+.mobile-nav .mobile-nav__link--staff {
+  color: #D97706;
+  font-weight: 600;
+}
+
+.mobile-nav__signout-btn {
+  width: 100%;
+  padding: 11px;
+  background: none;
+  border: 1.5px solid rgba(26, 26, 26, 0.12);
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-top: var(--sp-sm);
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+
+.mobile-nav__signout-btn:hover {
+  border-color: var(--noir);
+  color: var(--noir);
+  background: var(--petal);
+}
+
+/* ── Product Gallery — sin sticky en móvil ──────────────────── */
+@media (max-width: 1100px) {
+  .product-gallery { position: static; }
+}
+
+/* ── Cards — botón siempre visible en pantallas táctiles ─────── */
+@media (hover: none) {
+  .product-card__action {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Shop toolbar — apilado en pantallas pequeñas ───────────── */
+@media (max-width: 480px) {
+  .shop-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-md);
+  }
+  .shop-sort { width: 100%; }
+}
+
+/* ── Inputs — tamaño mínimo 16px para evitar zoom en iOS ─────── */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: max(16px, var(--fs-sm)) !important;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  select {
+    min-height: 44px;
+  }
+  .btn,
+  .btn-magnetic {
+    min-height: 44px;
+  }
+  .qty-selector button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ── Checkout — trust strip compacta ─────────────────────────── */
+@media (max-width: 480px) {
+  .trust-strip-inner { gap: var(--sp-lg); }
+  .co-nav { flex-direction: column-reverse; gap: var(--sp-md); }
+  .co-nav .btn { width: 100%; justify-content: center; }
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .footer-desc { max-width: 100%; }
+  .site-footer { padding: var(--sp-3xl) 0 var(--sp-2xl); }
+  .footer-socials { margin-top: var(--sp-md); }
+}
+
+/* ── About / Artículos — párrafos sin max-width ─────────────── */
+@media (max-width: 768px) {
+  .container p { max-width: 100%; }
+}
+
+/* ── Secciones — algo menos padding en móvil pequeño ─────────── */
+@media (max-width: 480px) {
+  .section { padding: var(--sp-2xl) 0; }
+  .container { padding-left: var(--sp-md); padding-right: var(--sp-md); }
+}

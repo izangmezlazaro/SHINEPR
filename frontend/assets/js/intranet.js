@@ -866,8 +866,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ── Welcome Toast ─────────────────────────
-setTimeout(() => showToast('Welcome back, Elena! 👋', 'success'), 800);
+// ── Welcome Toast (handled by role-based block below) ─────────────────────────
 
 // ══════════════════════════════════════════
 // PREMIUM ENHANCEMENTS v2.0
@@ -887,7 +886,12 @@ if (greetingEl) {
   // Update welcome username emoji
   const usernameEl = document.querySelector('.home-username');
   if (usernameEl) {
-    usernameEl.textContent = `Welcome back, Elena ${emoji}`;
+    let firstName = 'Staff';
+    try {
+      const s = JSON.parse(localStorage.getItem('shineStaff'));
+      if (s && s.name) firstName = s.name.split(' ')[0];
+    } catch(e) {}
+    usernameEl.textContent = `Welcome back, ${firstName} ${emoji}`;
   }
 }
 

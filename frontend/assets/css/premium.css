@@ -1944,3 +1944,165 @@
     font-size: clamp(5rem, 28vw, 10rem);
   }
 }
+
+/* ============================================================
+   MOBILE ENHANCEMENTS — index.html (premium.css)
+   Todas las reglas están dentro de @media — el escritorio
+   no se ve afectado.
+   ============================================================ */
+
+/* ── Preloader — imagen responsive ──────────────────────────── */
+@media (max-width: 768px) {
+  .preloader__brand img {
+    width: clamp(180px, 55vw, 260px);
+  }
+}
+
+/* ── Hero Cinematic — contenido centrado en móvil ───────────── */
+@media (max-width: 768px) {
+  .hero-cinematic__visual {
+    width: 100%;
+    opacity: 0.45;
+  }
+  .hero-cinematic__visual::before {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 15, 15, 0.65) 0%,
+      rgba(15, 15, 15, 0.88) 100%
+    );
+  }
+  .hero-cinematic__content {
+    max-width: 100%;
+    text-align: center;
+  }
+  .hero-cinematic__title {
+    align-items: center;
+  }
+  .hero-cinematic__sub {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-cinematic__actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-cinematic__inner {
+    padding-bottom: var(--sp-3xl);
+  }
+  .hero-cinematic__title {
+    font-size: clamp(2.6rem, 10vw, 3.5rem);
+  }
+  .hero-cinematic__actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-cinematic__actions .btn-magnetic {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}
+
+/* ── Bento Grid — 2 columnas en tablet (era 1 columna) ──────── */
+/* Sobreescribe el bloque de @media (max-width: 768px) de arriba */
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 200px 180px 180px;
+  }
+  .bento-grid__item:nth-child(1) {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+  .bento-grid__item:nth-child(2) {
+    grid-row: 2;
+    grid-column: 1 / 2;
+  }
+  .bento-grid__item:nth-child(3) {
+    grid-row: 2;
+    grid-column: 2 / 3;
+  }
+  .bento-grid__item:nth-child(4) {
+    grid-row: 3;
+    grid-column: 1 / 3;
+  }
+}
+
+@media (max-width: 480px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 200px 170px 170px 170px;
+  }
+  .bento-grid__item:nth-child(1),
+  .bento-grid__item:nth-child(2),
+  .bento-grid__item:nth-child(3),
+  .bento-grid__item:nth-child(4) {
+    grid-row: auto;
+    grid-column: 1;
+  }
+}
+
+/* ── Horizontal Scroll — optimizado para táctil ─────────────── */
+@media (max-width: 768px) {
+  .carousel-btn { display: none; }
+  .hscroll-container { padding: 0; gap: 0; }
+  .hscroll-track {
+    padding: var(--sp-xl) var(--sp-md);
+    gap: var(--sp-md);
+  }
+  .hscroll-track .product-card {
+    width: clamp(140px, 42vw, 185px);
+  }
+}
+
+/* ── Stats Row — cuadrícula 2×2 en móvil ─────────────────────── */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-md);
+  }
+  .stat-item { padding: var(--sp-lg); }
+}
+
+/* ── Niche Grid (Dark Room) — 2 cols en tablet ───────────────── */
+@media (max-width: 768px) and (min-width: 481px) {
+  .niche-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Testimonials — columna única en móvil pequeño ──────────── */
+@media (max-width: 480px) {
+  .testimonials-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-md);
+  }
+  .testimonial-card { padding: var(--sp-lg); }
+}
+
+/* ── Newsletter — compacta en móvil ─────────────────────────── */
+@media (max-width: 480px) {
+  .newsletter-card { padding: var(--sp-2xl) var(--sp-lg); }
+  .newsletter-form button { width: 100%; }
+}
+
+/* ── Espaciado de secciones ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .darkroom-ultra { padding: var(--sp-3xl) 0; }
+  .newsletter-section { padding: var(--sp-3xl) 0; }
+  .why-shine__lead {
+    margin-top: var(--sp-lg);
+    margin-bottom: var(--sp-xl);
+  }
+}
+
+/* ── Marquee Strip — texto más pequeño en móvil ─────────────── */
+@media (max-width: 480px) {
+  .marquee-strip__item {
+    font-size: var(--fs-xs);
+    gap: 16px;
+    padding: 0 16px;
+  }
+}
