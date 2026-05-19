@@ -86,7 +86,7 @@
   function getProductImage(p) {
     if (Array.isArray(p.imagenes) && p.imagenes[0]?.url) {
       const url = p.imagenes[0].url;
-      return url.startsWith('/') ? `http://localhost:8080${url}` : url;
+      return url.startsWith('/') ? `https://api.shinebeauty.store${url}` : url;
     }
     return FALLBACK_IMG;
   }

@@ -132,7 +132,7 @@
     if (!imagenPrincipal) return FALLBACK_IMAGE;
     const url = String(imagenPrincipal).trim();
     if (/^(https?:|data:|assets\/|\.\/|\.\.\/)/i.test(url)) return url;
-    if (url.startsWith('/')) return `http://localhost:8080${url}`;
+    if (url.startsWith('/')) return `https://api.shinebeauty.store${url}`;
     return url;
   }
 

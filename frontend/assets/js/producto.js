@@ -103,7 +103,7 @@
     const cleanUrl = String(url || '').trim();
     if (!cleanUrl) return FALLBACK_IMAGE;
     if (/^(https?:|data:|assets\/|\.\/|\.\.\/)/i.test(cleanUrl)) return cleanUrl;
-    if (cleanUrl.startsWith('/')) return `http://localhost:8080${cleanUrl}`;
+    if (cleanUrl.startsWith('/')) return `https://api.shinebeauty.store${cleanUrl}`;
     return cleanUrl;
   }
 

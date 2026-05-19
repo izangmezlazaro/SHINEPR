@@ -89,7 +89,7 @@
     const pointsBadge = puntosGanados > 0
       ? `<div style="display:inline-flex;align-items:center;gap:6px;background:var(--petal);border-radius:999px;padding:6px 14px;margin-bottom:var(--sp-lg);font-size:var(--fs-sm);border:1px solid rgba(212,145,154,.25)">
            <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--rose)" stroke="var(--rose)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-           <span style="color:var(--rose);font-weight:700">+${puntosGanados} puntos ganados</span>
+           <span style="color:var(--rose);font-weight:700">+${puntosGanados} points earned</span>
            ${puntosTotal != null ? `<span style="color:var(--text-muted)">· ${puntosTotal} total</span>` : ''}
          </div>`
       : '';
@@ -102,14 +102,14 @@
         <div style="width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:var(--petal);margin:0 auto 20px;box-shadow:0 0 0 12px rgba(212,145,154,.12)">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3 style="margin:0 0 8px;font-size:1.5rem;color:#1a1a1a">¡Pedido confirmado!</h3>
+        <h3 style="margin:0 0 8px;font-size:1.5rem;color:#1a1a1a">Order confirmed!</h3>
         <p style="margin:0 0 16px;font-size:.9rem;color:#888;line-height:1.5">
-          Pedido <strong style="color:#444">#${escapeHtml(pedido.idPedido)}</strong> procesado mediante Bizum.<br>Tu pedido está siendo preparado.
+          Order <strong style="color:#444">#${escapeHtml(pedido.idPedido)}</strong> processed via Bizum.<br>Your order is being prepared.
         </p>
         ${pointsBadge}
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
-          <button class="btn btn--primary" id="bizumOrdersBtn" type="button" style="width:100%;padding:14px">Ver mis pedidos</button>
-          <button class="btn btn--outline" id="bizumDoneBtn" type="button" style="width:100%;padding:14px">Volver al inicio</button>
+          <button class="btn btn--primary" id="bizumOrdersBtn" type="button" style="width:100%;padding:14px">View my orders</button>
+          <button class="btn btn--outline" id="bizumDoneBtn" type="button" style="width:100%;padding:14px">Back to home</button>
         </div>
       </div>
     `;
@@ -267,6 +267,9 @@
       const puntos = Math.round(subtotal * 10);
       pointsEl.textContent = puntos > 0 ? `+${puntos} pts` : '0 pts';
     }
+
+    const bizumAmountEl = document.getElementById('bizumAmountLabel');
+    if (bizumAmountEl) bizumAmountEl.textContent = `€${total.toFixed(2)}`;
   }
 
   async function cargarCheckout() {
@@ -346,44 +349,43 @@
     if (_timerIniciado) return;
     _timerIniciado = true;
 
-    // Calculamos el total actual en tiempo real
     const subtotal = getSubtotal();
     const tax      = subtotal * TAX_RATE;
     const shipping = getShippingCost();
     const total    = (subtotal + tax + shipping).toFixed(2);
 
-    // ID provisional de pedido para el concepto
     const orderId = 'SHINE-' + Math.floor(100000 + Math.random() * 900000);
 
-    // Actualizar labels del panel
     const labelId     = document.getElementById('bizumOrderIdLabel');
     const labelAmount = document.getElementById('bizumAmountLabel');
     if (labelId)     labelId.textContent     = orderId;
     if (labelAmount) labelAmount.textContent = `€${total}`;
 
-    // Iniciar cuenta atrás de 5 minutos (300 segundos)
     let timeLeft = 300;
+
     const countdownEl = document.getElementById('bizumCountdown');
-    
+    if (countdownEl) countdownEl.textContent = '05:00';
+
     if (_bizumTimer) clearInterval(_bizumTimer);
-    
+
     _bizumTimer = setInterval(() => {
       if (timeLeft <= 0) {
         clearInterval(_bizumTimer);
-        if (countdownEl) countdownEl.textContent = "00:00";
-        showToast("El tiempo para pagar ha expirado. Por favor, recarga la página para intentarlo de nuevo.");
+        const el = document.getElementById('bizumCountdown');
+        if (el) el.textContent = '00:00';
+        showToast('Payment time has expired. Please reload the page to try again.');
         const nextBtn = document.getElementById('coNextBtn');
         if (nextBtn) {
-            nextBtn.disabled = true;
-            nextBtn.textContent = 'Tiempo expirado';
+          nextBtn.disabled = true;
+          nextBtn.textContent = 'Time expired';
         }
         return;
       }
-      
       timeLeft--;
       const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
       const s = (timeLeft % 60).toString().padStart(2, '0');
-      if (countdownEl) countdownEl.textContent = `${m}:${s}`;
+      const el = document.getElementById('bizumCountdown');
+      if (el) el.textContent = `${m}:${s}`;
     }, 1000);
   }
 
@@ -397,7 +399,7 @@
     const nextBtn = document.getElementById('coNextBtn');
     if (nextBtn) {
       nextBtn.disabled = true;
-      nextBtn.textContent = 'Registrando pedido…';
+      nextBtn.textContent = 'Placing order…';
     }
 
     try {
@@ -449,7 +451,7 @@
       showBizumModal({ pedido, pago, puntosGanados, puntosTotal });
 
     } catch (error) {
-      showToast(error.message || 'No se pudo completar el pago Bizum.');
+      showToast(error.message || 'Could not complete the Bizum payment.');
     } finally {
       if (nextBtn) {
         nextBtn.disabled    = false;
