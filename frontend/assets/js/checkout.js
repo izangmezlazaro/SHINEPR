@@ -338,6 +338,53 @@
     return '';
   }
 
+  // ── Bizum QR Code Generator ──────────────────────────────────────────────
+  //   Número de teléfono de la tienda para recibir pagos Bizum
+  const SHINE_BIZUM_PHONE = '34684085815';
+
+  let _qrGenerado = false;
+
+  function generarBizumQR() {
+    const canvas = document.getElementById('bizumQrCanvas');
+    if (!canvas || typeof QRCode === 'undefined') return;
+
+    // Calculamos el total actual en tiempo real
+    const subtotal = getSubtotal();
+    const tax      = subtotal * TAX_RATE;
+    const shipping = getShippingCost();
+    const total    = (subtotal + tax + shipping).toFixed(2);
+
+    // ID provisional de pedido para mostrar en el QR (se asigna el definitivo al pagar)
+    const orderId = 'SHINE-' + Math.floor(100000 + Math.random() * 900000);
+
+    // URL del protocolo Bizum (compatible con app bancaria española)
+    const bizumUrl = `https://bizum.me/?phone=${SHINE_BIZUM_PHONE}&amount=${total}&concept=Pedido+${orderId}`;
+
+    // Actualizar labels del panel
+    const labelId     = document.getElementById('bizumOrderIdLabel');
+    const labelAmount = document.getElementById('bizumAmountLabel');
+    if (labelId)     labelId.textContent     = orderId;
+    if (labelAmount) labelAmount.textContent = `€${total}`;
+
+    // Generar QR en el canvas
+    QRCode.toCanvas(canvas, bizumUrl, {
+      width:            192,
+      margin:           1,
+      color: {
+        dark:  '#000000',
+        light: '#ffffff'
+      },
+      errorCorrectionLevel: 'M'
+    }, function(error) {
+      if (error) {
+        console.error('[BizumQR] Error generando QR:', error);
+      } else {
+        _qrGenerado = true;
+        console.log('[BizumQR] QR generado para:', bizumUrl);
+      }
+    });
+  }
+
   async function crearPedidoYPagarBizum() {
     const validation = validarPasoActual();
     if (validation) {
@@ -348,29 +395,42 @@
     const nextBtn = document.getElementById('coNextBtn');
     if (nextBtn) {
       nextBtn.disabled = true;
-      nextBtn.textContent = 'Processing Bizum…';
+      nextBtn.textContent = 'Registrando pedido…';
     }
 
     try {
       const puntosGanados = Math.round(getSubtotal() * 10);
 
+      // 1. Crear el pedido
       const pedido = await window.ShineAPI.post('/pedidos', {
-        idUsuario: getUsuarioId(),
+        idUsuario:   getUsuarioId(),
         idDireccion: getSelectedAddressId()
       });
 
+      // 2. Crear registro de pago en estado 'pendiente' (esperando confirmación manual)
       const pago = await window.ShineAPI.post('/pagos', {
-        idPedido: pedido.idPedido,
+        idPedido:   pedido.idPedido,
         metodoPago: 'bizum',
-        estado: 'completado'
+        estado:     'pendiente'   // ← pendiente: admin lo valida desde la intranet
       });
 
-      // Clear cart in backend and all frontend caches
+      // 3. Actualizar el estado del pedido a 'pendiente_bizum'
+      //    (indica que está esperando validación manual en la intranet)
+      try {
+        await window.ShineAPI.put(`/intranet/pedidos/${pedido.idPedido}/estado`, {
+          estado: 'pendiente_bizum'
+        });
+      } catch (_) {
+        // Si el endpoint rechaza 'pendiente_bizum' (por validación de estados),
+        // el pedido queda en 'pendiente' igual — la intranet puede filtrarlo.
+      }
+
+      // 4. Vaciar carrito
       try { await window.ShineAPI.delete('/carrito'); } catch (_) {}
       sessionStorage.removeItem('shine:carrito:v1');
       localStorage.removeItem('shineCart');
 
-      // Refresh loyalty points in localStorage so other pages show the updated balance
+      // 5. Puntos de fidelización (actualizamos preview, se confirmarán al validar)
       let puntosTotal = null;
       try {
         const puntosData = await window.ShineAPI.get(`/usuarios/${getUsuarioId()}/puntos`);
@@ -385,18 +445,19 @@
       carrito = { items: [], total: 0 };
       renderSummaryItems();
       showBizumModal({ pedido, pago, puntosGanados, puntosTotal });
+
     } catch (error) {
-      showToast(error.message || 'Could not complete the Bizum payment.');
+      showToast(error.message || 'No se pudo completar el pago Bizum.');
     } finally {
       if (nextBtn) {
-        nextBtn.disabled = false;
+        nextBtn.disabled    = false;
         nextBtn.textContent = 'Pay with Bizum';
       }
     }
   }
 
   function setupCheckoutStepper() {
-    const panels = document.querySelectorAll('.co-panel');
+    const panels  = document.querySelectorAll('.co-panel');
     const prevBtn = document.getElementById('coPrevBtn');
     const nextBtn = document.getElementById('coNextBtn');
 
@@ -420,7 +481,11 @@
       if (currentStep === 1) syncShippingSummary();
 
       currentStep++;
-      if (currentStep === 2) renderSummaryItems();
+      if (currentStep === 2) {
+        renderSummaryItems();
+        // Generar QR Bizum al llegar al paso de pago
+        setTimeout(generarBizumQR, 150);
+      }
       updateStepper();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, true);
@@ -432,6 +497,7 @@
 
       if (currentStep > 0) {
         currentStep--;
+        _qrGenerado = false; // Resetear QR si el usuario retrocede
         updateStepper();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -443,7 +509,11 @@
   function setupCheckoutInteractions() {
     document.addEventListener('change', event => {
       if (event.target.matches('input[name="co-address"]')) syncAddressSummary();
-      if (event.target.matches('input[name="co-shipping"]')) syncShippingSummary();
+      if (event.target.matches('input[name="co-shipping"]')) {
+        syncShippingSummary();
+        // Si ya estamos en el paso de pago, regenerar QR con nuevo total
+        if (currentStep === 2 && !_qrGenerado) generarBizumQR();
+      }
     });
 
     document.getElementById('coAddAddrBtn')?.addEventListener('click', event => {
@@ -485,9 +555,9 @@
 
   function initShippingDates() {
     const today = new Date();
-    const freeEl = document.getElementById('coDateFree');
+    const freeEl    = document.getElementById('coDateFree');
     const expressEl = document.getElementById('coDateExpress');
-    if (freeEl) freeEl.textContent = formatShippingDate(addBusinessDays(today, 6));
+    if (freeEl)    freeEl.textContent    = formatShippingDate(addBusinessDays(today, 6));
     if (expressEl) expressEl.textContent = formatShippingDate(addBusinessDays(today, 3));
   }
 

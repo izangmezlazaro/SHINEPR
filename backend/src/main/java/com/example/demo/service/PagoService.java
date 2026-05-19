@@ -54,6 +54,8 @@ public class PagoService {
                     usuarioDAO.addPuntos(pedido.getUsuario().getId(), puntos);
                 }
                 pedidoService.actualizarEstado(pedido.getIdPedido(), "procesando");
+            } else if ("pendiente".equals(estado) && "bizum".equals(request.getMetodoPago())) {
+                pedidoService.actualizarEstado(pedido.getIdPedido(), "pendiente_bizum");
             }
 
             return result;

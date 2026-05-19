@@ -150,7 +150,7 @@ public class PedidoService {
                 pedidoDAO.updateEstado(idPedido, nuevoEstado, conn);
 
                 // Descontar stock al confirmar el pedido
-                if ("procesando".equals(nuevoEstado) && "pendiente".equals(estadoActual)) {
+                if ("procesando".equals(nuevoEstado) && ("pendiente".equals(estadoActual) || "pendiente_bizum".equals(estadoActual))) {
                     List<DetallePedido> detalles = detallePedidoDAO.findByPedidoId(idPedido);
                     for (DetallePedido d : detalles) {
                         if (d.getProducto() != null)

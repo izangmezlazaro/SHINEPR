@@ -2130,8 +2130,22 @@ window.loadIntranetOrders = async function () {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--dash-muted)">Cargando pedidos…</td></tr>';
 
-  const STATUS_CLS   = { procesando: 'pending',  pendiente: 'pending',  enviado: 'shipped', entregado: 'active', cancelado: 'danger' };
-  const STATUS_LABEL = { procesando: 'Procesando', pendiente: 'Pendiente', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const STATUS_CLS   = {
+    procesando:       'pending',
+    pendiente:        'pending',
+    pendiente_bizum:  'pending',
+    enviado:          'shipped',
+    entregado:        'active',
+    cancelado:        'danger'
+  };
+  const STATUS_LABEL = {
+    procesando:       'Procesando',
+    pendiente:        'Pendiente',
+    pendiente_bizum:  '📱 Bizum pendiente',
+    enviado:          'Enviado',
+    entregado:        'Entregado',
+    cancelado:        'Cancelado'
+  };
 
   function fmtFecha(iso) {
     if (!iso) return '—';
@@ -2165,21 +2179,93 @@ window.loadIntranetOrders = async function () {
       const fecha = fmtFecha(p.fecha);
       const total = p.total != null ? `€${parseFloat(p.total).toFixed(2)}` : '—';
 
-      return `<tr data-status="${cls}">
+      // Botón "Validar Pago" solo para pedidos en estado pendiente_bizum
+      const validarBtn = estado === 'pendiente_bizum'
+        ? `<button
+              class="dash-btn dash-btn--sm btn-validar-bizum"
+              data-id="${p.idPedido}"
+              style="background:#16a34a;color:#fff;border-color:#16a34a;white-space:nowrap"
+              title="Confirmar que el Bizum ha sido recibido">
+              ✓ Validar Pago
+           </button>`
+        : '';
+
+      return `<tr data-status="${cls}" data-pedido-id="${p.idPedido}" ${estado === 'pendiente_bizum' ? 'style="background:rgba(22,163,74,0.06)"' : ''}>
         <td><strong>#${p.idPedido}</strong></td>
         <td>${fecha}</td>
         <td>${escapeHtml(p.nombreUsuario || '—')}</td>
         <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(articulos)}">${escapeHtml(articulos)}</td>
         <td>${total}</td>
         <td><span class="status status--${cls}">${label}</span></td>
-        <td><div class="row-actions"><button class="dash-btn dash-btn--outline dash-btn--sm view-order-api" data-id="${p.idPedido}">Ver</button></div></td>
+        <td><div class="row-actions">
+          <button class="dash-btn dash-btn--outline dash-btn--sm view-order-api" data-id="${p.idPedido}">Ver</button>
+          ${validarBtn}
+        </div></td>
       </tr>`;
     }).join('');
 
-    // Actualizar badge con pedidos activos (procesando + pendiente)
-    const activos = pedidos.filter(p => ['procesando', 'pendiente'].includes((p.estado || '').toLowerCase())).length;
+    // Actualizar badge con pedidos activos (procesando + pendiente + pendiente_bizum)
+    const activos = pedidos.filter(p => ['procesando', 'pendiente', 'pendiente_bizum'].includes((p.estado || '').toLowerCase())).length;
     const badge = document.querySelector('.sidebar-link[data-tab="orders"] .badge');
     if (badge) badge.textContent = activos;
+
+    // ── Delegar click en botones "Validar Pago" ─────────────────────────────
+    tbody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-validar-bizum');
+      if (!btn) return;
+
+      const idPedido = parseInt(btn.dataset.id, 10);
+      if (!idPedido) return;
+
+      const confirmar = confirm(`¿Confirmas que has recibido el Bizum del pedido #${idPedido}?\nEsto marcará el pedido como "Procesando" y enviará un email de confirmación al cliente.`);
+      if (!confirmar) return;
+
+      btn.disabled    = true;
+      btn.textContent = '⏳ Validando…';
+
+      try {
+        const res = await fetch(`${INTRANET_API}/intranet/validar-bizum`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idPedido })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || `Error ${res.status}`);
+        }
+
+        // ── Actualizar fila visualmente sin recargar ──────────────────────
+        const fila = tbody.querySelector(`tr[data-pedido-id="${idPedido}"]`);
+        if (fila) {
+          fila.style.background = '';
+          // Actualizar badge de estado
+          const statusBadge = fila.querySelector('.status');
+          if (statusBadge) {
+            statusBadge.className   = 'status status--active';
+            statusBadge.textContent = '✓ Procesando';
+          }
+          // Ocultar botón de validar
+          btn.remove();
+        }
+
+        if (window.showToast) showToast(`✅ Pago del pedido #${idPedido} validado. Email enviado al cliente.`, 'success');
+
+        // Refrescar badge del sidebar
+        const badgeEl = document.querySelector('.sidebar-link[data-tab="orders"] .badge');
+        if (badgeEl) {
+          const curr = parseInt(badgeEl.textContent, 10);
+          if (!isNaN(curr) && curr > 0) badgeEl.textContent = curr - 1;
+        }
+
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = '✓ Validar Pago';
+        if (window.showToast) showToast(`Error al validar: ${escapeHtml(err.message)}`, 'error');
+        console.error('[ValidarBizum]', err);
+      }
+    });
 
   } catch (err) {
     console.error('[loadIntranetOrders]', err);

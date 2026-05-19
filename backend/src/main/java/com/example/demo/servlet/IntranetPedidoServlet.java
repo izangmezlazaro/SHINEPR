@@ -21,7 +21,7 @@ import java.util.Set;
 public class IntranetPedidoServlet extends HttpServlet {
 
     private static final Set<String> ESTADOS_VALIDOS =
-        Set.of("pendiente", "procesando", "enviado", "entregado", "cancelado");
+        Set.of("pendiente", "pendiente_bizum", "procesando", "enviado", "entregado", "cancelado");
 
     private final PedidoService pedidoService = new PedidoService();
 
